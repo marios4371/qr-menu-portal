@@ -1,0 +1,181 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Palette — dark refined με warm amber accent */
+  --bg:         #0d0d0d;
+  --bg-card:    #141414;
+  --bg-hover:   #1a1a1a;
+  --border:     rgba(255,255,255,0.07);
+  --border-md:  rgba(255,255,255,0.12);
+  --accent:     #e8a045;       /* warm amber */
+  --accent-dim: rgba(232,160,69,0.12);
+  --accent-glow:rgba(232,160,69,0.25);
+  --text:       #f0ede8;
+  --text-muted: #6b6560;
+  --text-sub:   #9a9490;
+  --success:    #4caf78;
+  --error:      #e05454;
+  --error-dim:  rgba(224,84,84,0.12);
+  --radius:     10px;
+  --radius-lg:  16px;
+
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Layout helpers ── */
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ── Card ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  padding: 12px 24px;
+  transition: all 0.18s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #0d0d0d;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #f0b05a;
+  box-shadow: 0 0 24px var(--accent-glow);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-sub);
+  border: 1px solid var(--border-md);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: var(--error-dim);
+  color: var(--error);
+  border: 1px solid rgba(224,84,84,0.2);
+}
+
+.btn-lg { padding: 14px 32px; font-size: 1rem; }
+.btn-full { width: 100%; }
+.btn-sm { padding: 8px 16px; font-size: 0.82rem; }
+
+/* ── Form elements ── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  background: var(--bg);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius);
+  color: var(--text);
+  padding: 12px 16px;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+input::placeholder { color: var(--text-muted); }
+select option { background: #1a1a1a; }
+
+/* ── Error / Success messages ── */
+.msg-error {
+  background: var(--error-dim);
+  border: 1px solid rgba(224,84,84,0.2);
+  border-radius: var(--radius);
+  color: var(--error);
+  font-size: 0.875rem;
+  padding: 10px 14px;
+}
+.msg-success {
+  background: rgba(76,175,120,0.12);
+  border: 1px solid rgba(76,175,120,0.25);
+  border-radius: var(--radius);
+  color: var(--success);
+  font-size: 0.875rem;
+  padding: 10px 14px;
+}
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 24px 0;
+}
+
+/* ── Spinner ── */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Fade-in animation ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.45s ease both; }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .card { padding: 24px 20px; }
+  .container { padding: 0 16px; }
+}
