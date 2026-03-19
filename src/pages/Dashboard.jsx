@@ -6,7 +6,7 @@ export default function Dashboard() {
   const { owner, shops, logout } = useAuth();
   const navigate = useNavigate();
 
-  const shop = shops?.[0]; // αρχικά 1 shop
+  const shop = shops?.[0]; // for now 1 shop
 
   const handleLogout = () => {
     logout();
