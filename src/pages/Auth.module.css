@@ -5,44 +5,59 @@
   justify-content: center;
   padding: 40px 16px;
   background: var(--bg);
-  /* Subtle radial glow behind the card */
-  background-image: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(232,160,69,0.06) 0%, transparent 70%);
+  /*
+    Extra glow directly behind the auth card
+    — makes the glass card feel like it's floating in light
+  */
+  background-image:
+    radial-gradient(ellipse 55% 50% at 50% 30%, rgba(255,255,255,0.025) 0%, transparent 65%);
 }
 
+/* ── Glass card ── */
 .card {
-  background: var(--bg-card);
+  background: var(--glass-sm);
   border: 1px solid var(--border-md);
-  border-radius: var(--radius-lg);
+  border-top-color: var(--border-top);
+  border-radius: var(--radius-xl);
   padding: 40px 36px;
   width: 100%;
-  animation: fadeUp 0.4s ease both;
+  animation: fadeUp 0.38s ease both;
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.55),
+    0 4px 16px  rgba(0,0,0,0.3),
+    inset 0 1px 0 var(--border-top),
+    inset 0 -1px 0 rgba(0,0,0,0.15);
 }
 
+/* ── Logo ── */
 .logo {
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin-bottom: 28px;
+  color: var(--text);
 }
-.logo span { color: var(--accent); }
+.logo span { color: var(--text); }
 
+/* ── Headings ── */
 .title {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   margin-bottom: 6px;
+  color: var(--text);
 }
 
 .sub {
   color: var(--text-sub);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   margin-bottom: 28px;
   font-weight: 300;
 }
 
-/* Step indicator */
+/* ── Step Indicator — glass chips ── */
 .steps {
   display: flex;
   align-items: flex-start;
@@ -57,42 +72,49 @@
   gap: 0;
 }
 
+/* Glass step chip */
 .stepCircle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius);
   border: 1px solid var(--border-md);
-  background: var(--bg);
+  border-top-color: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.03);
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: all 0.18s;
+  backdrop-filter: blur(8px);
 }
 
 .stepActive .stepCircle {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-  color: var(--accent);
+  border-color: var(--border-hi);
+  border-top-color: rgba(255,255,255,0.28);
+  background: rgba(255,255,255,0.07);
+  color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 .stepDone .stepCircle {
   border-color: var(--success);
-  background: rgba(76,175,120,0.12);
+  background: rgba(76,175,120,0.10);
   color: var(--success);
 }
 
 .stepLabel {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   margin-left: 8px;
   white-space: nowrap;
-  transition: color 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: color 0.18s;
 }
-.stepActive .stepLabel { color: var(--accent); }
+.stepActive .stepLabel { color: var(--text-sub); }
 .stepDone .stepLabel   { color: var(--success); }
 
 .stepLine {
@@ -102,98 +124,113 @@
   margin: 0 8px;
 }
 
-/* Form grid */
+/* ── Form grid ── */
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* Slug preview */
+/* ── Slug preview — glass info bar ── */
 .slugPreview {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-top: 10px;
   padding: 10px 14px;
-  background: var(--bg);
+  background: rgba(255,255,255,0.03);
   border: 1px solid var(--border);
+  border-top-color: rgba(255,255,255,0.10);
   border-radius: var(--radius);
   flex-wrap: wrap;
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .slugLabel {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .slugCode {
   font-family: 'Courier New', monospace;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-sub);
   flex: 1;
 }
 .slugCode strong { color: var(--accent); }
 
-.slugOk   { font-size: 0.78rem; color: var(--success); white-space: nowrap; }
-.slugTaken { font-size: 0.78rem; color: var(--error);   white-space: nowrap; }
+.slugOk    { font-size: 0.75rem; color: var(--success); white-space: nowrap; }
+.slugTaken { font-size: 0.75rem; color: var(--error);   white-space: nowrap; }
 
-/* Summary (Step 2) */
+/* ── Summary (Step 2) ── */
 .summary {
-  background: var(--bg);
+  background: rgba(255,255,255,0.025);
   border: 1px solid var(--border);
+  border-top-color: rgba(255,255,255,0.10);
   border-radius: var(--radius);
   overflow: hidden;
   margin-top: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 .summaryRow {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 11px 16px;
   border-bottom: 1px solid var(--border);
   gap: 16px;
 }
 .summaryRow:last-child { border-bottom: none; }
 
 .summaryKey {
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.07em;
   flex-shrink: 0;
 }
 .summaryVal {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--text);
   text-align: right;
   word-break: break-all;
+  font-weight: 400;
 }
 
-/* Actions */
+/* ── Actions ── */
 .actions {
   display: flex;
   gap: 10px;
   margin-top: 24px;
 }
 
-/* Footer link */
+/* ── Footer link ── */
 .footer {
   text-align: center;
   margin-top: 20px;
-  font-size: 0.85rem;
+  font-size: 0.83rem;
   color: var(--text-muted);
 }
 .footer a {
-  color: var(--accent);
+  color: var(--text-sub);
   text-decoration: none;
+  border-bottom: 1px solid var(--border-md);
+  padding-bottom: 1px;
+  transition: color 0.14s, border-color 0.14s;
 }
-.footer a:hover { text-decoration: underline; }
+.footer a:hover {
+  color: var(--text);
+  border-color: var(--border-hi);
+}
 
 @media (max-width: 480px) {
-  .card { padding: 28px 20px; }
-  .formGrid { grid-template-columns: 1fr; }
+  .card      { padding: 28px 18px; }
+  .formGrid  { grid-template-columns: 1fr; }
   .stepLabel { display: none; }
 }

@@ -13,9 +13,11 @@ export default function Dashboard() {
     navigate("/login");
   };
 
+  const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
+
   const menuUrl = shop?.shopSlug
-    ? `${window.location.origin}/menu/${shop.shopSlug}`
-    : null;
+  ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
+  : null;
 
   return (
     <div className={styles.layout}>

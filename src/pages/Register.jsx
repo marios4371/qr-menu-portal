@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { register, checkSlug } from "../services/api";
+import { register, checkSlug, getOwnerDashboard } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import styles from "./Auth.module.css";
 
@@ -12,7 +12,6 @@ const BUSINESS_TYPES = [
   { value: "BAR",        label: "🍹  Bar" },
 ];
 
-// Debounce helper για το slug check
 function useDebounce(value, delay) {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -22,7 +21,6 @@ function useDebounce(value, delay) {
   return debounced;
 }
 
-// Μετατροπή shopName → preview slug (client-side, ίδια λογική με server)
 function previewSlug(name) {
   return name
     .toLowerCase()
@@ -43,22 +41,19 @@ export default function Register() {
   const [error, setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Step 1 fields
   const [firstName, setFirstName]       = useState("");
   const [lastName, setLastName]         = useState("");
   const [email, setEmail]               = useState("");
   const [password, setPassword]         = useState("");
   const [businessType, setBusinessType] = useState("RESTAURANT");
 
-  // Step 2 fields
   const [shopName, setShopName]       = useState("");
-  const [slugAvailable, setSlugAvail] = useState(null);  // null | true | false
+  const [slugAvailable, setSlugAvail] = useState(null);
   const [slugChecking, setSlugChecking] = useState(false);
 
   const slug          = previewSlug(shopName);
   const debouncedSlug = useDebounce(slug, 450);
 
-  // Real-time slug availability check
   useEffect(() => {
     if (debouncedSlug.length < 2) { setSlugAvail(null); return; }
     setSlugChecking(true);
@@ -93,21 +88,27 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
+      // Βήμα 1: Δημιούργησε owner + shop στο backend
       const data = await register({ firstName, lastName, email, password, businessType, shopName });
-      // Auto-login μετά το registration
-      login(data.token, {
-        ownerId: data.ownerId,
-        firstName,
-        lastName,
-        email,
-        businessType,
-        shopIds: [data.shopId],
-        plan: "FREE",
-      }, []);
+
+      // Βήμα 2: Αποθήκευσε το token πριν κάνεις οποιοδήποτε authenticated request
+      localStorage.setItem("qrmenu_token", data.token);
+
+      // ─────────────────────────────────────────────────────────────────────
+      // ΣΗΜΑΝΤΙΚΟ: Φέρνουμε τα shops από το dashboard ΠΡΙΝ καλέσουμε login().
+      // Αν περάσουμε [] στο login(), το shops state μένει κενό και το MenuEditor
+      // δεν μπορεί να βρει το shop — άρα το handleSave() κάνει return αμέσως.
+      // ─────────────────────────────────────────────────────────────────────
+      const dashData = await getOwnerDashboard();
+
+      // Βήμα 3: Ενημέρωσε το AuthContext με τα πλήρη shops data
+      login(data.token, dashData.owner, dashData.shops);
+
       navigate("/dashboard");
     } catch (e) {
       setError(e.message);
-      setStep(0); // πήγαινε πίσω αν το email υπάρχει ήδη
+      localStorage.removeItem("qrmenu_token");
+      setStep(0);
     } finally {
       setLoading(false);
     }
@@ -116,12 +117,10 @@ export default function Register() {
   return (
     <div className={styles.page}>
       <div className={styles.card} style={{ maxWidth: 480 }}>
-        {/* Logo */}
         <div className={styles.logo}>
           QR<span>Menu</span>
         </div>
 
-        {/* Steps indicator */}
         <div className={styles.steps}>
           {STEPS.map((label, i) => (
             <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
@@ -136,7 +135,6 @@ export default function Register() {
 
         <hr className="divider" />
 
-        {/* ── Step 0: Προσωπικά στοιχεία ── */}
         {step === 0 && (
           <div className="fade-up">
             <h2 className={styles.title}>Δημιουργία λογαριασμού</h2>
@@ -172,7 +170,6 @@ export default function Register() {
           </div>
         )}
 
-        {/* ── Step 1: Shop setup ── */}
         {step === 1 && (
           <div className="fade-up">
             <h2 className={styles.title}>Το μαγαζί σας</h2>
@@ -188,7 +185,6 @@ export default function Register() {
               />
             </div>
 
-            {/* Slug preview */}
             {shopName.trim().length > 0 && (
               <div className={styles.slugPreview}>
                 <span className={styles.slugLabel}>URL μενού:</span>
@@ -203,7 +199,6 @@ export default function Register() {
           </div>
         )}
 
-        {/* ── Step 2: Επιβεβαίωση ── */}
         {step === 2 && (
           <div className="fade-up">
             <h2 className={styles.title}>Όλα έτοιμα!</h2>
@@ -226,10 +221,8 @@ export default function Register() {
           </div>
         )}
 
-        {/* Error */}
         {error && <div className="msg-error" style={{ marginTop: 16 }}>{error}</div>}
 
-        {/* Actions */}
         <div className={styles.actions}>
           {step > 0 && (
             <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>
