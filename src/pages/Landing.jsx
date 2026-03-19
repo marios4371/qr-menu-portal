@@ -7,7 +7,7 @@ export default function Landing() {
       {/* Noise texture overlay */}
       <div className={styles.noise} />
 
-      {/* Nav */}
+      {/* Navigate */}
       <nav className={styles.nav}>
         <div className="container" style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <span className={styles.logo}>QR<span>Menu</span></span>
