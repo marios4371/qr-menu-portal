@@ -140,18 +140,16 @@ export default function Landing() {
               real-time routing από το τραπέζι στον σωστό σταθμό παρασκευής.
             </p>
 
-            <div className={styles.aboutList}>
+            <div className={styles.aboutCards}>
               {[
                 ["Serverless αρχιτεκτονική", "100% AWS. Αυτόματη κλιμάκωση, μηδέν συντήρηση, χωρίς σταθερό κόστος υποδομής."],
                 ["Multi-tenant SaaS", "Κάθε επιχείρηση έχει το δικό της URL, μενού και ρυθμίσεις. Πλήρης απομόνωση δεδομένων."],
                 ["Real-time routing", "Κάθε προϊόν γνωρίζει πού πηγαίνει. Άμεση ειδοποίηση στον σωστό σταθμό — Bar ή Kitchen."],
               ].map(([title, desc], i) => (
-                <div key={i} className={styles.aboutItem}>
-                  <span className={styles.aboutNum}>0{i+1}</span>
-                  <div>
-                    <div className={styles.aboutTitle}>{title}</div>
-                    <div className={styles.aboutDesc}>{desc}</div>
-                  </div>
+                <div key={i} className={styles.infoCard}>
+                  <span className={styles.infoNum}>0{i+1}</span>
+                  <div className={styles.infoTitle}>{title}</div>
+                  <div className={styles.infoDesc}>{desc}</div>
                 </div>
               ))}
             </div>
@@ -172,14 +170,12 @@ export default function Landing() {
               Ό,τι χρειάζεται η επιχείρησή σας.
             </h2>
 
-            <div className={styles.servicesGrid}>
+            <div className={styles.infoCards}>
               {SERVICES.map((s, i) => (
-                <div key={i} className={styles.serviceRow}>
-                  <span className={styles.serviceNum}>0{i+1}</span>
-                  <div className={styles.serviceBody}>
-                    <div className={styles.serviceName}>{s.title}</div>
-                    <div className={styles.serviceDesc}>{s.desc}</div>
-                  </div>
+                <div key={i} className={styles.infoCard}>
+                  <span className={styles.infoNum}>0{i+1}</span>
+                  <div className={styles.infoTitle}>{s.title}</div>
+                  <div className={styles.infoDesc}>{s.desc}</div>
                 </div>
               ))}
             </div>
