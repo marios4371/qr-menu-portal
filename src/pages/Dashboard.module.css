@@ -1,107 +1,15 @@
-.layout {
-  display: flex;
-  min-height: 100vh;
-  background: var(--bg);
-}
+/* ══════════════════════════════════════════════════════════════
+   DASHBOARD-SPECIFIC STYLES
+   Shared layout/sidebar/nav styles → Layout.module.css
+   ══════════════════════════════════════════════════════════════ */
 
 /* ────────────────────────────────────────────────────────────
    SIDEBAR
    ──────────────────────────────────────────────────────────── */
-.sidebar {
-  width: 210px;
-  flex-shrink: 0;
-  background: var(--bg-card);
-  border-right: 1px solid var(--border-md);
-  display: flex;
-  flex-direction: column;
-  padding: 24px 14px;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-}
-
-.sidebarLogo {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 32px;
-  padding: 0 6px;
-}
-
-.nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
-
-.navItem {
-  display: flex;
-  align-items: center;
-  padding: 9px 10px;
-  border-radius: var(--radius);
-  font-size: 0.84rem;
-  color: var(--text-sub);
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.13s, color 0.13s;
-  border-left: 2px solid transparent;
-  font-weight: 400;
-}
-.navItem:hover { background: var(--bg-hover); color: var(--text); }
-.navActive {
-  background: rgba(26,22,16,0.06) !important;
-  color: var(--text) !important;
-  border-left-color: var(--accent) !important;
-  font-weight: 500;
-}
-
-.sidebarFooter { border-top: 1px solid var(--border); padding-top: 14px; }
-
-.ownerInfo { display: flex; align-items: center; gap: 10px; overflow: hidden; }
-
-.ownerAvatar {
-  width: 32px; height: 32px;
-  border-radius: var(--radius);
-  background: var(--bg-hover);
-  border: 1px solid var(--border-md);
-  color: var(--text-sub);
-  font-size: 0.7rem;
-  font-weight: 600;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  letter-spacing: 0.02em;
-}
-
-.ownerName  { font-size: 0.82rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ownerEmail { font-size: 0.7rem; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ownerInfoText { min-width: 0; flex: 1; overflow: hidden; }
 
 /* ────────────────────────────────────────────────────────────
    MAIN
    ──────────────────────────────────────────────────────────── */
-.main {
-  flex: 1;
-  padding: 40px 48px;
-  overflow-y: auto;
-  max-width: 100%;
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 32px;
-}
-
-.heading {
-  font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin-bottom: 3px;
-  color: var(--text);
-}
-.headingSub {
-  color: var(--text-sub);
-  font-size: 0.85rem;
-  font-weight: 300;
-}
 
 /* ── Shop selector in header ── */
 .shopDropdownWrap {
@@ -424,8 +332,6 @@
   .statCard { flex: 1; }
 }
 @media (max-width: 860px) {
-  .sidebar { display: none; }
-  .main { padding: 24px 20px; }
 }
 @media (max-width: 560px) {
   .statsCol { flex-direction: column; }

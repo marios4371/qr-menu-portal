@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { saveMenu } from "../services/api";
 import styles from "./MenuEditor.module.css";
+import layout from "./Layout.module.css";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -237,23 +238,23 @@ export default function MenuEditor() {
     }
   };
 
-  const handleLogout = () => { logout(); navigate("/admin"); };
+  const handleLogout = () => { logout(); navigate("/login"); };
 
   // ─────────────────────────────────────────────────────────────────────────
 
   const totalProducts = categories.reduce((a, c) => a + c.items.length, 0);
 
   return (
-    <div className={styles.layout}>
+    <div className={layout.layout}>
 
       {/* Sidebar */}
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarLogo}>QRMenu</div>
-        <nav className={styles.nav}>
-          <Link to="/dashboard" className={styles.navItem}>Dashboard</Link>
-          <a className={`${styles.navItem} ${styles.navActive}`}>Επεξεργασία Μενού</a>
+      <aside className={layout.sidebar}>
+        <div className={layout.sidebarLogo}>QRMenu</div>
+        <nav className={layout.nav}>
+          <Link to="/dashboard" className={layout.navItem}>Αρχική</Link>
+          <a className={`${layout.navItem} ${layout.navActive}`}>Επεξεργασία Μενού</a>
         </nav>
-        <div className={styles.sidebarFooter}>
+        <div className={layout.sidebarFooter}>
           <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%" }}>
             Αποσύνδεση
           </button>
@@ -261,14 +262,14 @@ export default function MenuEditor() {
       </aside>
 
       {/* Main */}
-      <main className={styles.main}>
+      <main className={layout.main}>
 
         {/* Header */}
-        <div className={styles.header}>
+        <div className={layout.header}>
           <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
             <div>
-              <h1 className={styles.heading}>Επεξεργασία Μενού</h1>
-              <p className={styles.headingSub}>
+              <h1 className={layout.heading}>Επεξεργασία Μενού</h1>
+              <p className={layout.headingSub}>
                 {categories.length} κατηγορίες · {totalProducts} προϊόντα
                 {dirty && <span className={styles.dirtyDot} title="Μη αποθηκευμένες αλλαγές"> ●</span>}
               </p>

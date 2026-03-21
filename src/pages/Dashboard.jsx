@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import styles from "./Dashboard.module.css";
+import layout from "./Layout.module.css";
 
 const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
 
@@ -11,7 +12,7 @@ export default function Dashboard() {
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
   const shop     = shops?.[selectedShopIdx] ?? shops?.[0];
 
-  const handleLogout = () => { logout(); navigate("/admin"); };
+  const handleLogout = () => { logout(); navigate("/login"); };
 
   const menuUrl = shop?.shopSlug
     ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
@@ -21,25 +22,25 @@ export default function Dashboard() {
   const totalProducts   = shop?.menu?.reduce((a, c) => a + (c.items?.length ?? 0), 0) ?? 0;
 
   return (
-    <div className={styles.layout}>
+    <div className={layout.layout}>
 
       {/* ── SIDEBAR ── */}
-      <aside className={styles.sidebar}>
-        <div className={styles.sidebarLogo}>QRMenu</div>
+      <aside className={layout.sidebar}>
+        <div className={layout.sidebarLogo}>QRMenu</div>
 
-        <nav className={styles.nav}>
-          <a className={`${styles.navItem} ${styles.navActive}`}>Dashboard</a>
-          <Link to="/menu-editor" className={styles.navItem}>Επεξεργασία Μενού</Link>
+        <nav className={layout.nav}>
+          <a className={`${layout.navItem} ${layout.navActive}`}>Αρχική</a>
+          <Link to="/menu-editor" className={layout.navItem}>Επεξεργασία Μενού</Link>
         </nav>
 
-        <div className={styles.sidebarFooter}>
-          <div className={styles.ownerInfo}>
-            <div className={styles.ownerAvatar}>
+        <div className={layout.sidebarFooter}>
+          <div className={layout.ownerInfo}>
+            <div className={layout.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
             </div>
-            <div className={styles.ownerInfoText}>
-              <div className={styles.ownerName}>{owner?.firstName} {owner?.lastName}</div>
-              <div className={styles.ownerEmail}>{owner?.email}</div>
+            <div className={layout.ownerInfoText}>
+              <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
+              <div className={layout.ownerEmail}>{owner?.email}</div>
             </div>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%", marginTop:12 }}>
@@ -49,14 +50,14 @@ export default function Dashboard() {
       </aside>
 
       {/* ── MAIN ── */}
-      <main className={styles.main}>
+      <main className={layout.main}>
 
         {/* Header */}
-        <header className={styles.header}>
+        <header className={layout.header}>
           <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
             <div>
-              <h1 className={styles.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
-              <p className={styles.headingSub}>Επισκόπηση του καταστήματός σας.</p>
+              <h1 className={layout.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
+              <p className={layout.headingSub}>Επισκόπηση του καταστήματός σας.</p>
             </div>
             {shops && shops.length > 0 && (
               <div className={styles.shopDropdownWrap}>
