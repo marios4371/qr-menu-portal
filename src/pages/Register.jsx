@@ -69,12 +69,15 @@ export default function Register() {
   const { login }  = useAuth();
   const handleBack = () => navigate(-1);
 
-  const [step, setStep]       = useState(0);
+  // If coming from a plan card in Landing, pre-select that plan and start at step 1
+  const preselectedPlan = location.state?.selectedPlan || null;
+
+  const [step, setStep]       = useState(preselectedPlan ? 1 : 0);
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
 
   // Step 0 — Plan
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(preselectedPlan);
 
   // Step 1 — Account
   const [firstName, setFirstName]         = useState("");
@@ -161,7 +164,7 @@ export default function Register() {
         <span className={styles.logo}>QRMenu</span>
 
         {/* Step indicator */}
-        <div className={styles.steps}>
+        <div className={`${styles.steps} ${step === 0 ? styles.stepsCompact : ""}`}>
           {STEPS.map((label, i) => (
             <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
               <div className={styles.stepCircle}>{i < step ? "✓" : i + 1}</div>
@@ -206,9 +209,7 @@ export default function Register() {
         {step === 1 && (
           <div className="fade-up">
             <h2 className={styles.title}>Δημιουργία λογαριασμού</h2>
-            <p className={styles.sub}>
-              Πλάνο: <strong>{planInfo?.name}</strong> — {planInfo?.price}
-            </p>
+            <div className={styles.planChip}>{planInfo?.name} Πακέτο — {planInfo?.price}</div>
 
             <div className={styles.formGrid}>
               <div className="form-group">

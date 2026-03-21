@@ -196,7 +196,7 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/register" state={{ from: "plans" }} className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`} style={{ marginTop: "auto" }}>
+                <Link to="/register" state={{ from: "plans", selectedPlan: p.value }} className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`} style={{ marginTop: "auto" }}>
                   {p.cta}
                 </Link>
               </div>

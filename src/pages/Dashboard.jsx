@@ -39,6 +39,15 @@ export default function Dashboard() {
         </nav>
 
         <div className={layout.sidebarFooter}>
+          {/* Upgrade plan — πάνω από το όνομα */}
+          <button
+            className={styles.upgradePlanBtn}
+            onClick={() => { setShowPlanModal(true); setPlanError(""); setPlanSuccess(""); }}
+          >
+            <span className={styles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
+            <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
+          </button>
+
           <div className={layout.ownerInfo}>
             <div className={layout.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
@@ -186,21 +195,6 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            {/* ── PLAN SECTION ── */}
-            <div className={styles.planSection}>
-              <div className={styles.planSectionHeader}>
-                <div>
-                  <div className={styles.sectionLabel}>Πλάνο Συνδρομής</div>
-                  <h3 className={styles.sectionTitle}>
-                    {owner?.plan || "STANDARD"} Πακέτο
-                  </h3>
-                </div>
-                <button className="btn btn-ghost btn-sm" onClick={() => { setShowPlanModal(true); setPlanError(""); setPlanSuccess(""); }}>
-                  Αλλαγή πλάνου →
-                </button>
-              </div>
-            </div>
-
             {/* ── PLAN MODAL ── */}
             {showPlanModal && (
               <div className={styles.modalOverlay} onClick={() => setShowPlanModal(false)}>
