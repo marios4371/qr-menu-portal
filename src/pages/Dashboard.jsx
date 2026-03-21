@@ -7,8 +7,7 @@ const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-centr
 export default function Dashboard() {
   const { owner, shops, logout } = useAuth();
   const navigate = useNavigate();
-
-  const shop = shops?.[0];
+  const shop     = shops?.[0];
 
   const handleLogout = () => { logout(); navigate("/login"); };
 
@@ -16,17 +15,18 @@ export default function Dashboard() {
     ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
     : null;
 
-  const totalProducts = shop?.menu?.reduce((a, c) => a + (c.items?.length ?? 0), 0) ?? 0;
+  const totalCategories = shop?.menu?.length ?? 0;
+  const totalProducts   = shop?.menu?.reduce((a, c) => a + (c.items?.length ?? 0), 0) ?? 0;
 
   return (
     <div className={styles.layout}>
 
-      {/* ── Sidebar ── */}
+      {/* ── SIDEBAR ── */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarLogo}>QRMenu</div>
 
         <nav className={styles.nav}>
-          <a className={`${styles.navItem} ${styles.navActive}`}>Αρχική</a>
+          <a className={`${styles.navItem} ${styles.navActive}`}>Dashboard</a>
           <Link to="/menu-editor" className={styles.navItem}>Επεξεργασία Μενού</Link>
         </nav>
 
@@ -35,112 +35,134 @@ export default function Dashboard() {
             <div className={styles.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
             </div>
-            <div className={styles.ownerMeta}>
+            <div>
               <div className={styles.ownerName}>{owner?.firstName} {owner?.lastName}</div>
               <div className={styles.ownerEmail}>{owner?.email}</div>
             </div>
           </div>
-          <button className={`btn btn-ghost btn-sm ${styles.logoutBtn}`} onClick={handleLogout}>
+          <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%", marginTop:12 }}>
             Αποσύνδεση
           </button>
         </div>
       </aside>
 
-      {/* ── Main ── */}
+      {/* ── MAIN ── */}
       <main className={styles.main}>
 
         {/* Header */}
-        <div className={styles.header}>
+        <header className={styles.header}>
           <div>
-            <h1 className={styles.heading}>Αρχική</h1>
+            <h1 className={styles.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
             <p className={styles.headingSub}>Επισκόπηση του καταστήματός σας.</p>
           </div>
           <span className={styles.planBadge}>{owner?.plan || "STANDARD"}</span>
-        </div>
+        </header>
 
         {shop ? (
           <>
-            {/* ── Shop info ── */}
-            <div className={styles.shopInfo}>
-              <div className={styles.shopInfoRow}>
-                <span className={styles.shopInfoLabel}>Κατάστημα</span>
-                <span className={styles.shopInfoValue}>{shop.shopName || shop.settings?.shopName}</span>
-              </div>
-              <div className={styles.shopInfoRow}>
-                <span className={styles.shopInfoLabel}>Τύπος</span>
-                <span className={styles.shopInfoValue}>{shop.businessType}</span>
-              </div>
-              <div className={styles.shopInfoRow}>
-                <span className={styles.shopInfoLabel}>URL Μενού</span>
-                <div className={styles.urlCell}>
-                  <code className={styles.urlCode}>{menuUrl}</code>
-                  <button
-                    className={styles.copyBtn}
-                    onClick={() => menuUrl && navigator.clipboard.writeText(menuUrl)}
-                    title="Αντιγραφή"
-                  >
-                    Αντιγραφή
-                  </button>
-                  {menuUrl && (
-                    <a href={menuUrl} target="_blank" rel="noopener noreferrer" className={styles.openBtn}>
-                      Άνοιγμα ↗
-                    </a>
-                  )}
+            {/* ── TOP ROW ── */}
+            <div className={styles.topRow}>
+
+              {/* Shop card */}
+              <div className={styles.shopCard}>
+                <div className={styles.shopCardTop}>
+                  <div>
+                    <div className={styles.shopLabel}>Κατάστημα</div>
+                    <h2 className={styles.shopName}>{shop.shopName || shop.settings?.shopName}</h2>
+                    <span className={styles.shopType}>{shop.businessType}</span>
+                  </div>
+                  <span className={`${styles.statusBadge} ${styles.statusActive}`}>● Live</span>
+                </div>
+
+                <div className={styles.urlBlock}>
+                  <div className={styles.urlLabel}>URL Μενού</div>
+                  <div className={styles.urlRow}>
+                    <code className={styles.urlCode}>{menuUrl}</code>
+                    <div className={styles.urlActions}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => navigator.clipboard.writeText(menuUrl)}>
+                        Αντιγραφή
+                      </button>
+                      {menuUrl && (
+                        <a href={menuUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost btn-sm">
+                          Άνοιγμα ↗
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className={styles.shopInfoRow}>
-                <span className={styles.shopInfoLabel}>Κατηγορίες</span>
-                <span className={styles.shopInfoValue}>{shop.menu?.length ?? 0}</span>
-              </div>
-              <div className={styles.shopInfoRow}>
-                <span className={styles.shopInfoLabel}>Προϊόντα</span>
-                <span className={styles.shopInfoValue}>{totalProducts}</span>
+
+              {/* Stats column */}
+              <div className={styles.statsCol}>
+                {[
+                  { label: "Κατηγορίες",  value: totalCategories },
+                  { label: "Προϊόντα",    value: totalProducts },
+                  { label: "Παραγγελίες", value: "—" },
+                ].map(s => (
+                  <div key={s.label} className={styles.statCard}>
+                    <div className={styles.statValue}>{s.value}</div>
+                    <div className={styles.statLabel}>{s.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* ── Menu overview ── */}
-            {shop.menu && shop.menu.length > 0 ? (
-              <div className={styles.menuOverview}>
-                <div className={styles.menuOverviewHeader}>
-                  <span className={styles.menuOverviewTitle}>Μενού</span>
-                  <Link to="/menu-editor" className="btn btn-ghost btn-sm">Επεξεργασία</Link>
+            {/* ── MENU PREVIEW ── */}
+            <div className={styles.menuSection}>
+              <div className={styles.menuSectionHeader}>
+                <div>
+                  <div className={styles.sectionLabel}>Μενού</div>
+                  <h3 className={styles.sectionTitle}>
+                    {totalCategories
+                      ? `${totalCategories} κατηγορίες · ${totalProducts} προϊόντα`
+                      : "Δεν υπάρχουν κατηγορίες ακόμα"}
+                  </h3>
                 </div>
+                <Link to="/menu-editor" className="btn btn-primary btn-sm">
+                  Επεξεργασία →
+                </Link>
+              </div>
 
-                {shop.menu.map((cat) => (
-                  <div key={cat.id || cat.name} className={styles.catBlock}>
-                    <div className={styles.catBlockHeader}>
-                      <span className={styles.catBlockName}>{cat.name || cat.title}</span>
-                      <span className={styles.catBlockCount}>{cat.items?.length ?? 0} προϊόντα</span>
-                    </div>
-                    {cat.items && cat.items.length > 0 && (
-                      <div className={styles.catBlockItems}>
-                        {cat.items.map((item) => (
-                          <div key={item.id || item.name} className={styles.itemRow}>
-                            <span className={styles.itemName}>{item.name}</span>
-                            <span className={styles.itemStation}>{item.station}</span>
-                            <span className={styles.itemPrice}>
+              {totalCategories > 0 ? (
+                <div className={styles.menuGrid}>
+                  {shop.menu.map((cat) => (
+                    <div key={cat.id || cat.name} className={styles.catCard}>
+                      <div className={styles.catHeader}>
+                        <span className={styles.catName}>{cat.name || cat.title}</span>
+                        <span className={styles.catCount}>{cat.items?.length ?? 0}</span>
+                      </div>
+                      <ul className={styles.productList}>
+                        {(cat.items || []).slice(0, 5).map((item) => (
+                          <li key={item.id || item.name} className={styles.productItem}>
+                            <span className={styles.productName}>{item.name}</span>
+                            <span className={styles.productPrice}>
                               {item.price != null && item.price !== ""
                                 ? `${Number(item.price).toFixed(2)} €`
                                 : "—"}
                             </span>
-                          </div>
+                          </li>
                         ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className={styles.emptyMenu}>
-                <p>Το μενού σας είναι κενό.</p>
-                <Link to="/menu-editor" className="btn btn-primary" style={{ marginTop: 16 }}>
-                  Προσθήκη κατηγοριών
-                </Link>
-              </div>
-            )}
+                        {(cat.items?.length ?? 0) > 5 && (
+                          <li className={styles.productMore}>
+                            +{cat.items.length - 5} ακόμα
+                          </li>
+                        )}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={styles.emptyMenu}>
+                  <p>Δεν έχετε προσθέσει κατηγορίες ακόμα.</p>
+                  <Link to="/menu-editor" className="btn btn-primary" style={{ marginTop:16 }}>
+                    Ξεκινήστε την επεξεργασία
+                  </Link>
+                </div>
+              )}
+            </div>
           </>
         ) : (
-          <div className={styles.emptyMenu}>
+          <div className={styles.emptyState}>
             <p>Δεν βρέθηκε κατάστημα.</p>
           </div>
         )}
