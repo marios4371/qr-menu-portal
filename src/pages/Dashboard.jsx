@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import styles from "./Dashboard.module.css";
@@ -7,7 +8,8 @@ const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-centr
 export default function Dashboard() {
   const { owner, shops, logout } = useAuth();
   const navigate = useNavigate();
-  const shop     = shops?.[0];
+  const [selectedShopIdx, setSelectedShopIdx] = useState(0);
+  const shop     = shops?.[selectedShopIdx] ?? shops?.[0];
 
   const handleLogout = () => { logout(); navigate("/login"); };
 
@@ -35,7 +37,7 @@ export default function Dashboard() {
             <div className={styles.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
             </div>
-            <div>
+            <div className={styles.ownerInfoText}>
               <div className={styles.ownerName}>{owner?.firstName} {owner?.lastName}</div>
               <div className={styles.ownerEmail}>{owner?.email}</div>
             </div>
@@ -51,11 +53,29 @@ export default function Dashboard() {
 
         {/* Header */}
         <header className={styles.header}>
-          <div>
-            <h1 className={styles.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
-            <p className={styles.headingSub}>Επισκόπηση του καταστήματός σας.</p>
+          <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+            <div>
+              <h1 className={styles.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
+              <p className={styles.headingSub}>Επισκόπηση του καταστήματός σας.</p>
+            </div>
+            {shops && shops.length > 0 && (
+              <div className={styles.shopDropdownWrap}>
+                <span className={styles.shopDropdownLabel}>Επιλογή Καταστήματος</span>
+                <select
+                  className={styles.shopDropdownSelect}
+                  value={selectedShopIdx}
+                  onChange={e => setSelectedShopIdx(Number(e.target.value))}
+                >
+                  {shops.map((s, i) => (
+                    <option key={s.shop_id} value={i}>
+                      {s.shopName || s.settings?.shopName || s.shop_id}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
-          <span className={styles.planBadge}>{owner?.plan || "STANDARD"}</span>
+          <span className={styles.planBadge}>{owner?.plan || "STANDARD"} Πακέτο</span>
         </header>
 
         {shop ? (
