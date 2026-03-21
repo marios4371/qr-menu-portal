@@ -237,7 +237,7 @@ export default function MenuEditor() {
     }
   };
 
-  const handleLogout = () => { logout(); navigate("/login"); };
+  const handleLogout = () => { logout(); navigate("/admin"); };
 
   // ─────────────────────────────────────────────────────────────────────────
 
