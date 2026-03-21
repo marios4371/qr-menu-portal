@@ -173,15 +173,12 @@
 }
 
 /* ────────────────────────────────────────────────────────────
-   SECTIONS — single, full-height
+   SECTIONS — all visible, scrollable
    ──────────────────────────────────────────────────────────── */
 .section {
-  min-height: calc(100vh - 56px);
-  padding: 110px 0 80px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 96px 0 80px;
+  border-top: 1px solid var(--border);
+  scroll-margin-top: 64px;
 }
 
 .sectionTitle {
@@ -428,7 +425,7 @@
 }
 @media (max-width: 600px) {
   .hero    { padding: 110px 0 72px; }
-  .section { padding: 90px 0 60px; }
+  .section { padding: 72px 0 56px; }
   .headline { font-size: 1.9rem; }
   .aboutCards,
   .infoCards { grid-template-columns: 1fr; }
