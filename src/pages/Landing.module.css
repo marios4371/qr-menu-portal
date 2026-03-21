@@ -1,61 +1,63 @@
 .page {
   min-height: 100vh;
-  position: relative;
   display: flex;
   flex-direction: column;
 }
 
 /* ────────────────────────────────────────────────────────────
    NAV
-   Initially: transparent, blends into beige background
-   On scroll OR when section is active: solid beige bar with shadow
+   - Initially: transparent, no border
+   - On scroll / section active: faint bottom border appears
    ──────────────────────────────────────────────────────────── */
 .nav {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 20px 0;
-  /* Starts transparent — invisible against bg */
-  background: transparent;
-  transition: background 0.25s ease, padding 0.25s ease, box-shadow 0.25s ease;
+  padding: 22px 0;
+  background: rgba(240,232,216,0.0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    backdrop-filter 0.3s ease,
+    padding 0.25s ease;
+  border-bottom: 1px solid transparent;
 }
 
-/* Becomes a solid sticky bar on scroll */
-.navSolid {
-  background: rgba(240,232,216,0.92);
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+/* Border + blur appear on scroll */
+.navBorder {
+  background: rgba(240,232,216,0.88);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border-bottom-color: var(--border);
   padding: 14px 0;
-  box-shadow: 0 1px 0 rgba(30,20,10,0.08);
 }
 
 .navInner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
 }
 
 .logo {
   font-family: var(--font);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--text);
-  letter-spacing: -0.02em;
-  flex-shrink: 0;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
-/* Center nav links */
-.navCenter {
+/* Center nav links — underline style */
+.navLinks {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex: 1;
   justify-content: center;
 }
@@ -65,23 +67,25 @@
   border: none;
   cursor: pointer;
   font-family: var(--font);
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   font-weight: 400;
   color: var(--text-sub);
   padding: 6px 14px;
-  border-radius: var(--radius);
-  transition: color 0.14s, background 0.14s;
-  letter-spacing: 0.01em;
+  /* Underline via box-shadow so it doesn't shift layout */
+  box-shadow: inset 0 -2px 0 transparent;
+  transition: color 0.15s, box-shadow 0.15s;
+  letter-spacing: 0.005em;
+  position: relative;
 }
-.navLink:hover { color: var(--text); background: var(--accent-dim); }
+.navLink:hover {
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 rgba(26,22,16,0.25);
+}
+/* Active: solid underline, full opacity */
 .navLinkActive {
   color: var(--text) !important;
-  font-weight: 600;
-  background: var(--accent-dim);
-  /* Underline indicator */
-  border-bottom: 2px solid var(--accent);
-  border-radius: 0;
-  padding-bottom: 4px;
+  font-weight: 500;
+  box-shadow: inset 0 -2px 0 var(--accent) !important;
 }
 
 .navActions {
@@ -92,242 +96,194 @@
 }
 
 /* ────────────────────────────────────────────────────────────
-   HERO
+   HERO — editorial, measured
    ──────────────────────────────────────────────────────────── */
 .hero {
-  position: relative;
-  padding: 160px 0 120px;
+  padding: 160px 0 100px;
   flex: 1;
+  position: relative;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(26,22,16,0.06);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius);
-  padding: 5px 13px;
-  font-size: 0.73rem;
+/* Small category label above headline */
+.eyebrow {
+  font-size: 0.74rem;
   font-weight: 500;
-  letter-spacing: 0.07em;
-  color: var(--text-sub);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 36px;
-  animation: fadeUp 0.5s ease both;
+  color: var(--text-muted);
+  margin-bottom: 20px;
 }
 
-.badgeDot {
-  width: 5px;
-  height: 5px;
-  background: var(--accent);
-  border-radius: 50%;
-  animation: pulse 2.8s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-
+/* Headline — measured size, not huge */
 .headline {
   font-family: var(--font);
-  font-size: clamp(2.8rem, 5.5vw, 5rem);
-  font-weight: 800;
-  line-height: 1.05;
-  letter-spacing: -0.04em;
-  margin-bottom: 24px;
-  animation: fadeUp 0.52s 0.06s ease both;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   color: var(--text);
+  margin-bottom: 22px;
+  max-width: 600px;
 }
-/* Outline text — dark stroke on light bg */
-.headline em {
-  font-style: normal;
-  color: transparent;
-  -webkit-text-stroke: 2px rgba(26,22,16,0.35);
+
+/* Second line — lighter weight for contrast */
+.headlineLight {
+  font-weight: 300;
+  color: var(--text-sub);
 }
 
 .sub {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   color: var(--text-sub);
-  line-height: 1.72;
-  max-width: 500px;
-  margin-bottom: 40px;
+  line-height: 1.75;
+  max-width: 460px;
+  margin-bottom: 36px;
   font-weight: 300;
-  animation: fadeUp 0.52s 0.12s ease both;
 }
 
-.cta {
+.heroCta {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   flex-wrap: wrap;
-  animation: fadeUp 0.52s 0.18s ease both;
-  margin-bottom: 48px;
 }
 
-.ctaLink {
+.heroLink {
+  font-size: 0.84rem;
   color: var(--text-sub);
   text-decoration: none;
-  font-size: 0.87rem;
   transition: color 0.14s;
+  letter-spacing: 0.01em;
 }
-.ctaLink:hover { color: var(--text); }
+.heroLink:hover { color: var(--text); }
 
-/* Quick nav hint chips */
-.heroHints {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  animation: fadeUp 0.52s 0.24s ease both;
-}
-
-.hintChip {
-  background: rgba(26,22,16,0.05);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius);
-  padding: 7px 14px;
-  font-family: var(--font);
-  font-size: 0.8rem;
-  color: var(--text-sub);
-  cursor: pointer;
-  transition: background 0.14s, color 0.14s, border-color 0.14s;
-}
-.hintChip:hover {
-  background: var(--accent);
-  color: #F0E8D8;
-  border-color: var(--accent);
-}
-
-/* Decorative grid */
-.grid {
+/* Subtle decorative vertical lines */
+.verticals {
   position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  justify-content: space-evenly;
   pointer-events: none;
   z-index: -1;
 }
-.gridLine {
-  border-right: 1px solid rgba(26,22,16,0.05);
+.vLine {
+  width: 1px;
   height: 100%;
+  background: rgba(26,22,16,0.045);
 }
 
 /* ────────────────────────────────────────────────────────────
-   SECTIONS — full viewport, single at a time
+   SECTIONS — single, full-height
    ──────────────────────────────────────────────────────────── */
 .section {
-  min-height: calc(100vh - 60px);
-  padding: 100px 0 80px;
+  min-height: calc(100vh - 56px);
+  padding: 110px 0 80px;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* Shared section typography */
-.sectionLabel {
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  margin-bottom: 14px;
-}
-
 .sectionTitle {
-  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-  font-weight: 700;
+  font-size: clamp(1.6rem, 3vw, 2.5rem);
+  font-weight: 600;
   letter-spacing: -0.03em;
   color: var(--text);
   line-height: 1.15;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  max-width: 600px;
 }
 
-.sectionDesc {
-  font-size: 1rem;
+.sectionIntro {
+  font-size: 0.95rem;
   color: var(--text-sub);
-  line-height: 1.7;
+  line-height: 1.75;
+  max-width: 520px;
   font-weight: 300;
-  max-width: 540px;
-  margin-bottom: 48px;
+  margin-bottom: 52px;
 }
 
 /* ── About ── */
-.aboutGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+.aboutList {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
 }
 
-.aboutCard {
-  background: var(--bg-card);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius-xl);
-  padding: 28px 24px;
-  box-shadow: var(--shadow-card);
+.aboutItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 28px 0;
+  border-bottom: 1px solid var(--border);
 }
-.aboutCard:hover { background: var(--bg-hover); }
 
 .aboutNum {
   font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   color: var(--text-muted);
-  margin-bottom: 12px;
-  text-transform: uppercase;
+  flex-shrink: 0;
+  width: 24px;
+  padding-top: 3px;
 }
 
-.aboutCard h3 {
+.aboutTitle {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   letter-spacing: -0.01em;
 }
 
-.aboutCard p {
-  font-size: 0.85rem;
+.aboutDesc {
+  font-size: 0.87rem;
   color: var(--text-sub);
   line-height: 1.65;
   font-weight: 300;
 }
 
-/* ── Services ── */
+/* ── Services — list rows ── */
 .servicesGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border-md);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border);
 }
 
-.serviceCard {
-  background: var(--bg-card);
-  padding: 32px 28px;
-  transition: background 0.16s;
+.serviceRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.14s;
 }
-.serviceCard:hover { background: var(--bg-hover); }
+.serviceRow:hover { background: rgba(26,22,16,0.025); margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
 
-.serviceIcon {
-  font-size: 1.3rem;
+.serviceNum {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   color: var(--text-muted);
-  margin-bottom: 14px;
-  display: block;
+  flex-shrink: 0;
+  width: 24px;
+  padding-top: 3px;
 }
-.serviceTitle {
-  font-size: 0.95rem;
+
+.serviceBody { flex: 1; }
+
+.serviceName {
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   letter-spacing: -0.01em;
 }
+
 .serviceDesc {
   font-size: 0.84rem;
   color: var(--text-sub);
-  line-height: 1.65;
+  line-height: 1.6;
   font-weight: 300;
 }
 
@@ -335,172 +291,178 @@
 .plansGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 1px;
+  background: var(--border-md);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
   margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
 }
 
 .planCard {
   background: var(--bg-card);
-  border: 1px solid var(--border-md);
-  border-radius: var(--radius-xl);
-  padding: 28px 24px;
+  padding: 32px 26px;
   display: flex;
   flex-direction: column;
+  gap: 0;
   position: relative;
-  box-shadow: var(--shadow-card);
-  transition: box-shadow 0.15s;
+  transition: background 0.15s;
 }
-.planCard:hover {
-  box-shadow: var(--shadow-lg);
-}
+.planCard:hover { background: var(--bg-hover); }
 
-/* Highlighted plan */
-.planHighlight {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #F0E8D8;
-  box-shadow: var(--shadow-lg);
+/* Dark variant for highlighted plan */
+.planCardDark {
+  background: var(--accent) !important;
 }
-.planHighlight .planName,
-.planHighlight .planCurrency,
-.planHighlight .planDesc,
-.planHighlight .planFeature {
-  color: rgba(240,232,216,0.75) !important;
-}
-.planHighlight .planAmount,
-.planHighlight h3 {
-  color: #F0E8D8 !important;
-}
-.planHighlight .planCheck { color: rgba(240,232,216,0.9) !important; }
+.planCardDark:hover { background: #2e2820 !important; }
 
-.planBadge {
+.planTag {
   position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg);
-  color: var(--accent);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  top: 16px; right: 16px;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  padding: 4px 12px;
+  color: rgba(240,232,216,0.7);
+  border: 1px solid rgba(240,232,216,0.2);
   border-radius: var(--radius);
-  border: 1px solid var(--border-md);
-  white-space: nowrap;
+  padding: 3px 8px;
 }
+
+.planHeader {
+  margin-bottom: 22px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--border);
+}
+.planCardDark .planHeader { border-bottom-color: rgba(240,232,216,0.10); }
 
 .planName {
+  display: block;
   font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--text-sub);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+.planCardDark .planName { color: rgba(240,232,216,0.55); }
 
 .planPrice {
   display: flex;
   align-items: baseline;
-  gap: 4px;
-  margin-bottom: 10px;
+  gap: 5px;
 }
 .planAmount {
-  font-size: 2.2rem;
-  font-weight: 800;
+  font-size: 2rem;
+  font-weight: 700;
   letter-spacing: -0.03em;
   color: var(--text);
 }
-.planCurrency {
-  font-size: 0.8rem;
-  color: var(--text-sub);
-  font-weight: 300;
-}
+.planCardDark .planAmount { color: #F0E8D8; }
 
-.planDesc {
-  font-size: 0.82rem;
+.planPeriod {
+  font-size: 0.78rem;
   color: var(--text-sub);
-  line-height: 1.6;
   font-weight: 300;
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--border);
 }
-.planHighlight .planDesc { border-bottom-color: rgba(240,232,216,0.15); }
+.planCardDark .planPeriod { color: rgba(240,232,216,0.5); }
 
 .planFeatures {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 24px;
   flex: 1;
 }
+
 .planFeature {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
+  gap: 9px;
   font-size: 0.82rem;
   color: var(--text-sub);
   font-weight: 300;
   line-height: 1.5;
 }
+.planCardDark .planFeature { color: rgba(240,232,216,0.65); }
+
 .planCheck {
-  color: var(--success);
+  color: var(--text-muted);
   font-size: 0.75rem;
   flex-shrink: 0;
   margin-top: 2px;
+  font-weight: 300;
 }
 
-/* Ghost button on dark highlight card */
-.planHighlight .btn-ghost {
-  background: rgba(240,232,216,0.12);
-  color: #F0E8D8;
-  border-color: rgba(240,232,216,0.25);
+/* Ghost button on dark card */
+.planCardDark .btn-ghost {
+  background: rgba(240,232,216,0.08);
+  color: rgba(240,232,216,0.85);
+  border-color: rgba(240,232,216,0.18);
 }
-.planHighlight .btn-ghost:hover {
-  background: rgba(240,232,216,0.20);
+.planCardDark .btn-ghost:hover {
+  background: rgba(240,232,216,0.14);
+  color: #F0E8D8;
 }
 
 .customNote {
-  text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
+  text-align: center;
 }
 .customLink {
   color: var(--text-sub);
   cursor: pointer;
-  border-bottom: 1px solid var(--border-md);
-  padding-bottom: 1px;
-  transition: color 0.14s;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-md);
+  transition: color 0.14s, text-decoration-color 0.14s;
 }
-.customLink:hover { color: var(--text); }
+.customLink:hover {
+  color: var(--text);
+  text-decoration-color: var(--border-hi);
+}
 
-/* ── Footer ── */
+/* ────────────────────────────────────────────────────────────
+   FOOTER
+   ──────────────────────────────────────────────────────────── */
 .footer {
   border-top: 1px solid var(--border);
   padding: 20px 0;
+  margin-top: auto;
 }
 .footer > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-/* Footer when a section is shown — push to bottom */
-.footerSection {
-  margin-top: auto;
+
+.footerLogo {
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: -0.01em;
+}
+
+.footerCopy {
+  font-size: 0.78rem;
+  color: var(--text-muted);
 }
 
 /* ── Responsive ── */
-@media (max-width: 960px) {
-  .navCenter { display: none; }
-  .plansGrid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto 24px; }
-  .servicesGrid { grid-template-columns: repeat(2, 1fr); }
-  .aboutGrid { grid-template-columns: 1fr; }
+@media (max-width: 900px) {
+  .navLinks  { display: none; }
+  .plansGrid { grid-template-columns: 1fr; border-radius: var(--radius-lg); }
 }
 @media (max-width: 600px) {
-  .servicesGrid { grid-template-columns: 1fr; }
-  .hero { padding: 120px 0 72px; }
-  .section { padding: 80px 0 60px; }
-  .heroHints { display: none; }
+  .hero    { padding: 110px 0 72px; }
+  .section { padding: 90px 0 60px; }
+  .headline { font-size: 1.9rem; }
 }

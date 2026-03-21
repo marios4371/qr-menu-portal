@@ -3,62 +3,59 @@ import { Link } from "react-router-dom";
 import styles from "./Landing.module.css";
 
 const SERVICES = [
-  { icon: "◈", title: "Ψηφιακό Μενού QR", desc: "Οι πελάτες σκανάρουν, βλέπουν το μενού και παραγγέλνουν — χωρίς app, χωρίς εγγραφή." },
-  { icon: "◎", title: "Real-time Παραγγελίες", desc: "Bar, Kitchen και Service λαμβάνουν αμέσως αυτό που τους αφορά. Μηδέν καθυστέρηση." },
-  { icon: "◆", title: "Staff Dashboard", desc: "Σερβιτόροι, αναλήψεις τραπεζιών, πληρωμές — web dashboard χωρίς εγκατάσταση." },
-  { icon: "⬡", title: "Σύστημα Κρατήσεων", desc: "Διαχείριση κρατήσεων απευθείας από το portal σας. Διαθέσιμο στο Premium πλάνο." },
-  { icon: "◉", title: "Analytics & Αναφορές", desc: "Στατιστικά παραγγελιών, κορυφαία προϊόντα, έσοδα ανά μήνα. Exclusive πλάνο." },
-  { icon: "▣", title: "Διαχείριση Κάβας", desc: "Οργανωτής αποθέματος και μαζικών παραγγελιών προς προμηθευτές. Exclusive πλάνο." },
+  { title: "Ψηφιακό Μενού QR", desc: "Σάρωση QR — το μενού εμφανίζεται αμέσως στο κινητό. Χωρίς app, χωρίς εγγραφή πελάτη." },
+  { title: "Real-time Παραγγελίες", desc: "Κάθε παραγγελία φτάνει στον σωστό σταθμό — Bar ή Kitchen — σε δευτερόλεπτα." },
+  { title: "Staff Dashboard", desc: "Web-based dashboard για σερβιτόρους, αναλήψεις τραπεζιών και πληρωμές." },
+  { title: "Σύστημα Κρατήσεων", desc: "Διαχείριση κρατήσεων απευθείας από το portal. Διαθέσιμο στο Premium πλάνο." },
+  { title: "Analytics & Αναφορές", desc: "Στατιστικά παραγγελιών, κορυφαία προϊόντα, έσοδα ανά μήνα. Exclusive πλάνο." },
+  { title: "Διαχείριση Κάβας", desc: "Αποθεματολόγιο και μαζικές παραγγελίες προς προμηθευτές με export αρχείου." },
 ];
 
 const PLANS = [
   {
     name: "Standard",
     price: "12,00",
-    desc: "Ιδανικό για μικρές επιχειρήσεις που θέλουν γρήγορη ψηφιακή παρουσία.",
-    features: ["1 κατάστημα", "Universal digital menu", "Επεξεργασία μενού (CRUD)", "URL μενού: /menu/{slug}", "Email support"],
+    period: "€ / μήνα",
+    features: ["1 κατάστημα", "Universal digital menu", "Επεξεργασία μενού", "URL: /menu/{slug}", "Email support"],
     cta: "Ξεκινήστε",
     highlight: false,
   },
   {
     name: "Premium",
     price: "16,70",
-    desc: "Για επιχειρήσεις που θέλουν brand identity και πλήρη λειτουργικότητα παραγγελιών.",
-    features: ["Όλα του Standard", "Gallery templates", "Προσαρμογή χρωμάτων & γραμματοσειρών", "Φωτογραφίες προϊόντων", "Παραγγελιοληψία (toggle)", "Πίνακες παραγγελιών", "Σύστημα κρατήσεων"],
+    period: "€ / μήνα",
+    features: ["Όλα του Standard", "Gallery templates", "Προσαρμογή εμφάνισης", "Φωτογραφίες προϊόντων", "Παραγγελιοληψία (toggle)", "Πίνακες παραγγελιών", "Κρατήσεις"],
     cta: "Επιλέξτε Premium",
     highlight: true,
   },
   {
     name: "Exclusive",
     price: "25,00",
-    desc: "Πλήρης επαγγελματική διαχείριση για εστιατόρια με έντονη δραστηριότητα.",
-    features: ["Όλα του Premium", "Business analytics", "Σύστημα κάβας & αποθέματος", "Οργανωτής μαζικών παραγγελιών", "Export CSV για προμηθευτές", "Dedicated support"],
+    period: "€ / μήνα",
+    features: ["Όλα του Premium", "Business analytics", "Κάβα & απόθεμα", "Μαζικές παραγγελίες", "Export CSV", "Dedicated support"],
     cta: "Επιλέξτε Exclusive",
     highlight: false,
   },
 ];
 
-// null = hero, "about" | "services" | "plans"
 export default function Landing() {
   const [activeSection, setActiveSection] = useState(null);
   const [scrolled, setScrolled]           = useState(false);
 
-  // Scroll listener — nav becomes sticky bar after 60px
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
+    const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // When a nav section is selected, scroll to top so section fills viewport
   const selectSection = (id) => {
     setActiveSection(id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const backToHome = () => {
     setActiveSection(null);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   const isHome = activeSection === null;
@@ -67,30 +64,25 @@ export default function Landing() {
     <div className={styles.page}>
 
       {/* ── NAV ── */}
-      <nav className={`${styles.nav} ${scrolled || !isHome ? styles.navSolid : ""}`}>
+      <nav className={`${styles.nav} ${scrolled || !isHome ? styles.navBorder : ""}`}>
         <div className={`container ${styles.navInner}`}>
 
           <button className={styles.logo} onClick={backToHome}>QRMenu</button>
 
-          <div className={styles.navCenter}>
-            <button
-              className={`${styles.navLink} ${activeSection === "about" ? styles.navLinkActive : ""}`}
-              onClick={() => selectSection("about")}
-            >
-              Σχετικά με εμάς
-            </button>
-            <button
-              className={`${styles.navLink} ${activeSection === "services" ? styles.navLinkActive : ""}`}
-              onClick={() => selectSection("services")}
-            >
-              Υπηρεσίες
-            </button>
-            <button
-              className={`${styles.navLink} ${activeSection === "plans" ? styles.navLinkActive : ""}`}
-              onClick={() => selectSection("plans")}
-            >
-              Πακέτα
-            </button>
+          <div className={styles.navLinks}>
+            {[
+              { id: "about",    label: "Σχετικά με εμάς" },
+              { id: "services", label: "Υπηρεσίες" },
+              { id: "plans",    label: "Πακέτα" },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                className={`${styles.navLink} ${activeSection === id ? styles.navLinkActive : ""}`}
+                onClick={() => selectSection(id)}
+              >
+                {label}
+              </button>
+            ))}
           </div>
 
           <div className={styles.navActions}>
@@ -100,151 +92,138 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* ──────────────────────────────────────────────
-          HERO — εμφανίζεται μόνο όταν isHome
-      ────────────────────────────────────────────── */}
+      {/* ── HERO ── */}
       {isHome && (
         <section className={styles.hero}>
           <div className="container">
-            <div className={styles.badge}>
-              <span className={styles.badgeDot} />
-              Για επιχειρήσεις εστίασης
-            </div>
+
+            <p className={styles.eyebrow}>Ψηφιακή παραγγελιοληψία για επιχειρήσεις εστίασης</p>
+
             <h1 className={styles.headline}>
-              Το ψηφιακό μενού<br />
-              <em>που δουλεύει για σας</em>
+              Το μενού σας,<br />
+              <span className={styles.headlineLight}>παντού και πάντα.</span>
             </h1>
+
             <p className={styles.sub}>
-              QR code, παραγγελίες σε real-time, dashboard για την ομάδα σας.<br />
-              Στήστε το μαγαζί σας σε λιγότερο από 5 λεπτά.
+              Από το QR code στο τραπέζι μέχρι την κουζίνα και το bar —
+              χωρίς εγκατάσταση, χωρίς συντήρηση, χωρίς κόστος ανά παραγγελία.
             </p>
-            <div className={styles.cta}>
+
+            <div className={styles.heroCta}>
               <Link to="/register" className="btn btn-primary btn-lg">
                 Δημιουργία λογαριασμού
               </Link>
-              <Link to="/login" className={styles.ctaLink}>
-                Έχω ήδη λογαριασμό →
+              <Link to="/login" className={styles.heroLink}>
+                Σύνδεση →
               </Link>
-            </div>
-
-            {/* Quick navigation hints */}
-            <div className={styles.heroHints}>
-              <button className={styles.hintChip} onClick={() => selectSection("about")}>Σχετικά με εμάς →</button>
-              <button className={styles.hintChip} onClick={() => selectSection("services")}>Υπηρεσίες →</button>
-              <button className={styles.hintChip} onClick={() => selectSection("plans")}>Πακέτα →</button>
             </div>
           </div>
 
-          {/* Decorative grid */}
-          <div className={styles.grid} aria-hidden="true">
-            {[...Array(6)].map((_, i) => <div key={i} className={styles.gridLine} />)}
+          {/* Subtle vertical dividers */}
+          <div className={styles.verticals} aria-hidden>
+            {[...Array(5)].map((_, i) => <span key={i} className={styles.vLine} />)}
           </div>
         </section>
       )}
 
-      {/* ──────────────────────────────────────────────
-          ABOUT — εμφανίζεται μόνο όταν active
-      ────────────────────────────────────────────── */}
+      {/* ── ABOUT ── */}
       {activeSection === "about" && (
         <section className={`${styles.section} fade-up`}>
           <div className="container">
-            <div className={styles.sectionLabel}>Σχετικά με εμάς</div>
+            <p className={styles.eyebrow}>Σχετικά με εμάς</p>
             <h2 className={styles.sectionTitle}>
-              Φτιαγμένο για την εστίαση.<br />Όχι για developers.
+              Φτιαγμένο για την εστίαση.
             </h2>
-            <p className={styles.sectionDesc}>
-              Το QRMenu είναι μια serverless B2B2C πλατφόρμα που γεφυρώνει την εμπειρία
-              του πελάτη με την επιχειρησιακή αποδοτικότητα. Από το QR code στο τραπέζι
-              μέχρι τον σερβιτόρο και την κουζίνα — σε πραγματικό χρόνο.
+            <p className={styles.sectionIntro}>
+              Το QRMenu είναι μια B2B2C πλατφόρμα που γεφυρώνει την εμπειρία του πελάτη
+              με την επιχειρησιακή λειτουργία. Serverless αρχιτεκτονική, μηδέν idle κόστος,
+              real-time routing από το τραπέζι στον σωστό σταθμό παρασκευής.
             </p>
 
-            <div className={styles.aboutGrid}>
-              <div className={styles.aboutCard}>
-                <div className={styles.aboutNum}>01</div>
-                <h3>Serverless αρχιτεκτονική</h3>
-                <p>100% AWS serverless. Μηδέν idle κόστος, αυτόματη κλιμάκωση, zero maintenance.</p>
-              </div>
-              <div className={styles.aboutCard}>
-                <div className={styles.aboutNum}>02</div>
-                <h3>Multi-tenant SaaS</h3>
-                <p>Κάθε επιχείρηση έχει το δικό της URL, μενού και ρυθμίσεις. Πλήρης απομόνωση δεδομένων.</p>
-              </div>
-              <div className={styles.aboutCard}>
-                <div className={styles.aboutNum}>03</div>
-                <h3>Real-time routing</h3>
-                <p>Κάθε προϊόν γνωρίζει πού πηγαίνει — BAR ή KITCHEN. Άμεση ειδοποίηση στον σωστό σταθμό.</p>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 48 }}>
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Δημιουργία λογαριασμού δωρεάν
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ──────────────────────────────────────────────
-          SERVICES
-      ────────────────────────────────────────────── */}
-      {activeSection === "services" && (
-        <section className={`${styles.section} fade-up`}>
-          <div className="container">
-            <div className={styles.sectionLabel}>Υπηρεσίες</div>
-            <h2 className={styles.sectionTitle}>Ό,τι χρειάζεται η επιχείρησή σας</h2>
-            <p className={styles.sectionDesc}>
-              Ένα ολοκληρωμένο σύστημα — από το ψηφιακό μενού μέχρι τη διαχείριση αποθέματος.
-            </p>
-
-            <div className={styles.servicesGrid}>
-              {SERVICES.map((s) => (
-                <div key={s.title} className={styles.serviceCard}>
-                  <div className={styles.serviceIcon}>{s.icon}</div>
-                  <h3 className={styles.serviceTitle}>{s.title}</h3>
-                  <p className={styles.serviceDesc}>{s.desc}</p>
+            <div className={styles.aboutList}>
+              {[
+                ["Serverless αρχιτεκτονική", "100% AWS. Αυτόματη κλιμάκωση, μηδέν συντήρηση, χωρίς σταθερό κόστος υποδομής."],
+                ["Multi-tenant SaaS", "Κάθε επιχείρηση έχει το δικό της URL, μενού και ρυθμίσεις. Πλήρης απομόνωση δεδομένων."],
+                ["Real-time routing", "Κάθε προϊόν γνωρίζει πού πηγαίνει. Άμεση ειδοποίηση στον σωστό σταθμό — Bar ή Kitchen."],
+              ].map(([title, desc], i) => (
+                <div key={i} className={styles.aboutItem}>
+                  <span className={styles.aboutNum}>0{i+1}</span>
+                  <div>
+                    <div className={styles.aboutTitle}>{title}</div>
+                    <div className={styles.aboutDesc}>{desc}</div>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ marginTop: 48 }}>
-              <Link to="/register" className="btn btn-primary btn-lg">
-                Ξεκινήστε τώρα
-              </Link>
-            </div>
+            <Link to="/register" className="btn btn-primary btn-lg" style={{ marginTop: 48 }}>
+              Δημιουργία λογαριασμού δωρεάν
+            </Link>
           </div>
         </section>
       )}
 
-      {/* ──────────────────────────────────────────────
-          PLANS
-      ────────────────────────────────────────────── */}
+      {/* ── SERVICES ── */}
+      {activeSection === "services" && (
+        <section className={`${styles.section} fade-up`}>
+          <div className="container">
+            <p className={styles.eyebrow}>Υπηρεσίες</p>
+            <h2 className={styles.sectionTitle}>
+              Ό,τι χρειάζεται η επιχείρησή σας.
+            </h2>
+
+            <div className={styles.servicesGrid}>
+              {SERVICES.map((s, i) => (
+                <div key={i} className={styles.serviceRow}>
+                  <span className={styles.serviceNum}>0{i+1}</span>
+                  <div className={styles.serviceBody}>
+                    <div className={styles.serviceName}>{s.title}</div>
+                    <div className={styles.serviceDesc}>{s.desc}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <Link to="/register" className="btn btn-primary btn-lg" style={{ marginTop: 48 }}>
+              Ξεκινήστε τώρα
+            </Link>
+          </div>
+        </section>
+      )}
+
+      {/* ── PLANS ── */}
       {activeSection === "plans" && (
         <section className={`${styles.section} fade-up`}>
           <div className="container">
-            <div className={styles.sectionLabel}>Πακέτα</div>
-            <h2 className={styles.sectionTitle}>Απλή τιμολόγηση, χωρίς εκπλήξεις</h2>
-            <p className={styles.sectionDesc}>
-              Κανένα ποσοστό ανά παραγγελία. Μόνο μια σταθερή μηνιαία συνδρομή.
+            <p className={styles.eyebrow}>Πακέτα</p>
+            <h2 className={styles.sectionTitle}>
+              Απλή τιμολόγηση.
+            </h2>
+            <p className={styles.sectionIntro}>
+              Κανένα ποσοστό ανά παραγγελία. Σταθερή μηνιαία συνδρομή.
             </p>
 
             <div className={styles.plansGrid}>
               {PLANS.map((p) => (
-                <div key={p.name} className={`${styles.planCard} ${p.highlight ? styles.planHighlight : ""}`}>
-                  {p.highlight && <div className={styles.planBadge}>Δημοφιλές</div>}
-                  <div className={styles.planName}>{p.name}</div>
-                  <div className={styles.planPrice}>
-                    <span className={styles.planAmount}>{p.price}</span>
-                    <span className={styles.planCurrency}>€/μήνα</span>
+                <div key={p.name} className={`${styles.planCard} ${p.highlight ? styles.planCardDark : ""}`}>
+                  {p.highlight && <div className={styles.planTag}>Δημοφιλές</div>}
+
+                  <div className={styles.planHeader}>
+                    <span className={styles.planName}>{p.name}</span>
+                    <div className={styles.planPrice}>
+                      <span className={styles.planAmount}>{p.price}</span>
+                      <span className={styles.planPeriod}>{p.period}</span>
+                    </div>
                   </div>
-                  <p className={styles.planDesc}>{p.desc}</p>
+
                   <ul className={styles.planFeatures}>
                     {p.features.map((f) => (
                       <li key={f} className={styles.planFeature}>
-                        <span className={styles.planCheck}>✓</span>{f}
+                        <span className={styles.planCheck}>—</span>{f}
                       </li>
                     ))}
                   </ul>
+
                   <Link
                     to="/register"
                     className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`}
@@ -264,13 +243,11 @@ export default function Landing() {
         </section>
       )}
 
-      {/* ── FOOTER — πάντα ορατό ── */}
-      <footer className={`${styles.footer} ${!isHome ? styles.footerSection : ""}`}>
+      {/* ── FOOTER ── */}
+      <footer className={styles.footer}>
         <div className="container">
-          <button className={styles.logo} onClick={backToHome} style={{ fontSize: "1rem", background: "none", border: "none", cursor: "pointer" }}>
-            QRMenu
-          </button>
-          <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>© 2026</span>
+          <button className={styles.footerLogo} onClick={backToHome}>QRMenu</button>
+          <span className={styles.footerCopy}>© 2026</span>
         </div>
       </footer>
     </div>
