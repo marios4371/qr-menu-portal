@@ -12,7 +12,7 @@ export default function Dashboard() {
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
   const shop     = shops?.[selectedShopIdx] ?? shops?.[0];
 
-  const handleLogout = () => { logout(); navigate("/login"); };
+  const handleLogout = () => { logout(); navigate("/admin"); };
 
   const menuUrl = shop?.shopSlug
     ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
