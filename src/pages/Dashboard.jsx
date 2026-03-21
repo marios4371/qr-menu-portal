@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { upgradePlan } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import styles from "./Dashboard.module.css";
 import layout from "./Layout.module.css";
@@ -11,8 +12,12 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
   const shop     = shops?.[selectedShopIdx] ?? shops?.[0];
+  const [showPlanModal, setShowPlanModal] = useState(false);
+  const [planLoading, setPlanLoading]     = useState(false);
+  const [planError, setPlanError]         = useState("");
+  const [planSuccess, setPlanSuccess]     = useState("");
 
-  const handleLogout = () => { logout(); navigate("/admin"); };
+  const handleLogout = () => { logout(); navigate("/login"); };
 
   const menuUrl = shop?.shopSlug
     ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
@@ -181,6 +186,58 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
+            {/* ── PLAN SECTION ── */}
+            <div className={styles.planSection}>
+              <div className={styles.planSectionHeader}>
+                <div>
+                  <div className={styles.sectionLabel}>Πλάνο Συνδρομής</div>
+                  <h3 className={styles.sectionTitle}>
+                    {owner?.plan || "STANDARD"} Πακέτο
+                  </h3>
+                </div>
+                <button className="btn btn-ghost btn-sm" onClick={() => { setShowPlanModal(true); setPlanError(""); setPlanSuccess(""); }}>
+                  Αλλαγή πλάνου →
+                </button>
+              </div>
+            </div>
+
+            {/* ── PLAN MODAL ── */}
+            {showPlanModal && (
+              <div className={styles.modalOverlay} onClick={() => setShowPlanModal(false)}>
+                <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                  <div className={styles.modalHeader}>
+                    <span className={styles.modalTitle}>Αλλαγή πλάνου συνδρομής</span>
+                    <button className={styles.modalClose} onClick={() => setShowPlanModal(false)}>✕</button>
+                  </div>
+                  <div className={styles.modalBody}>
+                    <p className={styles.modalSub}>Τρέχον πλάνο: <strong>{owner?.plan}</strong></p>
+                    <div className={styles.planChoiceGrid}>
+                      {[
+                        { value: "STANDARD",  name: "Standard",  price: "12,00 €/μήνα" },
+                        { value: "PREMIUM",   name: "Premium",   price: "16,70 €/μήνα" },
+                        { value: "EXCLUSIVE", name: "Exclusive", price: "25,00 €/μήνα" },
+                      ].map(p => (
+                        <button
+                          key={p.value}
+                          className={`${styles.planChoiceCard} ${owner?.plan === p.value ? styles.planChoiceCurrent : ""}`}
+                          onClick={() => handlePlanChange(p.value)}
+                          disabled={planLoading || owner?.plan === p.value}
+                        >
+                          <div className={styles.planChoiceName}>{p.name}</div>
+                          <div className={styles.planChoicePrice}>{p.price}</div>
+                          {owner?.plan === p.value && <div className={styles.planChoiceBadge}>Τρέχον</div>}
+                        </button>
+                      ))}
+                    </div>
+                    {planError   && <div className="msg-error"   style={{ marginTop:14 }}>{planError}</div>}
+                    {planSuccess && <div className="msg-success" style={{ marginTop:14 }}>{planSuccess}</div>}
+                    <p className={styles.planChoiceNote}>
+                      Για Custom πλάνο επικοινωνήστε μαζί μας.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className={styles.emptyState}>

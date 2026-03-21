@@ -278,3 +278,96 @@
   .back      { top: 16px; left: 16px; font-size: 1rem; }
   .page      { padding: 70px 16px 32px; }
 }
+
+/* ────────────────────────────────────────────────────────────
+   PLAN SELECTION — Step 0 of Register
+   ──────────────────────────────────────────────────────────── */
+.planGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.planCard {
+  background: rgba(255,255,255,0.35);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+  transition: background 0.14s, border-color 0.14s, box-shadow 0.14s;
+  position: relative;
+}
+.planCard:hover {
+  background: rgba(255,255,255,0.55);
+  border-color: var(--border-hi);
+}
+/* Selected state */
+.planCardSelected {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  box-shadow: 0 4px 16px rgba(26,22,16,0.18);
+}
+.planCardSelected .planCardName,
+.planCardSelected .planCardPrice,
+.planCardSelected .planCardFeature,
+.planCardSelected .planCardCheck {
+  color: #F0E8D8 !important;
+}
+
+.planCardName {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-sub);
+  margin-bottom: 2px;
+}
+
+.planCardPrice {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.planCardSelected .planCardPrice {
+  border-bottom-color: rgba(240,232,216,0.18) !important;
+}
+
+.planCardFeatures {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  margin: 0;
+}
+
+.planCardFeature {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  font-weight: 300;
+  line-height: 1.45;
+}
+
+.planCardCheck {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (max-width: 600px) {
+  .planGrid { grid-template-columns: 1fr; }
+}

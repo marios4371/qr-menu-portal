@@ -20,10 +20,10 @@ async function request(path, options = {}) {
 
 // ─── SaaS Auth ────────────────────────────────────────────────────────────────
 
-export const register = ({ firstName, lastName, email, password, businessType, shopName }) =>
+export const register = ({ firstName, lastName, email, password, businessType, shopName, plan }) =>
   request("/register", {
     method: "POST",
-    body: JSON.stringify({ firstName, lastName, email, password, businessType, shopName }),
+    body: JSON.stringify({ firstName, lastName, email, password, businessType, shopName, plan }),
   });
 
 export const ownerLogin = ({ email, password }) =>
@@ -52,4 +52,12 @@ export const saveMenu = ({ shopId, data }) =>
   request("/save-menu", {
     method: "POST",
     body: JSON.stringify({ shopId, data }),
+  });
+
+// ─── Plan Management ──────────────────────────────────────────────────────────
+
+export const upgradePlan = (newPlan) =>
+  request("/upgrade-plan", {
+    method: "POST",
+    body: JSON.stringify({ newPlan }),
   });

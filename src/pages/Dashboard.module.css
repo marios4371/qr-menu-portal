@@ -337,3 +337,157 @@
   .statsCol { flex-direction: column; }
   .menuGrid { grid-template-columns: 1fr; }
 }
+
+/* ────────────────────────────────────────────────────────────
+   PLAN SECTION
+   ──────────────────────────────────────────────────────────── */
+.planSection {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-xl);
+  padding: 22px 30px;
+  margin-top: 16px;
+}
+
+.planSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ── Plan Modal ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26,20,15,0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+  animation: fadeIn 0.14s ease both;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-xl);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  animation: fadeUp 0.18s ease both;
+  box-shadow: 0 16px 48px rgba(30,20,10,0.14);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.modalTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  transition: background 0.13s, color 0.13s;
+}
+.modalClose:hover { background: var(--bg-hover); color: var(--text); }
+
+.modalBody {
+  padding: 20px 22px 22px;
+}
+
+.modalSub {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  margin-bottom: 16px;
+  font-weight: 300;
+}
+
+/* Plan choice grid inside modal */
+.planChoiceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.planChoiceCard {
+  background: var(--bg);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: center;
+  font-family: var(--font);
+  transition: background 0.13s, border-color 0.13s, box-shadow 0.13s;
+  position: relative;
+}
+.planChoiceCard:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hi);
+}
+.planChoiceCard:disabled { opacity: 0.6; cursor: default; }
+
+.planChoiceCurrent {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+.planChoiceCurrent .planChoiceName,
+.planChoiceCurrent .planChoicePrice {
+  color: #F0E8D8 !important;
+}
+
+.planChoiceName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.planChoicePrice {
+  font-size: 0.76rem;
+  color: var(--text-sub);
+  font-weight: 300;
+}
+
+.planChoiceBadge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  color: rgba(240,232,216,0.8);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(240,232,216,0.2);
+  white-space: nowrap;
+}
+
+.planChoiceNote {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 14px;
+  text-align: center;
+}
