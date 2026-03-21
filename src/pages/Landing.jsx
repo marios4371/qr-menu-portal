@@ -34,8 +34,11 @@ export default function Landing() {
   const [activeSection, setActiveSection] = useState(null);
 
   // Nav becomes solid after scrolling past hero
-  // Scroll to top on mount — handles page refresh
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  // Disable browser scroll restoration + scroll to top on mount
+  useEffect(() => {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
