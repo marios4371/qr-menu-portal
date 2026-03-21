@@ -1,14 +1,30 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { register, checkSlug, getOwnerDashboard } from "../services/api";
 import { useAuth } from "../hooks/useAuth";
 import styles from "./Auth.module.css";
 
+// Eye icons
+const EyeOpen = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+    <circle cx="12" cy="12" r="3"/>
+  </svg>
+);
+const EyeClosed = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+    <line x1="1" y1="1" x2="23" y2="23"/>
+  </svg>
+);
+
 const STEPS = ["Στοιχεία λογαριασμού", "Το μαγαζί σας", "Επιβεβαίωση"];
+
+// No emojis
 const BUSINESS_TYPES = [
-  { value: "RESTAURANT", label: "🍽️  Εστιατόριο" },
-  { value: "CAFE",       label: "☕  Καφέ" },
-  { value: "BAR",        label: "🍹  Bar" },
+  { value: "RESTAURANT", label: "Εστιατόριο" },
+  { value: "CAFE",       label: "Καφέ" },
+  { value: "BAR",        label: "Bar" },
 ];
 
 function useDebounce(value, delay) {
@@ -21,21 +37,35 @@ function useDebounce(value, delay) {
 }
 
 function previewSlug(name) {
-  return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").substring(0, 50);
+  return name.toLowerCase().normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .trim().replace(/\s+/g, "-").replace(/-+/g, "-").substring(0, 50);
 }
 
 export default function Register() {
-  const navigate = useNavigate();
-  const { login } = useAuth();
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const { login }  = useAuth();
+
+  const from   = location.state?.from;
+  const backTo = (!from || from === "nav") ? "/" : `/#${from}`;
+
   const [step, setStep]       = useState(0);
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
-  const [firstName, setFirstName]       = useState("");
-  const [lastName, setLastName]         = useState("");
-  const [email, setEmail]               = useState("");
-  const [password, setPassword]         = useState("");
-  const [businessType, setBusinessType] = useState("RESTAURANT");
+
+  // Step 0 fields
+  const [firstName, setFirstName]         = useState("");
+  const [lastName, setLastName]           = useState("");
+  const [email, setEmail]                 = useState("");
+  const [password, setPassword]           = useState("");
+  const [confirmPassword, setConfirmPass] = useState("");
+  const [showPass, setShowPass]           = useState(false);
+  const [showConfirm, setShowConfirm]     = useState(false);
+  const [businessType, setBusinessType]   = useState("RESTAURANT");
+
+  // Step 1 fields
   const [shopName, setShopName]         = useState("");
   const [slugAvailable, setSlugAvail]   = useState(null);
   const [slugChecking, setSlugChecking] = useState(false);
@@ -56,12 +86,13 @@ export default function Register() {
     if (!firstName.trim() || !lastName.trim()) return "Συμπληρώστε όνομα και επώνυμο";
     if (!email.trim() || !email.includes("@")) return "Εισάγετε έγκυρο email";
     if (password.length < 8) return "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες";
+    if (password !== confirmPassword) return "Οι κωδικοί δεν ταιριάζουν";
     return null;
   };
   const validateStep1 = () => {
     if (!shopName.trim()) return "Εισάγετε όνομα μαγαζιού";
     if (slug.length < 2)  return "Το όνομα μαγαζιού είναι πολύ κοντό";
-    if (slugAvailable === false) return "Αυτό το URL χρησιμοποιείται ήδη.";
+    if (slugAvailable === false) return "Αυτό το URL χρησιμοποιείται ήδη. Δοκιμάστε διαφορετικό.";
     return null;
   };
 
@@ -91,11 +122,12 @@ export default function Register() {
 
   return (
     <div className={styles.page}>
-      <Link to="/" className={styles.back}>← Πίσω</Link>
+      <Link to={backTo} className={styles.back}>← Πίσω</Link>
 
-      <div className={styles.card} style={{ maxWidth: 480 }}>
-        <div className={styles.logo}>QRMenu</div>
+      <div className={styles.card} style={{ maxWidth: 490 }}>
+        <span className={styles.logo}>QRMenu</span>
 
+        {/* Step indicator */}
         <div className={styles.steps}>
           {STEPS.map((label, i) => (
             <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
@@ -108,10 +140,12 @@ export default function Register() {
 
         <hr className="divider" />
 
+        {/* ── Step 0 ── */}
         {step === 0 && (
           <div className="fade-up">
             <h2 className={styles.title}>Δημιουργία λογαριασμού</h2>
             <p className={styles.sub}>Τα στοιχεία σας για την πρόσβαση στο σύστημα.</p>
+
             <div className={styles.formGrid}>
               <div className="form-group">
                 <label>Όνομα</label>
@@ -122,15 +156,64 @@ export default function Register() {
                 <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="π.χ. Παπαδόπουλος" />
               </div>
             </div>
-            <div className="form-group" style={{ marginTop:16 }}>
+
+            <div className="form-group" style={{ marginTop:14 }}>
               <label>Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" />
             </div>
-            <div className="form-group" style={{ marginTop:16 }}>
+
+            {/* Password with eye toggle */}
+            <div className="form-group" style={{ marginTop:14 }}>
               <label>Κωδικός πρόσβασης</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Τουλάχιστον 8 χαρακτήρες" />
+              <div className={styles.passwordWrap}>
+                <input
+                  type={showPass ? "text" : "password"}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Τουλάχιστον 8 χαρακτήρες"
+                />
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  onClick={() => setShowPass(v => !v)}
+                  tabIndex={-1}
+                  aria-label={showPass ? "Απόκρυψη" : "Εμφάνιση"}
+                >
+                  {showPass ? <EyeClosed /> : <EyeOpen />}
+                </button>
+              </div>
             </div>
-            <div className="form-group" style={{ marginTop:16 }}>
+
+            {/* Confirm password with eye toggle */}
+            <div className="form-group" style={{ marginTop:14 }}>
+              <label>Επιβεβαίωση κωδικού</label>
+              <div className={styles.passwordWrap}>
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPass(e.target.value)}
+                  placeholder="Επαναλάβετε τον κωδικό"
+                  style={confirmPassword && password !== confirmPassword
+                    ? { borderColor: "var(--error)" }
+                    : confirmPassword && password === confirmPassword
+                    ? { borderColor: "var(--success)" }
+                    : {}
+                  }
+                />
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  onClick={() => setShowConfirm(v => !v)}
+                  tabIndex={-1}
+                  aria-label={showConfirm ? "Απόκρυψη" : "Εμφάνιση"}
+                >
+                  {showConfirm ? <EyeClosed /> : <EyeOpen />}
+                </button>
+              </div>
+            </div>
+
+            {/* Business type — no emojis */}
+            <div className="form-group" style={{ marginTop:14 }}>
               <label>Τύπος επιχείρησης</label>
               <select value={businessType} onChange={e => setBusinessType(e.target.value)}>
                 {BUSINESS_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
@@ -139,19 +222,25 @@ export default function Register() {
           </div>
         )}
 
+        {/* ── Step 1 ── */}
         {step === 1 && (
           <div className="fade-up">
             <h2 className={styles.title}>Το μαγαζί σας</h2>
-            <p className={styles.sub}>Δώστε όνομα στο μαγαζί σας. Αυτό θα γίνει το URL του μενού.</p>
+            <p className={styles.sub}>Δώστε όνομα στο μαγαζί σας. Αυτό θα γίνει το URL του μενού σας.</p>
             <div className="form-group" style={{ marginTop:8 }}>
               <label>Όνομα μαγαζιού</label>
-              <input value={shopName} onChange={e => setShopName(e.target.value)} placeholder="π.χ. Souvlaki tou Niku" autoFocus />
+              <input
+                value={shopName}
+                onChange={e => setShopName(e.target.value)}
+                placeholder="π.χ. Souvlaki tou Niku"
+                autoFocus
+              />
             </div>
             {shopName.trim().length > 0 && (
               <div className={styles.slugPreview}>
                 <span className={styles.slugLabel}>URL μενού:</span>
                 <code className={styles.slugCode}>…/menu/<strong>{slug || "…"}</strong></code>
-                {slugChecking && <span className="spinner" style={{ width:14, height:14 }} />}
+                {slugChecking && <span className="spinner" style={{ width:13, height:13 }} />}
                 {!slugChecking && slugAvailable === true  && <span className={styles.slugOk}>✓ Διαθέσιμο</span>}
                 {!slugChecking && slugAvailable === false && <span className={styles.slugTaken}>✗ Μη διαθέσιμο</span>}
               </div>
@@ -159,14 +248,19 @@ export default function Register() {
           </div>
         )}
 
+        {/* ── Step 2 ── */}
         {step === 2 && (
           <div className="fade-up">
             <h2 className={styles.title}>Όλα έτοιμα!</h2>
             <p className={styles.sub}>Ελέγξτε τα στοιχεία σας πριν δημιουργήσετε τον λογαριασμό.</p>
             <div className={styles.summary}>
-              {[["Όνομα", `${firstName} ${lastName}`], ["Email", email],
+              {[
+                ["Όνομα",      `${firstName} ${lastName}`],
+                ["Email",      email],
                 ["Επιχείρηση", BUSINESS_TYPES.find(t => t.value === businessType)?.label],
-                ["Μαγαζί", shopName], ["URL μενού", `…/menu/${slug}`]].map(([k, v]) => (
+                ["Μαγαζί",     shopName],
+                ["URL μενού",  `…/menu/${slug}`],
+              ].map(([k, v]) => (
                 <div key={k} className={styles.summaryRow}>
                   <span className={styles.summaryKey}>{k}</span>
                   <span className={styles.summaryVal}>{v}</span>
@@ -180,10 +274,14 @@ export default function Register() {
 
         <div className={styles.actions}>
           {step > 0 && (
-            <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>← Πίσω</button>
+            <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>
+              ← Πίσω
+            </button>
           )}
           {step < 2 ? (
-            <button className="btn btn-primary" style={{ flex:1 }} onClick={nextStep}>Συνέχεια →</button>
+            <button className="btn btn-primary" style={{ flex:1 }} onClick={nextStep}>
+              Συνέχεια →
+            </button>
           ) : (
             <button className="btn btn-primary" style={{ flex:1 }} onClick={handleSubmit} disabled={loading}>
               {loading ? <span className="spinner" /> : "Δημιουργία λογαριασμού"}
@@ -192,7 +290,7 @@ export default function Register() {
         </div>
 
         <p className={styles.footer}>
-          Έχετε ήδη λογαριασμό; <Link to="/login">Σύνδεση</Link>
+          Έχετε ήδη λογαριασμό; <Link to="/login" state={location.state}>Σύνδεση</Link>
         </p>
       </div>
     </div>

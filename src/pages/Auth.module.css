@@ -3,17 +3,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 16px;
+  padding: 80px 24px 40px;
   background: var(--bg);
-  background-image:
-    radial-gradient(ellipse 60% 50% at 50% 20%, rgba(26,22,16,0.03) 0%, transparent 65%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Vertical grid lines — same as Landing but on auth pages ── */
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent calc((100% / 6) - 1px),
+    rgba(26,22,16,0.055) calc((100% / 6) - 1px),
+    rgba(26,22,16,0.055) calc(100% / 6)
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ── Back button ── */
 .back {
   position: fixed;
-  top: 20px;
-  left: 24px;
+  top: 22px;
+  left: 28px;
   z-index: 50;
   display: inline-flex;
   align-items: center;
@@ -25,8 +41,9 @@
   text-decoration: none;
   padding: 7px 13px;
   border-radius: var(--radius);
-  background: rgba(26,22,16,0.05);
+  background: rgba(240,232,216,0.75);
   border: 1px solid var(--border-md);
+  backdrop-filter: blur(8px);
   transition: background 0.14s, color 0.14s, border-color 0.14s;
 }
 .back:hover {
@@ -37,32 +54,34 @@
 
 /* ── Card ── */
 .card {
-  background: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.52);
   border: 1px solid var(--border-md);
   border-radius: var(--radius-xl);
-  padding: 40px 36px;
+  padding: 40px 38px;
   width: 100%;
-  animation: fadeUp 0.38s ease both;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  z-index: 1;
+  animation: fadeUp 0.35s ease both;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   box-shadow:
-    0 16px 48px rgba(30,20,10,0.10),
-    0 2px 8px   rgba(30,20,10,0.06);
+    0 8px 32px rgba(30,20,10,0.08),
+    0 1px 4px   rgba(30,20,10,0.05);
 }
 
 /* ── Logo ── */
 .logo {
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   color: var(--text);
+  display: block;
 }
-.logo span { color: var(--text); }
 
 /* ── Headings ── */
 .title {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   margin-bottom: 6px;
@@ -73,6 +92,7 @@
   font-size: 0.875rem;
   margin-bottom: 28px;
   font-weight: 300;
+  line-height: 1.5;
 }
 
 /* ── Step indicator ── */
@@ -93,7 +113,7 @@
   height: 26px;
   border-radius: var(--radius);
   border: 1px solid var(--border-md);
-  background: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.6);
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 600;
@@ -105,9 +125,9 @@
 }
 .stepActive .stepCircle {
   border-color: var(--accent);
-  background: var(--accent-dim);
+  background: rgba(26,22,16,0.06);
   color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(26,22,16,0.06);
+  box-shadow: 0 0 0 3px rgba(26,22,16,0.05);
 }
 .stepDone .stepCircle {
   border-color: var(--success);
@@ -115,7 +135,7 @@
   color: var(--success);
 }
 .stepLabel {
-  font-size: 0.68rem;
+  font-size: 0.67rem;
   color: var(--text-muted);
   margin-left: 8px;
   white-space: nowrap;
@@ -139,6 +159,32 @@
   gap: 12px;
 }
 
+/* ── Password input wrapper ── */
+.passwordWrap {
+  position: relative;
+}
+.passwordWrap input {
+  padding-right: 44px;
+}
+.eyeBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.14s;
+  line-height: 1;
+  font-size: 1rem;
+}
+.eyeBtn:hover { color: var(--text-sub); }
+
 /* ── Slug preview ── */
 .slugPreview {
   display: flex;
@@ -152,11 +198,11 @@
   flex-wrap: wrap;
 }
 .slugLabel {
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   white-space: nowrap;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
 }
 .slugCode {
   font-family: 'Courier New', monospace;
@@ -165,8 +211,8 @@
   flex: 1;
 }
 .slugCode strong { color: var(--accent); }
-.slugOk    { font-size: 0.75rem; color: var(--success); white-space: nowrap; }
-.slugTaken { font-size: 0.75rem; color: var(--error);   white-space: nowrap; }
+.slugOk    { font-size: 0.74rem; color: var(--success); white-space: nowrap; }
+.slugTaken { font-size: 0.74rem; color: var(--error);   white-space: nowrap; }
 
 /* ── Summary ── */
 .summary {
@@ -180,20 +226,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 11px 16px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border);
   gap: 16px;
 }
 .summaryRow:last-child { border-bottom: none; }
 .summaryKey {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.08em;
   flex-shrink: 0;
 }
 .summaryVal {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   color: var(--text);
   text-align: right;
   word-break: break-all;
@@ -209,8 +255,8 @@
 /* ── Footer link ── */
 .footer {
   text-align: center;
-  margin-top: 20px;
-  font-size: 0.83rem;
+  margin-top: 18px;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 .footer a {
@@ -226,8 +272,9 @@
 }
 
 @media (max-width: 480px) {
-  .card      { padding: 28px 18px; }
+  .card      { padding: 28px 20px; }
   .formGrid  { grid-template-columns: 1fr; }
   .stepLabel { display: none; }
-  .back      { top: 12px; left: 12px; }
+  .back      { top: 14px; left: 14px; }
+  .page      { padding: 70px 16px 32px; }
 }

@@ -159,20 +159,7 @@
 }
 .heroLink:hover { color: var(--text); }
 
-/* Subtle decorative vertical lines */
-.verticals {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  justify-content: space-evenly;
-  pointer-events: none;
-  z-index: -1;
-}
-.vLine {
-  width: 1px;
-  height: 100%;
-  background: rgba(26,22,16,0.045);
-}
+
 
 /* ────────────────────────────────────────────────────────────
    SECTIONS — all visible, scrollable

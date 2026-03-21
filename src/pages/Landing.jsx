@@ -93,8 +93,8 @@ export default function Landing() {
           </div>
 
           <div className={styles.navActions}>
-            <Link to="/login"    className="btn btn-ghost btn-sm">Σύνδεση</Link>
-            <Link to="/register" className="btn btn-primary btn-sm">Ξεκινήστε Δωρεάν</Link>
+            <Link to="/login"    state={{ from: "nav" }} className="btn btn-ghost btn-sm">Σύνδεση</Link>
+            <Link to="/register" state={{ from: "nav" }} className="btn btn-primary btn-sm">Ξεκινήστε Δωρεάν</Link>
           </div>
         </div>
       </nav>
@@ -118,9 +118,7 @@ export default function Landing() {
             <Link to="/login" className={styles.heroLink}>Σύνδεση →</Link>
           </div>
         </div>
-        <div className={styles.verticals} aria-hidden>
-          {[...Array(5)].map((_, i) => <span key={i} className={styles.vLine} />)}
-        </div>
+
       </section>
 
       {/* ── ABOUT ── */}
