@@ -13,17 +13,17 @@ const SERVICES = [
 
 const PLANS = [
   {
-    name: "Standard", price: "12,00", period: "€ / μήνα",
+    value: "STANDARD", name: "Standard", price: "12,00", period: "€ / μήνα",
     features: ["1 κατάστημα", "Universal digital menu", "Επεξεργασία μενού", "URL: /menu/{slug}", "Email support"],
     cta: "Ξεκινήστε", highlight: false,
   },
   {
-    name: "Premium", price: "16,70", period: "€ / μήνα",
+    value: "PREMIUM", name: "Premium", price: "16,70", period: "€ / μήνα",
     features: ["Όλα του Standard", "Gallery templates", "Προσαρμογή εμφάνισης", "Φωτογραφίες προϊόντων", "Παραγγελιοληψία (toggle)", "Πίνακες παραγγελιών", "Κρατήσεις"],
     cta: "Επιλέξτε Premium", highlight: true,
   },
   {
-    name: "Exclusive", price: "25,00", period: "€ / μήνα",
+    value: "EXCLUSIVE", name: "Exclusive", price: "25,00", period: "€ / μήνα",
     features: ["Όλα του Premium", "Business analytics", "Κάβα & απόθεμα", "Μαζικές παραγγελίες", "Export CSV", "Dedicated support"],
     cta: "Επιλέξτε Exclusive", highlight: false,
   },

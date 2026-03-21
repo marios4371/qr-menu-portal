@@ -372,12 +372,9 @@
   .planGrid { grid-template-columns: 1fr; }
 }
 
-/* ── Compact steps (4 items) ── */
-.stepsCompact .stepLabel {
-  display: none;   /* hide text labels when 4 steps — only show numbers */
-}
-.stepsCompact .stepLine {
-  margin: 0 4px;
+/* Steps: always show only circles/numbers, never text labels */
+.stepLabel {
+  display: none;
 }
 
 /* ── Plan chip on step 1 ── */

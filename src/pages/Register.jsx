@@ -69,15 +69,15 @@ export default function Register() {
   const { login }  = useAuth();
   const handleBack = () => navigate(-1);
 
-  // If coming from a plan card in Landing, pre-select that plan and start at step 1
-  const preselectedPlan = location.state?.selectedPlan || null;
+  // If coming from a plan card in Landing, pre-select that plan and skip to step 1
+  const preselectedPlan = location.state?.selectedPlan ?? null;
 
-  const [step, setStep]       = useState(preselectedPlan ? 1 : 0);
+  const [step, setStep]       = useState(() => preselectedPlan ? 1 : 0);
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
 
   // Step 0 — Plan
-  const [selectedPlan, setSelectedPlan] = useState(preselectedPlan);
+  const [selectedPlan, setSelectedPlan] = useState(() => preselectedPlan);
 
   // Step 1 — Account
   const [firstName, setFirstName]         = useState("");
@@ -164,7 +164,7 @@ export default function Register() {
         <span className={styles.logo}>QRMenu</span>
 
         {/* Step indicator */}
-        <div className={`${styles.steps} ${step === 0 ? styles.stepsCompact : ""}`}>
+        <div className={styles.steps}>
           {STEPS.map((label, i) => (
             <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
               <div className={styles.stepCircle}>{i < step ? "✓" : i + 1}</div>
