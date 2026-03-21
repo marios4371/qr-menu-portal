@@ -61,7 +61,7 @@ export default function Landing() {
     const el = document.getElementById(id);
     if (!el) return;
     // Offset for fixed nav height (~60px)
-    const top = el.getBoundingClientRect().top + window.scrollY - 70;
+    const top = el.getBoundingClientRect().top + window.scrollY;
     window.scrollTo({ top, behavior: "smooth" });
   };
 

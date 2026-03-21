@@ -99,9 +99,11 @@
    HERO — editorial, measured
    ──────────────────────────────────────────────────────────── */
 .hero {
-  padding: 160px 0 100px;
-  flex: 1;
+  min-height: 100vh;
+  padding: 0;
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 /* Small category label above headline */
@@ -176,9 +178,14 @@
    SECTIONS — all visible, scrollable
    ──────────────────────────────────────────────────────────── */
 .section {
+  min-height: 100vh;
   padding: 96px 0 80px;
   border-top: 1px solid var(--border);
-  scroll-margin-top: 64px;
+  scroll-margin-top: 0;
+  /* Center content vertically */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .sectionTitle {
@@ -425,7 +432,7 @@
 }
 @media (max-width: 600px) {
   .hero    { padding: 110px 0 72px; }
-  .section { padding: 72px 0 56px; }
+  .section { padding: 60px 0 40px; min-height: 100svh; }
   .headline { font-size: 1.9rem; }
   .aboutCards,
   .infoCards { grid-template-columns: 1fr; }
