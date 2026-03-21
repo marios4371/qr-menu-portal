@@ -5,7 +5,6 @@ import { useAuth } from "../hooks/useAuth";
 import styles from "./Auth.module.css";
 
 const STEPS = ["Στοιχεία λογαριασμού", "Το μαγαζί σας", "Επιβεβαίωση"];
-
 const BUSINESS_TYPES = [
   { value: "RESTAURANT", label: "🍽️  Εστιατόριο" },
   { value: "CAFE",       label: "☕  Καφέ" },
@@ -22,31 +21,21 @@ function useDebounce(value, delay) {
 }
 
 function previewSlug(name) {
-  return name
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .substring(0, 50);
+  return name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").replace(/-+/g, "-").substring(0, 50);
 }
 
 export default function Register() {
-  const navigate    = useNavigate();
-  const { login }   = useAuth();
-
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const [step, setStep]       = useState(0);
   const [error, setError]     = useState("");
   const [loading, setLoading] = useState(false);
-
   const [firstName, setFirstName]       = useState("");
   const [lastName, setLastName]         = useState("");
   const [email, setEmail]               = useState("");
   const [password, setPassword]         = useState("");
   const [businessType, setBusinessType] = useState("RESTAURANT");
-
   const [shopName, setShopName]         = useState("");
   const [slugAvailable, setSlugAvail]   = useState(null);
   const [slugChecking, setSlugChecking] = useState(false);
@@ -58,22 +47,21 @@ export default function Register() {
     if (debouncedSlug.length < 2) { setSlugAvail(null); return; }
     setSlugChecking(true);
     checkSlug(debouncedSlug)
-      .then((res) => setSlugAvail(res.available))
+      .then(res => setSlugAvail(res.available))
       .catch(() => setSlugAvail(null))
       .finally(() => setSlugChecking(false));
   }, [debouncedSlug]);
 
   const validateStep0 = () => {
     if (!firstName.trim() || !lastName.trim()) return "Συμπληρώστε όνομα και επώνυμο";
-    if (!email.trim() || !email.includes("@"))  return "Εισάγετε έγκυρο email";
-    if (password.length < 8)                    return "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες";
+    if (!email.trim() || !email.includes("@")) return "Εισάγετε έγκυρο email";
+    if (password.length < 8) return "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες";
     return null;
   };
-
   const validateStep1 = () => {
-    if (!shopName.trim())        return "Εισάγετε όνομα μαγαζιού";
-    if (slug.length < 2)         return "Το όνομα μαγαζιού είναι πολύ κοντό";
-    if (slugAvailable === false)  return "Αυτό το URL χρησιμοποιείται ήδη. Δοκιμάστε διαφορετικό όνομα.";
+    if (!shopName.trim()) return "Εισάγετε όνομα μαγαζιού";
+    if (slug.length < 2)  return "Το όνομα μαγαζιού είναι πολύ κοντό";
+    if (slugAvailable === false) return "Αυτό το URL χρησιμοποιείται ήδη.";
     return null;
   };
 
@@ -81,12 +69,11 @@ export default function Register() {
     setError("");
     const err = step === 0 ? validateStep0() : validateStep1();
     if (err) { setError(err); return; }
-    setStep((s) => s + 1);
+    setStep(s => s + 1);
   };
 
   const handleSubmit = async () => {
-    setError("");
-    setLoading(true);
+    setError(""); setLoading(true);
     try {
       const data = await register({ firstName, lastName, email, password, businessType, shopName });
       localStorage.setItem("qrmenu_token", data.token);
@@ -104,22 +91,15 @@ export default function Register() {
 
   return (
     <div className={styles.page}>
-      {/* Back button */}
       <Link to="/" className={styles.back}>← Πίσω</Link>
 
       <div className={styles.card} style={{ maxWidth: 480 }}>
         <div className={styles.logo}>QRMenu</div>
 
-        {/* Steps */}
         <div className={styles.steps}>
           {STEPS.map((label, i) => (
-            <div
-              key={i}
-              className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}
-            >
-              <div className={styles.stepCircle}>
-                {i < step ? "✓" : i + 1}
-              </div>
+            <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
+              <div className={styles.stepCircle}>{i < step ? "✓" : i + 1}</div>
               <span className={styles.stepLabel}>{label}</span>
               {i < STEPS.length - 1 && <div className={styles.stepLine} />}
             </div>
@@ -128,12 +108,10 @@ export default function Register() {
 
         <hr className="divider" />
 
-        {/* Step 0 */}
         {step === 0 && (
           <div className="fade-up">
             <h2 className={styles.title}>Δημιουργία λογαριασμού</h2>
             <p className={styles.sub}>Τα στοιχεία σας για την πρόσβαση στο σύστημα.</p>
-
             <div className={styles.formGrid}>
               <div className="form-group">
                 <label>Όνομα</label>
@@ -161,19 +139,13 @@ export default function Register() {
           </div>
         )}
 
-        {/* Step 1 */}
         {step === 1 && (
           <div className="fade-up">
             <h2 className={styles.title}>Το μαγαζί σας</h2>
             <p className={styles.sub}>Δώστε όνομα στο μαγαζί σας. Αυτό θα γίνει το URL του μενού.</p>
             <div className="form-group" style={{ marginTop:8 }}>
               <label>Όνομα μαγαζιού</label>
-              <input
-                value={shopName}
-                onChange={e => setShopName(e.target.value)}
-                placeholder="π.χ. Souvlaki tou Niku"
-                autoFocus
-              />
+              <input value={shopName} onChange={e => setShopName(e.target.value)} placeholder="π.χ. Souvlaki tou Niku" autoFocus />
             </div>
             {shopName.trim().length > 0 && (
               <div className={styles.slugPreview}>
@@ -187,19 +159,14 @@ export default function Register() {
           </div>
         )}
 
-        {/* Step 2 */}
         {step === 2 && (
           <div className="fade-up">
             <h2 className={styles.title}>Όλα έτοιμα!</h2>
             <p className={styles.sub}>Ελέγξτε τα στοιχεία σας πριν δημιουργήσετε τον λογαριασμό.</p>
             <div className={styles.summary}>
-              {[
-                ["Όνομα", `${firstName} ${lastName}`],
-                ["Email", email],
+              {[["Όνομα", `${firstName} ${lastName}`], ["Email", email],
                 ["Επιχείρηση", BUSINESS_TYPES.find(t => t.value === businessType)?.label],
-                ["Μαγαζί", shopName],
-                ["URL μενού", `…/menu/${slug}`],
-              ].map(([k, v]) => (
+                ["Μαγαζί", shopName], ["URL μενού", `…/menu/${slug}`]].map(([k, v]) => (
                 <div key={k} className={styles.summaryRow}>
                   <span className={styles.summaryKey}>{k}</span>
                   <span className={styles.summaryVal}>{v}</span>
@@ -213,14 +180,10 @@ export default function Register() {
 
         <div className={styles.actions}>
           {step > 0 && (
-            <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>
-              ← Πίσω
-            </button>
+            <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>← Πίσω</button>
           )}
           {step < 2 ? (
-            <button className="btn btn-primary" style={{ flex:1 }} onClick={nextStep}>
-              Συνέχεια →
-            </button>
+            <button className="btn btn-primary" style={{ flex:1 }} onClick={nextStep}>Συνέχεια →</button>
           ) : (
             <button className="btn btn-primary" style={{ flex:1 }} onClick={handleSubmit} disabled={loading}>
               {loading ? <span className="spinner" /> : "Δημιουργία λογαριασμού"}

@@ -32,7 +32,6 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
-      {/* Back button */}
       <Link to="/" className={styles.back}>← Πίσω</Link>
 
       <div className={styles.card} style={{ maxWidth: 420 }}>
@@ -43,29 +42,13 @@ export default function Login() {
         <form onSubmit={handleSubmit} style={{ display:"flex", flexDirection:"column", gap:16 }}>
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              required
-              autoFocus
-            />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" required autoFocus />
           </div>
-
           <div className="form-group">
             <label>Κωδικός πρόσβασης</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required />
           </div>
-
           {error && <div className="msg-error">{error}</div>}
-
           <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={loading}>
             {loading ? <span className="spinner" /> : "Σύνδεση"}
           </button>
