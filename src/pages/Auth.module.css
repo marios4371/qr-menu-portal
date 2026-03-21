@@ -25,31 +25,31 @@
   z-index: 0;
 }
 
-/* ── Back button ── */
+/* ── Back arrow — no border, plain ── */
 .back {
   position: fixed;
-  top: 22px;
+  top: 24px;
   left: 28px;
   z-index: 50;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-family: var(--font);
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 1.1rem;
+  font-weight: 300;
   color: var(--text-sub);
   text-decoration: none;
-  padding: 7px 13px;
-  border-radius: var(--radius);
-  background: rgba(240,232,216,0.75);
-  border: 1px solid var(--border-md);
-  backdrop-filter: blur(8px);
-  transition: background 0.14s, color 0.14s, border-color 0.14s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+  letter-spacing: -0.01em;
 }
 .back:hover {
-  background: var(--bg-hover);
   color: var(--text);
-  border-color: var(--border-hi);
+  transform: translateX(-3px);
 }
 
 /* ── Card ── */
@@ -275,6 +275,6 @@
   .card      { padding: 28px 20px; }
   .formGrid  { grid-template-columns: 1fr; }
   .stepLabel { display: none; }
-  .back      { top: 14px; left: 14px; }
+  .back      { top: 16px; left: 16px; font-size: 1rem; }
   .page      { padding: 70px 16px 32px; }
 }

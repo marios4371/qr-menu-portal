@@ -48,8 +48,7 @@ export default function Register() {
   const location   = useLocation();
   const { login }  = useAuth();
 
-  const from   = location.state?.from;
-  const backTo = (!from || from === "nav") ? "/" : `/#${from}`;
+  const handleBack = () => navigate(-1);
 
   const [step, setStep]       = useState(0);
   const [error, setError]     = useState("");
@@ -122,7 +121,7 @@ export default function Register() {
 
   return (
     <div className={styles.page}>
-      <Link to={backTo} className={styles.back}>← Πίσω</Link>
+      <button onClick={handleBack} className={styles.back}>←</button>
 
       <div className={styles.card} style={{ maxWidth: 490 }}>
         <span className={styles.logo}>QRMenu</span>

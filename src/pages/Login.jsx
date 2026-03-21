@@ -29,12 +29,11 @@ export default function Login() {
   const [error, setError]       = useState("");
   const [loading, setLoading]   = useState(false);
 
-  // from === "nav" → back goes to admin/
-  // from === undefined → back goes to admin/ (direct navigation)
-  // from === "about"|"services"|"plans" → back goes to /#section
-  const from    = location.state?.from;
-  const backTo  = (!from || from === "nav") ? "/" : `/#${from}`;
-  const backLabel = "← Πίσω";
+  // navigate(-1) goes exactly where the user came from — handles all cases:
+  // from nav → back to admin/
+  // from plans section → back to admin/ scrolled to plans
+  // from hero → back to admin/
+  const handleBack = () => navigate(-1);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,7 +55,7 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
-      <Link to={backTo} className={styles.back}>{backLabel}</Link>
+      <button onClick={handleBack} className={styles.back}>←</button>
 
       <div className={styles.card} style={{ maxWidth: 420 }}>
         <span className={styles.logo}>QRMenu</span>

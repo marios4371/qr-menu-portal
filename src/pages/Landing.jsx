@@ -34,6 +34,9 @@ export default function Landing() {
   const [activeSection, setActiveSection] = useState(null);
 
   // Nav becomes solid after scrolling past hero
+  // Scroll to top on mount — handles page refresh
+  useEffect(() => { window.scrollTo(0, 0); }, []);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -112,10 +115,10 @@ export default function Landing() {
             χωρίς εγκατάσταση, χωρίς συντήρηση, χωρίς κόστος ανά παραγγελία.
           </p>
           <div className={styles.heroCta}>
-            <Link to="/register" className="btn btn-primary btn-lg">
+            <Link to="/register" state={{ from: null }} className="btn btn-primary btn-lg">
               Δημιουργία λογαριασμού
             </Link>
-            <Link to="/login" className={styles.heroLink}>Σύνδεση →</Link>
+            <Link to="/login" state={{ from: null }} className={styles.heroLink}>Σύνδεση →</Link>
           </div>
         </div>
 
@@ -190,7 +193,7 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <Link to="/register" className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`} style={{ marginTop: "auto" }}>
+                <Link to="/register" state={{ from: "plans" }} className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`} style={{ marginTop: "auto" }}>
                   {p.cta}
                 </Link>
               </div>
