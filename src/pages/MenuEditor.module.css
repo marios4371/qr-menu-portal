@@ -43,8 +43,11 @@
 }
 .shopSelectorSelect {
   font-family:var(--font); font-size:0.88rem; font-weight:500;
-  color:var(--text); background:transparent; border:none; outline:none; cursor:pointer; flex:1;
+  color:var(--text); background:var(--bg-card); border:none; outline:none; cursor:pointer; flex:1;
+  -webkit-appearance:none; appearance:none;
 }
+.shopSelectorSelect:focus { background:var(--bg-card); outline:none; }
+.shopSelectorSelect option { background:var(--bg-card); color:var(--text); }
 
 /* ── Category list ── */
 .catList { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
@@ -119,25 +122,24 @@
 /* ── Modal ── */
 .modalOverlay {
   position:fixed; inset:0;
-  background:rgba(26,20,15,0.45);
+  background:rgba(26,20,15,0.35);
   backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
   display:flex; align-items:center; justify-content:center;
   z-index:200; padding:20px; animation:fadeIn 0.14s ease both;
 }
 .modal {
-  background:rgba(255,255,255,0.72);
+  background:var(--bg-card);
   border:1px solid var(--border-md); border-radius:var(--radius-xl);
   width:100%; max-width:448px;
   animation:fadeUp 0.18s ease both; overflow:hidden;
-  backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
   box-shadow:0 16px 48px rgba(30,20,10,0.14),0 2px 8px rgba(30,20,10,0.08);
 }
-.modalHeader { display:flex; align-items:center; justify-content:space-between; padding:16px 22px 12px; border-bottom:1px solid var(--border); }
+.modalHeader { display:flex; align-items:center; justify-content:space-between; padding:16px 22px 12px; border-bottom:1px solid var(--border); background:var(--bg); }
 .modalTitle { font-size:0.95rem; font-weight:600; color:var(--text); letter-spacing:-0.01em; }
 .modalClose { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:0.9rem; padding:4px 8px; border-radius:var(--radius); transition:background 0.13s,color 0.13s; }
 .modalClose:hover { background:var(--bg-hover); color:var(--text); }
 .modalBody   { padding:18px 22px; }
-.modalFooter { display:flex; justify-content:flex-end; gap:9px; padding:12px 22px 16px; border-top:1px solid var(--border); }
+.modalFooter { display:flex; justify-content:flex-end; gap:9px; padding:12px 22px 16px; border-top:1px solid var(--border); background:var(--bg-hover); }
 
 @media (max-width:900px) { .sidebar{display:none;} .main{padding:22px 16px;max-width:100%;} }
 @media (max-width:600px) { .catHeader{flex-wrap:wrap;} .productRow{flex-direction:column;align-items:flex-start;} .productMeta{flex-wrap:wrap;} }
