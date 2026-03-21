@@ -5,12 +5,37 @@
   justify-content: center;
   padding: 40px 16px;
   background: var(--bg);
-  /*
-    Extra glow directly behind the auth card
-    — makes the glass card feel like it's floating in light
-  */
   background-image:
-    radial-gradient(ellipse 55% 50% at 50% 30%, rgba(255,255,255,0.025) 0%, transparent 65%);
+    radial-gradient(ellipse 55% 50% at 50% 30%, rgba(255,200,120,0.03) 0%, transparent 65%);
+}
+
+/* ── Back button — top left ── */
+.back {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  background: rgba(255,230,190,0.04);
+  border: 1px solid var(--border);
+  border-top-color: rgba(255,230,190,0.10);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.back:hover {
+  background: rgba(255,230,190,0.07);
+  color: var(--text);
+  border-color: var(--border-md);
 }
 
 /* ── Glass card ── */
@@ -49,7 +74,6 @@
   margin-bottom: 6px;
   color: var(--text);
 }
-
 .sub {
   color: var(--text-sub);
   font-size: 0.875rem;
@@ -57,29 +81,26 @@
   font-weight: 300;
 }
 
-/* ── Step Indicator — glass chips ── */
+/* ── Step indicator ── */
 .steps {
   display: flex;
   align-items: flex-start;
   gap: 0;
   margin-bottom: 8px;
 }
-
 .stepItem {
   display: flex;
   align-items: center;
   flex: 1;
   gap: 0;
 }
-
-/* Glass step chip */
 .stepCircle {
   width: 26px;
   height: 26px;
   border-radius: var(--radius);
   border: 1px solid var(--border-md);
-  border-top-color: rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.03);
+  border-top-color: rgba(255,230,190,0.12);
+  background: rgba(255,230,190,0.03);
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 600;
@@ -90,21 +111,18 @@
   transition: all 0.18s;
   backdrop-filter: blur(8px);
 }
-
 .stepActive .stepCircle {
   border-color: var(--border-hi);
-  border-top-color: rgba(255,255,255,0.28);
-  background: rgba(255,255,255,0.07);
+  border-top-color: rgba(255,230,190,0.28);
+  background: rgba(255,230,190,0.07);
   color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 rgba(255,230,190,0.12);
 }
-
 .stepDone .stepCircle {
   border-color: var(--success);
   background: rgba(76,175,120,0.10);
   color: var(--success);
 }
-
 .stepLabel {
   font-size: 0.68rem;
   color: var(--text-muted);
@@ -116,7 +134,6 @@
 }
 .stepActive .stepLabel { color: var(--text-sub); }
 .stepDone .stepLabel   { color: var(--success); }
-
 .stepLine {
   flex: 1;
   height: 1px;
@@ -131,22 +148,21 @@
   gap: 12px;
 }
 
-/* ── Slug preview — glass info bar ── */
+/* ── Slug preview ── */
 .slugPreview {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-top: 10px;
   padding: 10px 14px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,230,190,0.03);
   border: 1px solid var(--border);
-  border-top-color: rgba(255,255,255,0.10);
+  border-top-color: rgba(255,230,190,0.10);
   border-radius: var(--radius);
   flex-wrap: wrap;
   backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: inset 0 1px 0 rgba(255,230,190,0.04);
 }
-
 .slugLabel {
   font-size: 0.72rem;
   color: var(--text-muted);
@@ -154,7 +170,6 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-
 .slugCode {
   font-family: 'Courier New', monospace;
   font-size: 0.8rem;
@@ -162,22 +177,20 @@
   flex: 1;
 }
 .slugCode strong { color: var(--accent); }
-
 .slugOk    { font-size: 0.75rem; color: var(--success); white-space: nowrap; }
 .slugTaken { font-size: 0.75rem; color: var(--error);   white-space: nowrap; }
 
-/* ── Summary (Step 2) ── */
+/* ── Summary ── */
 .summary {
-  background: rgba(255,255,255,0.025);
+  background: rgba(255,230,190,0.025);
   border: 1px solid var(--border);
-  border-top-color: rgba(255,255,255,0.10);
+  border-top-color: rgba(255,230,190,0.10);
   border-radius: var(--radius);
   overflow: hidden;
   margin-top: 8px;
   backdrop-filter: blur(8px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+  box-shadow: inset 0 1px 0 rgba(255,230,190,0.04);
 }
-
 .summaryRow {
   display: flex;
   justify-content: space-between;
@@ -187,7 +200,6 @@
   gap: 16px;
 }
 .summaryRow:last-child { border-bottom: none; }
-
 .summaryKey {
   font-size: 0.7rem;
   color: var(--text-muted);
@@ -233,4 +245,5 @@
   .card      { padding: 28px 18px; }
   .formGrid  { grid-template-columns: 1fr; }
   .stepLabel { display: none; }
+  .back      { top: 12px; left: 12px; }
 }

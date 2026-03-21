@@ -17,13 +17,9 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      // Βήμα 1: login → πάρε JWT
       const loginData = await ownerLogin({ email, password });
-      // Βήμα 2: αποθήκευσε token στο localStorage πρώτα
       localStorage.setItem("qrmenu_token", loginData.token);
-      // Βήμα 3: φόρτωσε dashboard data με το νέο token
       const dashData = await getOwnerDashboard();
-      // Βήμα 4: ενημέρωσε το AuthContext
       login(loginData.token, loginData.owner, dashData.shops);
       navigate("/dashboard");
     } catch (e) {
@@ -36,8 +32,11 @@ export default function Login() {
 
   return (
     <div className={styles.page}>
+      {/* Back button */}
+      <Link to="/" className={styles.back}>← Πίσω</Link>
+
       <div className={styles.card} style={{ maxWidth: 420 }}>
-        <div className={styles.logo}>QR<span>Menu</span></div>
+        <div className={styles.logo}>QRMenu</div>
         <h2 className={styles.title}>Σύνδεση</h2>
         <p className={styles.sub}>Καλώς ήρθατε πίσω.</p>
 
