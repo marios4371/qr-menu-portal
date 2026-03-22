@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { saveMenu } from "../services/api";
+import { saveMenu, getOwnerDashboard } from "../services/api";
 import styles from "./MenuEditor.module.css";
 import layout from "./Layout.module.css";
 
@@ -124,7 +124,7 @@ function ProductModal({ product, onSave, onClose }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MenuEditor() {
-  const { shops, logout } = useAuth();
+  const { shops, logout, login } = useAuth();
   const navigate          = useNavigate();
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
   const shop              = shops?.[selectedShopIdx] ?? shops?.[0];
@@ -228,6 +228,16 @@ export default function MenuEditor() {
       }));
 
       await saveMenu({ shopId: shop.shop_id, data: { menu: menuToSave } });
+
+      // Ανανέωση AuthContext ώστε το shop.menu να είναι up-to-date
+      // χωρίς αυτό, το useEffect([shop]) δεν ξανά-τρέχει και η σελίδα
+      // δείχνει κενό κατά το επόμενο mount
+      const token = localStorage.getItem("qrmenu_token");
+      if (token) {
+        const dashData = await getOwnerDashboard();
+        login(token, dashData.owner, dashData.shops);
+      }
+
       setDirty(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -238,7 +248,7 @@ export default function MenuEditor() {
     }
   };
 
-  const handleLogout = () => { logout(); navigate("/admin"); };
+  const handleLogout = () => { logout(); navigate("/"); };
 
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -266,14 +276,14 @@ export default function MenuEditor() {
 
         {/* Header */}
         <div className={layout.header}>
-          <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
-            <div>
-              <h1 className={layout.heading}>Επεξεργασία Μενού</h1>
-              <p className={layout.headingSub}>
-                {categories.length} κατηγορίες · {totalProducts} προϊόντα
-                {dirty && <span className={styles.dirtyDot} title="Μη αποθηκευμένες αλλαγές"> ●</span>}
-              </p>
-            </div>
+          <div>
+            <h1 className={layout.heading}>Επεξεργασία Μενού</h1>
+            <p className={layout.headingSub}>
+              {categories.length} κατηγορίες · {totalProducts} προϊόντα
+              {dirty && <span className={styles.dirtyDot} title="Μη αποθηκευμένες αλλαγές"> ●</span>}
+            </p>
+          </div>
+          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
             {shops && shops.length > 0 && (
               <div className={styles.shopSelector}>
                 <span className={styles.shopSelectorLabel}>Επιλογή Καταστήματος</span>
@@ -290,8 +300,6 @@ export default function MenuEditor() {
                 </select>
               </div>
             )}
-          </div>
-          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
             {saved && <span className={styles.savedMsg}>✓ Αποθηκεύτηκε</span>}
             <button
               className="btn btn-primary"
