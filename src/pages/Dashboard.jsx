@@ -246,7 +246,6 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* ── FEATURES PANEL ────────────────────────────────────────────── */}
             {/* ── FEATURES PANEL ── */}
             <div className={styles.featuresSection}>
               <div className={styles.menuSectionHeader}>
