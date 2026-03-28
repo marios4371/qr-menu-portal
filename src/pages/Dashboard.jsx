@@ -1,3 +1,5 @@
+// Dashboard.jsx — πλήρες αρχείο με προσθήκη Features Panel
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { upgradePlan } from "../services/api";
@@ -7,11 +9,43 @@ import layout from "./Layout.module.css";
 
 const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
 
+// ─── Feature definitions ανά plan ─────────────────────────────────────────
+const PLAN_FEATURES = {
+  STANDARD: [
+    { key: "digitalMenu",    label: "Ψηφιακό Μενού",      desc: "QR menu για τους πελάτες σας",              icon: "▦" },
+    { key: "globalTemplate", label: "Global Template",     desc: "Ένα έτοιμο template για το μενού",          icon: "◻" },
+  ],
+  PREMIUM: [
+    { key: "digitalMenu",        label: "Ψηφιακό Μενού",          desc: "QR menu για τους πελάτες σας",                         icon: "▦" },
+    { key: "globalTemplate",     label: "Global Template",         desc: "Ένα έτοιμο template για το μενού",                     icon: "◻" },
+    { key: "templateGallery",    label: "Template Gallery",        desc: "Επιλογή από πολλά έτοιμα templates",                   icon: "⊞" },
+    { key: "themeCustomization", label: "Προσαρμογή Εμφάνισης",   desc: "Γραμματοσειρές, χρώματα, borders, φωτογραφίες",        icon: "◈" },
+    { key: "customerOrdering",   label: "Παραγγελιοληψία",        desc: "On/off κουμπί παραγγελίας στο μενού",                  icon: "⊕" },
+    { key: "orderAnalytics",     label: "Αναλυτική Παραγγελιών",  desc: "Πίνακες παραγγελιών ανά μήνα με φιλτράρισμα",         icon: "▤" },
+    { key: "reservations",       label: "Σύστημα Κρατήσεων",      desc: "Online κρατήσεις τραπεζιού",                           icon: "◷" },
+  ],
+  EXCLUSIVE: [
+    { key: "digitalMenu",        label: "Ψηφιακό Μενού",          desc: "QR menu για τους πελάτες σας",                         icon: "▦" },
+    { key: "globalTemplate",     label: "Global Template",         desc: "Ένα έτοιμο template για το μενού",                     icon: "◻" },
+    { key: "templateGallery",    label: "Template Gallery",        desc: "Επιλογή από πολλά έτοιμα templates",                   icon: "⊞" },
+    { key: "themeCustomization", label: "Προσαρμογή Εμφάνισης",   desc: "Γραμματοσειρές, χρώματα, borders, φωτογραφίες",        icon: "◈" },
+    { key: "customerOrdering",   label: "Παραγγελιοληψία",        desc: "On/off κουμπί παραγγελίας στο μενού",                  icon: "⊕" },
+    { key: "orderAnalytics",     label: "Αναλυτική Παραγγελιών",  desc: "Πίνακες παραγγελιών ανά μήνα με φιλτράρισμα",         icon: "▤" },
+    { key: "reservations",       label: "Σύστημα Κρατήσεων",      desc: "Online κρατήσεις τραπεζιού",                           icon: "◷" },
+    { key: "advancedReports",    label: "Αναφορές Επιχείρησης",   desc: "Εξειδικευμένη ανάλυση επιδόσεων",                      icon: "◉" },
+    { key: "inventory",          label: "Κάβα & Αποθήκη",         desc: "Καταχώρηση παραλαβών & stock management",               icon: "◫" },
+    { key: "supplierExport",     label: "Export Προμηθευτή",       desc: "Αυτόματο αρχείο παραγγελίας για τον προμηθευτή",       icon: "↑" },
+  ],
+};
+
+const PLAN_LEVELS = { STANDARD: 1, PREMIUM: 2, EXCLUSIVE: 3, CUSTOM: 99 };
+
 export default function Dashboard() {
   const { owner, shops, logout } = useAuth();
   const navigate = useNavigate();
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
-  const shop     = shops?.[selectedShopIdx] ?? shops?.[0];
+  const shop = shops?.[selectedShopIdx] ?? shops?.[0];
+
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planLoading, setPlanLoading]     = useState(false);
   const [planError, setPlanError]         = useState("");
@@ -26,28 +60,50 @@ export default function Dashboard() {
   const totalCategories = shop?.menu?.length ?? 0;
   const totalProducts   = shop?.menu?.reduce((a, c) => a + (c.items?.length ?? 0), 0) ?? 0;
 
+  const currentPlan      = owner?.plan || "STANDARD";
+  const currentPlanLevel = PLAN_LEVELS[currentPlan] ?? 1;
+  const shopFeatures     = shop?.features ?? {};
+
+  // ─── Αλλαγή πλάνου ────────────────────────────────────────────────────────
+  const handlePlanChange = async (newPlan) => {
+    setPlanLoading(true);
+    setPlanError("");
+    setPlanSuccess("");
+    try {
+      await upgradePlan(newPlan);
+      setPlanSuccess(`Το πλάνο σας άλλαξε σε ${newPlan} επιτυχώς.`);
+      setTimeout(() => { setShowPlanModal(false); window.location.reload(); }, 1500);
+    } catch (err) {
+      setPlanError(err.message || "Σφάλμα αλλαγής πλάνου.");
+    } finally {
+      setPlanLoading(false);
+    }
+  };
+
+  // ─── Έλεγχος αν ένα feature είναι ενεργό ─────────────────────────────────
+  const isFeatureActive = (featureKey, alwaysOn) => {
+    if (alwaysOn) return true;
+    return !!shopFeatures[featureKey];
+  };
+
   return (
     <div className={layout.layout}>
 
       {/* ── SIDEBAR ── */}
       <aside className={layout.sidebar}>
         <div className={layout.sidebarLogo}>QRMenu</div>
-
         <nav className={layout.nav}>
           <a className={`${layout.navItem} ${layout.navActive}`}>Αρχική</a>
           <Link to="/menu-editor" className={layout.navItem}>Επεξεργασία Μενού</Link>
         </nav>
-
         <div className={layout.sidebarFooter}>
-          {/* Upgrade plan — πάνω από το όνομα */}
           <button
             className={styles.upgradePlanBtn}
             onClick={() => { setShowPlanModal(true); setPlanError(""); setPlanSuccess(""); }}
           >
-            <span className={styles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
+            <span className={styles.upgradePlanLabel}>{currentPlan} Πακέτο</span>
             <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
           </button>
-
           <div className={layout.ownerInfo}>
             <div className={layout.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
@@ -57,7 +113,7 @@ export default function Dashboard() {
               <div className={layout.ownerEmail}>{owner?.email}</div>
             </div>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%", marginTop:12 }}>
+          <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width: "100%", marginTop: 12 }}>
             Αποσύνδεση
           </button>
         </div>
@@ -68,7 +124,7 @@ export default function Dashboard() {
 
         {/* Header */}
         <header className={layout.header}>
-          <div style={{ display:"flex", alignItems:"center", gap:16, flexWrap:"wrap" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
             <div>
               <h1 className={layout.heading}>Καλώς ήρθατε, {owner?.firstName}.</h1>
               <p className={layout.headingSub}>Επισκόπηση του καταστήματός σας.</p>
@@ -90,15 +146,13 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <span className={styles.planBadge}>{owner?.plan || "STANDARD"} Πακέτο</span>
+          <span className={styles.planBadge}>{currentPlan} Πακέτο</span>
         </header>
 
         {shop ? (
           <>
             {/* ── TOP ROW ── */}
             <div className={styles.topRow}>
-
-              {/* Shop card */}
               <div className={styles.shopCard}>
                 <div className={styles.shopCardTop}>
                   <div>
@@ -108,7 +162,6 @@ export default function Dashboard() {
                   </div>
                   <span className={`${styles.statusBadge} ${styles.statusActive}`}>● Live</span>
                 </div>
-
                 <div className={styles.urlBlock}>
                   <div className={styles.urlLabel}>URL Μενού</div>
                   <div className={styles.urlRow}>
@@ -127,7 +180,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Stats column */}
               <div className={styles.statsCol}>
                 {[
                   { label: "Κατηγορίες",  value: totalCategories },
@@ -178,9 +230,7 @@ export default function Dashboard() {
                           </li>
                         ))}
                         {(cat.items?.length ?? 0) > 5 && (
-                          <li className={styles.productMore}>
-                            +{cat.items.length - 5} ακόμα
-                          </li>
+                          <li className={styles.productMore}>+{cat.items.length - 5} ακόμα</li>
                         )}
                       </ul>
                     </div>
@@ -189,11 +239,41 @@ export default function Dashboard() {
               ) : (
                 <div className={styles.emptyMenu}>
                   <p>Δεν έχετε προσθέσει κατηγορίες ακόμα.</p>
-                  <Link to="/menu-editor" className="btn btn-primary" style={{ marginTop:16 }}>
+                  <Link to="/menu-editor" className="btn btn-primary" style={{ marginTop: 16 }}>
                     Ξεκινήστε την επεξεργασία
                   </Link>
                 </div>
               )}
+            </div>
+
+            {/* ── FEATURES PANEL ────────────────────────────────────────────── */}
+            {/* ── FEATURES PANEL ── */}
+            <div className={styles.featuresSection}>
+              <div className={styles.menuSectionHeader}>
+                <div>
+                  <div className={styles.sectionLabel}>Δυνατότητες</div>
+                  <h3 className={styles.sectionTitle}>Τι περιλαμβάνει το {currentPlan} πακέτο σας</h3>
+                </div>
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => { setShowPlanModal(true); setPlanError(""); setPlanSuccess(""); }}
+                >
+                  Αναβάθμιση ↑
+                </button>
+              </div>
+
+              <div className={styles.featureGrid}>
+                {(PLAN_FEATURES[currentPlan] ?? PLAN_FEATURES.STANDARD).map((feat) => (
+                  <div key={feat.key} className={styles.featureCard}>
+                    <div className={styles.featureCardTop}>
+                      <span className={styles.featureIcon}>{feat.icon}</span>
+                      <span className={styles.featureActiveDot} />
+                    </div>
+                    <div className={styles.featureLabel}>{feat.label}</div>
+                    <div className={styles.featureDesc}>{feat.desc}</div>
+                  </div>
+                ))}
+              </div>
             </div>
             {/* ── PLAN MODAL ── */}
             {showPlanModal && (
@@ -204,39 +284,36 @@ export default function Dashboard() {
                     <button className={styles.modalClose} onClick={() => setShowPlanModal(false)}>✕</button>
                   </div>
                   <div className={styles.modalBody}>
-                    <p className={styles.modalSub}>Τρέχον πλάνο: <strong>{owner?.plan}</strong></p>
+                    <p className={styles.modalSub}>Τρέχον πλάνο: <strong>{currentPlan}</strong></p>
                     <div className={styles.planChoiceGrid}>
                       {[
-                        { value: "STANDARD",  name: "Standard",  price: "12,00 €/μήνα" },
-                        { value: "PREMIUM",   name: "Premium",   price: "16,70 €/μήνα" },
-                        { value: "EXCLUSIVE", name: "Exclusive", price: "25,00 €/μήνα" },
+                        { value: "STANDARD",  name: "Standard",  price: "12,00 €/μήνα",  desc: "Ψηφιακό μενού & global template" },
+                        { value: "PREMIUM",   name: "Premium",   price: "16,70 €/μήνα",  desc: "Templates, παραγγελιοληψία, κρατήσεις" },
+                        { value: "EXCLUSIVE", name: "Exclusive", price: "25,00 €/μήνα",  desc: "Αναφορές, κάβα & export προμηθευτή" },
                       ].map(p => (
                         <button
                           key={p.value}
-                          className={`${styles.planChoiceCard} ${owner?.plan === p.value ? styles.planChoiceCurrent : ""}`}
+                          className={`${styles.planChoiceCard} ${currentPlan === p.value ? styles.planChoiceCurrent : ""}`}
                           onClick={() => handlePlanChange(p.value)}
-                          disabled={planLoading || owner?.plan === p.value}
+                          disabled={planLoading || currentPlan === p.value}
                         >
                           <div className={styles.planChoiceName}>{p.name}</div>
                           <div className={styles.planChoicePrice}>{p.price}</div>
-                          {owner?.plan === p.value && <div className={styles.planChoiceBadge}>Τρέχον</div>}
+                          <div className={styles.planChoiceDesc}>{p.desc}</div>
+                          {currentPlan === p.value && <div className={styles.planChoiceBadge}>Τρέχον</div>}
                         </button>
                       ))}
                     </div>
-                    {planError   && <div className="msg-error"   style={{ marginTop:14 }}>{planError}</div>}
-                    {planSuccess && <div className="msg-success" style={{ marginTop:14 }}>{planSuccess}</div>}
-                    <p className={styles.planChoiceNote}>
-                      Για Custom πλάνο επικοινωνήστε μαζί μας.
-                    </p>
+                    {planError   && <div className="msg-error"   style={{ marginTop: 14 }}>{planError}</div>}
+                    {planSuccess && <div className="msg-success" style={{ marginTop: 14 }}>{planSuccess}</div>}
+                    <p className={styles.planChoiceNote}>Για Custom πλάνο επικοινωνήστε μαζί μας.</p>
                   </div>
                 </div>
               </div>
             )}
           </>
         ) : (
-          <div className={styles.emptyState}>
-            <p>Δεν βρέθηκε κατάστημα.</p>
-          </div>
+          <div className={styles.emptyState}><p>Δεν βρέθηκε κατάστημα.</p></div>
         )}
       </main>
     </div>
