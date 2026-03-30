@@ -5,6 +5,7 @@ import Register   from "./pages/Register";
 import Login      from "./pages/Login";
 import Dashboard  from "./pages/Dashboard";
 import MenuEditor from "./pages/MenuEditor";
+import MenuAppearance from "./pages/MenuAppearance";
 
 // Protected route: redirect στο /login αν δεν υπάρχει owner
 function ProtectedRoute({ children }) {
@@ -46,6 +47,10 @@ export default function App() {
 
           <Route path="/menu-editor" element={
             <ProtectedRoute><MenuEditor /></ProtectedRoute>
+          } />
+
+          <Route path="/menu-appearance" element={
+            <ProtectedRoute><MenuAppearance /></ProtectedRoute>
           } />
 
           {/* Fallback */}

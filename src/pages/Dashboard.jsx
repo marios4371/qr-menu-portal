@@ -95,6 +95,9 @@ export default function Dashboard() {
         <nav className={layout.nav}>
           <a className={`${layout.navItem} ${layout.navActive}`}>Αρχική</a>
           <Link to="/menu-editor" className={layout.navItem}>Επεξεργασία Μενού</Link>
+          {currentPlan !== "STANDARD" && (
+            <Link to="/menu-appearance" className={layout.navItem}>Εμφάνιση Μενού</Link>
+          )}
         </nav>
         <div className={layout.sidebarFooter}>
           <button

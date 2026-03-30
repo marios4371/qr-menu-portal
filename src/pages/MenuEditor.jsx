@@ -124,7 +124,7 @@ function ProductModal({ product, onSave, onClose }) {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MenuEditor() {
-  const { shops, logout, login } = useAuth();
+  const { owner, shops, logout, login } = useAuth();
   const navigate          = useNavigate();
   const [selectedShopIdx, setSelectedShopIdx] = useState(0);
   const shop              = shops?.[selectedShopIdx] ?? shops?.[0];
@@ -263,6 +263,9 @@ export default function MenuEditor() {
         <nav className={layout.nav}>
           <Link to="/dashboard" className={layout.navItem}>Αρχική</Link>
           <a className={`${layout.navItem} ${layout.navActive}`}>Επεξεργασία Μενού</a>
+          {owner?.plan && owner.plan !== "STANDARD" && (
+            <Link to="/menu-appearance" className={layout.navItem}>Εμφάνιση Μενού</Link>
+          )}
         </nav>
         <div className={layout.sidebarFooter}>
           <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%" }}>

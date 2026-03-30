@@ -54,6 +54,12 @@ export const saveMenu = ({ shopId, data }) =>
     body: JSON.stringify({ shopId, data }),
   });
 
+export const saveAppearance = ({ shopId, theme }) =>
+  request("/save-appearance", {
+    method: "POST",
+    body: JSON.stringify({ shopId, theme }),
+  });
+
 // ─── Plan Management ──────────────────────────────────────────────────────────
 
 export const upgradePlan = (newPlan) =>
