@@ -68,18 +68,26 @@ export default function MenuAppearance() {
           <Link to="/menu-editor"     className={layout.navItem}>Επεξεργασία Μενού</Link>
           <Link to="/menu-appearance" className={`${layout.navItem} ${layout.navActive}`}>Εμφάνιση Μενού</Link>
         </nav>
-        <div className={layout.sidebarFooter}>
-          <div className={layout.ownerInfo}>
-            <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
-            <div className={layout.ownerInfoText}>
-              <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
-              <div className={layout.ownerEmail}>{owner?.email}</div>
+          <div className={layout.sidebarFooter}>
+            <button
+              className={styles.upgradePlanBtn}
+              onClick={() => navigate("/dashboard")}
+              style={{ marginBottom: 10 }}
+            >
+              <span className={styles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
+              <span className={styles.upgradePlanArrow}>↗ Dashboard</span>
+            </button>
+            <div className={layout.ownerInfo}>
+              <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
+              <div className={layout.ownerInfoText}>
+                <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
+                <div className={layout.ownerEmail}>{owner?.email}</div>
+              </div>
             </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/login"); }} style={{ width:"100%", marginTop:12 }}>
+              Αποσύνδεση
+            </button>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/login"); }} style={{ width:"100%", marginTop:12 }}>
-            Αποσύνδεση
-          </button>
-        </div>
       </aside>
 
       <main className={layout.main}>

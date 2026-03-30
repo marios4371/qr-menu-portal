@@ -268,7 +268,16 @@ export default function MenuEditor() {
           )}
         </nav>
         <div className={layout.sidebarFooter}>
-          <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%" }}>
+          <div className={layout.ownerInfo}>
+            <div className={layout.ownerAvatar}>
+              {owner?.firstName?.[0]}{owner?.lastName?.[0]}
+            </div>
+            <div className={layout.ownerInfoText}>
+              <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
+              <div className={layout.ownerEmail}>{owner?.email}</div>
+            </div>
+          </div>
+          <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ width:"100%", marginTop:12 }}>
             Αποσύνδεση
           </button>
         </div>
