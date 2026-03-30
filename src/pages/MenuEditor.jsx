@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { saveMenu, getOwnerDashboard } from "../services/api";
 import styles from "./MenuEditor.module.css";
+import dashStyles from "./Dashboard.module.css";
 import layout from "./Layout.module.css";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -268,6 +269,13 @@ export default function MenuEditor() {
           )}
         </nav>
         <div className={layout.sidebarFooter}>
+          <button
+            className={styles.upgradePlanBtn}
+            onClick={() => navigate("/dashboard")}
+          >
+            <span className={dashStyles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
+            <span className={dashStyles.upgradePlanArrow}>↑ Αναβάθμιση</span>
+          </button>
           <div className={layout.ownerInfo}>
             <div className={layout.ownerAvatar}>
               {owner?.firstName?.[0]}{owner?.lastName?.[0]}
