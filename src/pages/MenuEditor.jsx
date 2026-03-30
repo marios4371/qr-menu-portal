@@ -270,7 +270,7 @@ export default function MenuEditor() {
         </nav>
         <div className={layout.sidebarFooter}>
           <button
-            className={styles.upgradePlanBtn}
+            className={dashStyles.upgradePlanBtn}
             onClick={() => navigate("/dashboard")}
           >
             <span className={dashStyles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>

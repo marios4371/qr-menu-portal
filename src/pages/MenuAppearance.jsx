@@ -72,10 +72,9 @@ export default function MenuAppearance() {
             <button
               className={styles.upgradePlanBtn}
               onClick={() => navigate("/dashboard")}
-              style={{ marginBottom: 10 }}
             >
               <span className={styles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
-              <span className={styles.upgradePlanArrow}>↗ Dashboard</span>
+              <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
             </button>
             <div className={layout.ownerInfo}>
               <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>

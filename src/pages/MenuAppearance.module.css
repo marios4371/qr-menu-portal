@@ -212,3 +212,40 @@
   .appearanceLayout { grid-template-columns: 1fr; }
   .preview { position: static; }
 }
+
+/* Για εμφανιση ονοαμτος, μειλ, πλανου κατω αριστερα */
+.upgradePlanBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 10px;
+  margin-bottom: 10px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: background 0.13s, border-color 0.13s;
+  text-align: left;
+}
+.upgradePlanBtn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.upgradePlanBtn:hover .upgradePlanLabel,
+.upgradePlanBtn:hover .upgradePlanArrow {
+  color: #F0E8D8;
+}
+.upgradePlanLabel {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.upgradePlanArrow {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
