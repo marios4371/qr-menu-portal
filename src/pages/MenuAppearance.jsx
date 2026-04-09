@@ -64,8 +64,8 @@ export default function MenuAppearance() {
     : null;
 
   const refreshPreview = () => {
-    if (iframeRef.current) {
-      iframeRef.current.src = iframeRef.current.src;
+    if (iframeRef.current && menuPreviewUrl) {
+      iframeRef.current.src = `${menuPreviewUrl}?t=${Date.now()}`;
     }
   };
 
