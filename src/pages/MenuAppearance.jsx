@@ -1,23 +1,29 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { saveAppearance } from "../services/api";
 import layout from "./Layout.module.css";
 import styles from "./MenuAppearance.module.css";
 
-const FONTS     = ["Inter", "Playfair Display", "Lato", "Roboto", "Syne", "DM Sans"];
+const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
+
+const FONTS      = ["Inter", "Playfair Display", "Lato", "Roboto", "Syne", "DM Sans"];
 const FONT_SIZES = ["small", "medium", "large"];
-const RADII     = ["sharp", "soft", "rounded"];
-const BORDERS   = ["none", "minimal", "full"];
-const CARDS     = ["glass", "solid", "outline", "flat"];
-const HEADERS   = ["centered", "left", "logo-only"];
-const LAYOUTS   = ["grid", "list", "compact"];
+const RADII      = ["sharp", "soft", "rounded"];
+const BORDERS    = ["none", "minimal", "full"];
+const CARDS      = ["glass", "solid", "outline", "flat"];
+const HEADERS    = ["centered", "left", "logo-only"];
+const LAYOUTS    = ["grid", "list", "compact"];
+const SPACINGS   = ["compact", "normal", "relaxed"];
+const OPACITIES  = ["subtle", "medium", "strong"];
+const ANIMATIONS = ["none", "fade", "slide"];
 
 const DEFAULT_THEME = {
   primaryColor:      "#000000",
   accentColor:       "#ffffff",
   backgroundColor:   "#0a0a0a",
   textColor:         "#f0f0f0",
+  secondaryBgColor:  "#111111",
   fontFamily:        "Inter",
   fontSize:          "medium",
   borderRadius:      "soft",
@@ -25,33 +31,53 @@ const DEFAULT_THEME = {
   cardStyle:         "glass",
   headerStyle:       "centered",
   layoutMode:        "grid",
+  spacing:           "normal",
+  glassOpacity:      "medium",
+  animationStyle:    "fade",
   logoUrl:           null,
   coverImageUrl:     null,
   showPrices:        true,
   showDescriptions:  true,
   showStationBadges: false,
+  showCategoryCount: true,
+  showItemImages:    false,
+  stickyHeader:      true,
   customCss:         "",
 };
 
 export default function MenuAppearance() {
   const { owner, shops, logout } = useAuth();
-  const navigate = useNavigate();
-  const shop     = shops?.[0];
+  const navigate    = useNavigate();
+  const shop        = shops?.[0];
   const currentPlan = owner?.plan || "STANDARD";
+  const iframeRef   = useRef(null);
 
-  const [theme, setTheme]       = useState({ ...DEFAULT_THEME, ...shop?.theme });
-  const [saving, setSaving]     = useState(false);
-  const [saved,  setSaved]      = useState(false);
-  const [error,  setError]      = useState("");
+  const [theme, setTheme]   = useState({ ...DEFAULT_THEME, ...shop?.theme });
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+  const [error,  setError]  = useState("");
 
   const set = (key, val) => setTheme(t => ({ ...t, [key]: val }));
+
+  const menuPreviewUrl = shop?.shopSlug
+    ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
+    : null;
+
+  const refreshPreview = () => {
+    if (iframeRef.current) {
+      iframeRef.current.src = iframeRef.current.src;
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true); setError(""); setSaved(false);
     try {
       await saveAppearance({ shopId: shop.shop_id, theme });
       setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => {
+        refreshPreview();
+        setSaved(false);
+      }, 800);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -68,25 +94,22 @@ export default function MenuAppearance() {
           <Link to="/menu-editor"     className={layout.navItem}>Επεξεργασία Μενού</Link>
           <Link to="/menu-appearance" className={`${layout.navItem} ${layout.navActive}`}>Εμφάνιση Μενού</Link>
         </nav>
-          <div className={layout.sidebarFooter}>
-            <button
-              className={styles.upgradePlanBtn}
-              onClick={() => navigate("/dashboard")}
-            >
-              <span className={styles.upgradePlanLabel}>{owner?.plan || "STANDARD"} Πακέτο</span>
-              <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
-            </button>
-            <div className={layout.ownerInfo}>
-              <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
-              <div className={layout.ownerInfoText}>
-                <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
-                <div className={layout.ownerEmail}>{owner?.email}</div>
-              </div>
+        <div className={layout.sidebarFooter}>
+          <button className={styles.upgradePlanBtn} onClick={() => navigate("/dashboard")}>
+            <span className={styles.upgradePlanLabel}>{currentPlan} Πακέτο</span>
+            <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
+          </button>
+          <div className={layout.ownerInfo}>
+            <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
+            <div className={layout.ownerInfoText}>
+              <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
+              <div className={layout.ownerEmail}>{owner?.email}</div>
             </div>
-            <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/login"); }} style={{ width:"100%", marginTop:12 }}>
-              Αποσύνδεση
-            </button>
           </div>
+          <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/login"); }} style={{ width:"100%", marginTop:12 }}>
+            Αποσύνδεση
+          </button>
+        </div>
       </aside>
 
       <main className={layout.main}>
@@ -96,8 +119,9 @@ export default function MenuAppearance() {
             <p className={layout.headingSub}>Προσαρμόστε την εμφάνιση του μενού σας.</p>
           </div>
           <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-            {saved  && <span className="msg-success" style={{ fontSize:13 }}>Αποθηκεύτηκε ✓</span>}
-            {error  && <span className="msg-error"   style={{ fontSize:13 }}>{error}</span>}
+            {saved && <span className="msg-success" style={{ fontSize:13 }}>Αποθηκεύτηκε ✓</span>}
+            {error && <span className="msg-error"   style={{ fontSize:13 }}>{error}</span>}
+            <button className="btn btn-ghost btn-sm" onClick={refreshPreview}>↻ Preview</button>
             <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
               {saving ? <span className="spinner" /> : "Αποθήκευση"}
             </button>
@@ -105,24 +129,23 @@ export default function MenuAppearance() {
         </header>
 
         <div className={styles.appearanceLayout}>
-
-          {/* ── LEFT: Controls ── */}
           <div className={styles.controls}>
 
-            {/* Χρώματα */}
+            {/* 1. ΧΡΩΜΑΤΑ */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Χρώματα</div>
               <div className={styles.colorGrid}>
                 {[
-                  { key: "primaryColor",    label: "Κύριο χρώμα" },
-                  { key: "accentColor",     label: "Accent" },
-                  { key: "backgroundColor", label: "Φόντο" },
-                  { key: "textColor",       label: "Κείμενο" },
+                  { key: "primaryColor",     label: "Κύριο χρώμα" },
+                  { key: "accentColor",      label: "Accent" },
+                  { key: "backgroundColor",  label: "Φόντο" },
+                  { key: "textColor",        label: "Κείμενο" },
+                  { key: "secondaryBgColor", label: "Φόντο κάρτας" },
                 ].map(c => (
                   <div key={c.key} className={styles.colorItem}>
                     <label className={styles.controlLabel}>{c.label}</label>
                     <div className={styles.colorRow}>
-                      <input type="color" value={theme[c.key]} onChange={e => set(c.key, e.target.value)} className={styles.colorInput} />
+                      <input type="color" value={theme[c.key] || "#000000"} onChange={e => set(c.key, e.target.value)} className={styles.colorInput} />
                       <span className={styles.colorHex}>{theme[c.key]}</span>
                     </div>
                   </div>
@@ -130,7 +153,7 @@ export default function MenuAppearance() {
               </div>
             </section>
 
-            {/* Γραμματοσειρά */}
+            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΑ */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Γραμματοσειρά</div>
               <div className={styles.chipGroup}>
@@ -152,7 +175,7 @@ export default function MenuAppearance() {
               </div>
             </section>
 
-            {/* Γωνίες & Borders */}
+            {/* 3. ΓΩΝΙΕΣ & BORDERS */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Γωνίες & Borders</div>
               <div className={styles.subLabel}>Στυλ γωνιών</div>
@@ -175,7 +198,7 @@ export default function MenuAppearance() {
               </div>
             </section>
 
-            {/* Στυλ κάρτας */}
+            {/* 4. ΣΤΥΛ ΚΑΡΤΑΣ */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Στυλ Κάρτας Προϊόντος</div>
               <div className={styles.chipGroup}>
@@ -186,9 +209,18 @@ export default function MenuAppearance() {
                   </button>
                 ))}
               </div>
+              <div className={styles.subLabel}>Αδιαφάνεια glass effect</div>
+              <div className={styles.chipGroup}>
+                {OPACITIES.map(o => (
+                  <button key={o} className={`${styles.chip} ${theme.glassOpacity === o ? styles.chipActive : ""}`}
+                    onClick={() => set("glassOpacity", o)}>
+                    {o === "subtle" ? "Ελαφρύ" : o === "medium" ? "Μεσαίο" : "Έντονο"}
+                  </button>
+                ))}
+              </div>
             </section>
 
-            {/* Header & Layout */}
+            {/* 5. HEADER & LAYOUT */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Header & Layout</div>
               <div className={styles.subLabel}>Στυλ header</div>
@@ -209,15 +241,40 @@ export default function MenuAppearance() {
                   </button>
                 ))}
               </div>
+              <div className={styles.subLabel}>Spacing</div>
+              <div className={styles.chipGroup}>
+                {SPACINGS.map(s => (
+                  <button key={s} className={`${styles.chip} ${theme.spacing === s ? styles.chipActive : ""}`}
+                    onClick={() => set("spacing", s)}>
+                    {s === "compact" ? "Compact" : s === "normal" ? "Normal" : "Relaxed"}
+                  </button>
+                ))}
+              </div>
             </section>
 
-            {/* Ορατότητα */}
+            {/* 6. ANIMATIONS */}
+            <section className={styles.section}>
+              <div className={styles.sectionTitle}>Animations</div>
+              <div className={styles.chipGroup}>
+                {ANIMATIONS.map(a => (
+                  <button key={a} className={`${styles.chip} ${theme.animationStyle === a ? styles.chipActive : ""}`}
+                    onClick={() => set("animationStyle", a)}>
+                    {a === "none" ? "Καμία" : a === "fade" ? "Fade" : "Slide"}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {/* 7. ΟΡΑΤΟΤΗΤΑ */}
             <section className={styles.section}>
               <div className={styles.sectionTitle}>Ορατότητα Στοιχείων</div>
               {[
                 { key: "showPrices",        label: "Εμφάνιση τιμών" },
                 { key: "showDescriptions",  label: "Εμφάνιση περιγραφών" },
-                { key: "showStationBadges", label: "Εμφάνιση badge σταθμού (Bar/Kitchen)" },
+                { key: "showStationBadges", label: "Badge σταθμού (Bar/Kitchen)" },
+                { key: "showCategoryCount", label: "Αριθμός προϊόντων ανά κατηγορία" },
+                { key: "showItemImages",    label: "Εικόνες προϊόντων" },
+                { key: "stickyHeader",      label: "Sticky header κατά το scroll" },
               ].map(t => (
                 <div key={t.key} className={styles.toggleRow}>
                   <span className={styles.toggleLabel}>{t.label}</span>
@@ -225,64 +282,63 @@ export default function MenuAppearance() {
                     className={`${styles.toggle} ${theme[t.key] ? styles.toggleOn : ""}`}
                     onClick={() => set(t.key, !theme[t.key])}
                   >
-                    <span className={styles.toggleKnob} />
+                    <span className={`${styles.toggleKnob} ${theme[t.key] ? styles.toggleKnobOn : ""}`} />
                   </button>
                 </div>
               ))}
             </section>
 
-            {/* Custom CSS */}
+            {/* 8. CUSTOM CSS */}
             <section className={styles.section}>
-              <div className={styles.sectionTitle}>Custom CSS <span className={styles.advancedBadge}>Advanced</span></div>
+              <div className={styles.sectionTitle}>
+                Custom CSS <span className={styles.advancedBadge}>Advanced</span>
+              </div>
+              <p style={{ fontSize:"0.76rem", color:"var(--text-muted)", marginBottom:10, fontWeight:300 }}>
+                Χρησιμοποίησε τις CSS variables: <code style={{ fontSize:"0.72rem" }}>--theme-primary</code>, <code style={{ fontSize:"0.72rem" }}>--theme-accent</code>, <code style={{ fontSize:"0.72rem" }}>--theme-bg</code>, <code style={{ fontSize:"0.72rem" }}>--theme-text</code>
+              </p>
               <textarea
                 className={styles.cssInput}
                 value={theme.customCss}
                 onChange={e => set("customCss", e.target.value)}
-                placeholder="/* π.χ. .menu-item { font-size: 16px; } */"
-                rows={6}
+                placeholder={"/* Παράδειγμα:\n.menu-item { border-radius: 12px; }\n.category-title { letter-spacing: 0.2em; } */"}
+                rows={7}
               />
             </section>
 
           </div>
 
-          {/* ── RIGHT: Preview ── */}
+          {/* ── RIGHT: Live Preview ── */}
           <div className={styles.preview}>
-            <div className={styles.previewLabel}>Preview</div>
-            <div className={styles.previewCard} style={{
-              backgroundColor: theme.backgroundColor,
-              color:           theme.textColor,
-              fontFamily:      theme.fontFamily,
-              borderRadius:    theme.borderRadius === "sharp" ? 2 : theme.borderRadius === "soft" ? 8 : 16,
-            }}>
-              <div className={styles.previewHeader} style={{
-                textAlign: theme.headerStyle === "centered" ? "center" : "left",
-                borderBottom: `1px solid ${theme.accentColor}22`,
-                color: theme.primaryColor,
-              }}>
-                {shop?.shopName || "Το Κατάστημά σας"}
-              </div>
-              <div className={styles.previewCategories}>
-                {(shop?.menu?.slice(0, 2) || [{ name: "Ποτά", items: [{name:"Καφές", price:2.5}, {name:"Τσάι", price:2}] }]).map(cat => (
-                  <div key={cat.name} className={styles.previewCat}>
-                    <div className={styles.previewCatName} style={{ color: theme.accentColor }}>{cat.name}</div>
-                    {(cat.items || []).slice(0, 3).map(item => (
-                      <div key={item.name} className={styles.previewItem} style={{
-                        background: theme.cardStyle === "glass"   ? `${theme.primaryColor}11` :
-                                    theme.cardStyle === "solid"   ? `${theme.primaryColor}22` :
-                                    theme.cardStyle === "outline" ? "transparent" : "transparent",
-                        border: theme.borderStyle !== "none" ? `1px solid ${theme.accentColor}22` : "none",
-                        borderRadius: theme.borderRadius === "sharp" ? 2 : theme.borderRadius === "soft" ? 6 : 12,
-                      }}>
-                        <span>{item.name}</span>
-                        {theme.showPrices && <span style={{ color: theme.accentColor }}>{item.price?.toFixed(2)} €</span>}
-                      </div>
-                    ))}
-                  </div>
-                ))}
+            <div className={styles.previewLabelRow}>
+              <span className={styles.previewLabel}>Live Preview</span>
+              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                <span style={{ fontSize:"0.7rem", color:"var(--text-muted)" }}>
+                  Αποθήκευσε για να δεις τις αλλαγές
+                </span>
+                {menuPreviewUrl && (
+                  <a href={menuPreviewUrl} target="_blank" rel="noopener noreferrer"
+                    className="btn btn-ghost btn-sm" style={{ fontSize:"0.72rem", padding:"4px 10px" }}>
+                    Άνοιγμα ↗
+                  </a>
+                )}
               </div>
             </div>
+            {menuPreviewUrl ? (
+              <div className={styles.iframeWrapper}>
+                <iframe
+                  ref={iframeRef}
+                  src={menuPreviewUrl}
+                  className={styles.previewIframe}
+                  title="Menu Preview"
+                  sandbox="allow-scripts allow-same-origin"
+                />
+              </div>
+            ) : (
+              <div className={styles.previewEmpty}>
+                <p>Δεν υπάρχει διαθέσιμο URL μενού.</p>
+              </div>
+            )}
           </div>
-
         </div>
       </main>
     </div>
