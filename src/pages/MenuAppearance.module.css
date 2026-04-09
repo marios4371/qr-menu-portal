@@ -1,3 +1,4 @@
+/* ── Layout ── */
 .appearanceLayout {
   display: grid;
   grid-template-columns: 1fr 340px;
@@ -8,78 +9,145 @@
 .controls {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
-.section {
+/* ── Accordion ── */
+.accordionItem {
   background: var(--bg-card);
   border: 1px solid var(--border-md);
   border-radius: var(--radius-xl);
-  padding: 20px 24px;
+  overflow: hidden;
+  transition: border-color 0.15s;
 }
 
-.sectionTitle {
-  font-size: 0.72rem;
+.accordionOpen {
+  border-color: var(--border-hi);
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  text-align: left;
+  transition: background 0.13s;
+}
+.accordionHeader:hover { background: var(--bg-hover); }
+
+.accordionIcon {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.accordionTitle {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.accordionChevron {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+.accordionChevronOpen {
+  transform: rotate(90deg);
+}
+
+.accordionBody {
+  padding: 0 20px 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Color Section ── */
+.colorSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-top: 4px;
+}
+
+.colorGroupLabel {
+  font-size: 0.66rem;
   font-weight: 600;
   letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  padding: 12px 0 6px;
 }
-
-.subLabel {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  margin: 12px 0 8px;
-  font-weight: 500;
-}
-
-.controlLabel {
-  font-size: 0.75rem;
-  color: var(--text-sub);
-  margin-bottom: 6px;
-  display: block;
-}
-
-/* Color grid */
-.colorGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.colorItem { display: flex; flex-direction: column; }
 
 .colorRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.colorRow:last-child { border-bottom: none; }
+
+.colorLabel {
+  font-size: 0.84rem;
+  color: var(--text-sub);
+  font-weight: 300;
+}
+
+.colorRight {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .colorInput {
-  width: 36px;
-  height: 36px;
-  border: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border-md);
   border-radius: var(--radius);
   cursor: pointer;
   background: none;
-  padding: 0;
+  padding: 2px;
 }
 
 .colorHex {
-  font-size: 0.78rem;
-  color: var(--text-sub);
+  font-size: 0.76rem;
+  color: var(--text-muted);
   font-family: monospace;
+  min-width: 58px;
+  text-align: right;
 }
 
-/* Chips */
+/* ── Controls (reusable) ── */
+.controlGroup {
+  margin-top: 14px;
+}
+.controlGroup:first-child { margin-top: 4px; }
+
+.controlLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
 .chipGroup {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chip {
@@ -90,7 +158,7 @@
   background: var(--bg);
   border: 1px solid var(--border-md);
   border-radius: var(--radius);
-  padding: 6px 13px;
+  padding: 5px 12px;
   cursor: pointer;
   transition: background 0.13s, border-color 0.13s, color 0.13s;
 }
@@ -101,7 +169,7 @@
   color: #F0E8D8 !important;
 }
 
-/* Toggles */
+/* ── Toggles ── */
 .toggleRow {
   display: flex;
   align-items: center;
@@ -134,9 +202,9 @@
   background: #fff;
   transition: transform 0.18s;
 }
-.toggleOn .toggleKnob { transform: translateX(16px); }
+.toggleKnobOn { transform: translateX(16px); }
 
-/* Custom CSS */
+/* ── Custom CSS ── */
 .cssInput {
   width: 100%;
   font-family: 'Courier New', monospace;
@@ -149,21 +217,28 @@
   resize: vertical;
   line-height: 1.6;
   box-sizing: border-box;
+  margin-top: 4px;
 }
 .cssInput:focus { outline: none; border-color: var(--border-hi); }
 
-.advancedBadge {
-  font-size: 0.62rem;
-  background: var(--bg-hover);
+/* ── Coming Soon ── */
+.comingSoon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0 4px;
   color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1px 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.84rem;
+  font-weight: 300;
+}
+.comingSoonIcon {
+  font-size: 1rem;
+  color: var(--text-muted);
 }
 
-/* Preview */
+/* ── Preview ── */
+.preview { position: sticky; top: 20px; }
+
 .previewLabelRow {
   display: flex;
   align-items: center;
@@ -184,7 +259,6 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: #0a0a0a;
-  /* Mobile frame effect */
   width: 100%;
   aspect-ratio: 9 / 16;
   max-height: 700px;
@@ -206,12 +280,7 @@
   font-size: 0.84rem;
 }
 
-/* Fix toggle knob — explicit class αντί για CSS descendant ── */
-.toggleKnobOn {
-  transform: translateX(16px);
-}
-
-/* Για εμφανιση ονοαμτος, μειλ, πλανου κατω αριστερα */
+/* ── Sidebar plan button ── */
 .upgradePlanBtn {
   display: flex;
   align-items: center;
@@ -232,9 +301,8 @@
   border-color: var(--accent);
 }
 .upgradePlanBtn:hover .upgradePlanLabel,
-.upgradePlanBtn:hover .upgradePlanArrow {
-  color: #F0E8D8;
-}
+.upgradePlanBtn:hover .upgradePlanArrow { color: #F0E8D8; }
+
 .upgradePlanLabel {
   font-size: 0.76rem;
   font-weight: 600;
@@ -246,4 +314,9 @@
   color: var(--text-muted);
   letter-spacing: 0.03em;
   white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .appearanceLayout { grid-template-columns: 1fr; }
+  .preview { position: static; }
 }

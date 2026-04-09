@@ -7,44 +7,129 @@ import styles from "./MenuAppearance.module.css";
 
 const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
 
-const FONTS      = ["Inter", "Playfair Display", "Lato", "Roboto", "Syne", "DM Sans"];
-const FONT_SIZES = ["small", "medium", "large"];
-const RADII      = ["sharp", "soft", "rounded"];
-const BORDERS    = ["none", "minimal", "full"];
-const CARDS      = ["glass", "solid", "outline", "flat"];
-const HEADERS    = ["centered", "left", "logo-only"];
-const LAYOUTS    = ["grid", "list", "compact"];
-const SPACINGS   = ["compact", "normal", "relaxed"];
-const OPACITIES  = ["subtle", "medium", "strong"];
-const ANIMATIONS = ["none", "fade", "slide"];
+const FONTS = [
+  "DM Sans", "Inter", "Playfair Display", "Lato",
+  "Roboto", "Syne", "Merriweather", "Montserrat",
+];
 
 const DEFAULT_THEME = {
-  primaryColor:      "#000000",
-  accentColor:       "#ffffff",
-  backgroundColor:   "#0a0a0a",
-  textColor:         "#f0f0f0",
-  secondaryBgColor:  "#111111",
-  fontFamily:        "Inter",
-  fontSize:          "medium",
-  borderRadius:      "soft",
-  borderStyle:       "minimal",
-  cardStyle:         "glass",
-  headerStyle:       "centered",
-  layoutMode:        "grid",
-  spacing:           "normal",
-  glassOpacity:      "medium",
-  animationStyle:    "fade",
-  logoUrl:           null,
-  coverImageUrl:     null,
-  showPrices:        true,
-  showDescriptions:  true,
-  showStationBadges: false,
-  showCategoryCount: true,
-  showItemImages:    false,
-  stickyHeader:      true,
-  customCss:         "",
+  // ── Χρώματα ────────────────────────────────────────────────
+  titleColor:       "#F0EBE0",
+  categoryColor:    "#C9A84C",
+  productColor:     "#F0EBE0",
+  priceColor:       "#C9A84C",
+  descColor:        "#7A7268",
+  bgColor:          "#0C0C0D",
+  accentColor:      "#C9A84C",
+  cardBgColor:      "#1A1A1B",
+
+  // ── Γραμματοσειρές ─────────────────────────────────────────
+  titleFont:        "Playfair Display",
+  titleSize:        "2.4rem",
+  titleWeight:      "400",
+  titleSpacing:     "0.18em",
+  titleAlign:       "center",
+
+  categoryFont:     "DM Sans",
+  categorySize:     "1.1rem",
+  categoryWeight:   "400",
+  categorySpacing:  "0.08em",
+  categoryAlign:    "left",
+
+  productFont:      "DM Sans",
+  productSize:      "0.9rem",
+  productWeight:    "400",
+
+  descFont:         "DM Sans",
+  descSize:         "0.76rem",
+
+  priceFont:        "Playfair Display",
+  priceSize:        "0.95rem",
+  priceWeight:      "400",
+
+  // ── Εφέ & Layout ────────────────────────────────────────────
+  layoutMode:       "tabs",       // "tabs" | "accordion"
+  cardStyle:        "flat",       // "flat" | "glass" | "solid" | "outline"
+  spacing:          "normal",     // "compact" | "normal" | "relaxed"
+  animationStyle:   "fade",       // "none" | "fade" | "slide"
+  borderRadius:     "soft",       // "sharp" | "soft" | "rounded"
+  stickyHeader:     true,
+  showPrices:       true,
+  showDescriptions: true,
+  showStationBadges:false,
+
+  customCss: "",
 };
 
+// ─── Accordion Section Component ──────────────────────────────
+function AccordionSection({ id, title, icon, openId, setOpenId, children }) {
+  const isOpen = openId === id;
+  return (
+    <div className={`${styles.accordionItem} ${isOpen ? styles.accordionOpen : ""}`}>
+      <button
+        className={styles.accordionHeader}
+        onClick={() => setOpenId(isOpen ? null : id)}
+      >
+        <span className={styles.accordionIcon}>{icon}</span>
+        <span className={styles.accordionTitle}>{title}</span>
+        <span className={`${styles.accordionChevron} ${isOpen ? styles.accordionChevronOpen : ""}`}>›</span>
+      </button>
+      {isOpen && (
+        <div className={styles.accordionBody}>
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Reusable Controls ─────────────────────────────────────────
+function ColorRow({ label, value, onChange }) {
+  return (
+    <div className={styles.colorRow}>
+      <span className={styles.colorLabel}>{label}</span>
+      <div className={styles.colorRight}>
+        <input type="color" value={value || "#000000"} onChange={e => onChange(e.target.value)} className={styles.colorInput} />
+        <span className={styles.colorHex}>{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function ChipGroup({ label, options, value, onChange }) {
+  return (
+    <div className={styles.controlGroup}>
+      {label && <div className={styles.controlLabel}>{label}</div>}
+      <div className={styles.chipGroup}>
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            className={`${styles.chip} ${value === opt.value ? styles.chipActive : ""}`}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ToggleRow({ label, value, onChange }) {
+  return (
+    <div className={styles.toggleRow}>
+      <span className={styles.toggleLabel}>{label}</span>
+      <button
+        className={`${styles.toggle} ${value ? styles.toggleOn : ""}`}
+        onClick={() => onChange(!value)}
+      >
+        <span className={`${styles.toggleKnob} ${value ? styles.toggleKnobOn : ""}`} />
+      </button>
+    </div>
+  );
+}
+
+// ─── Main Component ────────────────────────────────────────────
 export default function MenuAppearance() {
   const { owner, shops, logout } = useAuth();
   const navigate    = useNavigate();
@@ -52,10 +137,11 @@ export default function MenuAppearance() {
   const currentPlan = owner?.plan || "STANDARD";
   const iframeRef   = useRef(null);
 
-  const [theme, setTheme]   = useState({ ...DEFAULT_THEME, ...shop?.theme });
-  const [saving, setSaving] = useState(false);
-  const [saved,  setSaved]  = useState(false);
-  const [error,  setError]  = useState("");
+  const [theme, setTheme]     = useState({ ...DEFAULT_THEME, ...shop?.theme });
+  const [openId, setOpenId]   = useState("colors"); // πρώτο section ανοιχτό
+  const [saving, setSaving]   = useState(false);
+  const [saved,  setSaved]    = useState(false);
+  const [error,  setError]    = useState("");
 
   const set = (key, val) => setTheme(t => ({ ...t, [key]: val }));
 
@@ -74,10 +160,7 @@ export default function MenuAppearance() {
     try {
       await saveAppearance({ shopId: shop.shop_id, theme });
       setSaved(true);
-      setTimeout(() => {
-        refreshPreview();
-        setSaved(false);
-      }, 800);
+      setTimeout(() => { refreshPreview(); setSaved(false); }, 800);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -87,6 +170,7 @@ export default function MenuAppearance() {
 
   return (
     <div className={layout.layout}>
+      {/* ── SIDEBAR ── */}
       <aside className={layout.sidebar}>
         <div className={layout.sidebarLogo}>QRMenu</div>
         <nav className={layout.nav}>
@@ -112,6 +196,7 @@ export default function MenuAppearance() {
         </div>
       </aside>
 
+      {/* ── MAIN ── */}
       <main className={layout.main}>
         <header className={layout.header}>
           <div>
@@ -129,181 +214,55 @@ export default function MenuAppearance() {
         </header>
 
         <div className={styles.appearanceLayout}>
+
+          {/* ── LEFT: Accordion Controls ── */}
           <div className={styles.controls}>
 
             {/* 1. ΧΡΩΜΑΤΑ */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Χρώματα</div>
-              <div className={styles.colorGrid}>
-                {[
-                  { key: "primaryColor",     label: "Κύριο χρώμα" },
-                  { key: "accentColor",      label: "Accent" },
-                  { key: "backgroundColor",  label: "Φόντο" },
-                  { key: "textColor",        label: "Κείμενο" },
-                  { key: "secondaryBgColor", label: "Φόντο κάρτας" },
-                ].map(c => (
-                  <div key={c.key} className={styles.colorItem}>
-                    <label className={styles.controlLabel}>{c.label}</label>
-                    <div className={styles.colorRow}>
-                      <input type="color" value={theme[c.key] || "#000000"} onChange={e => set(c.key, e.target.value)} className={styles.colorInput} />
-                      <span className={styles.colorHex}>{theme[c.key]}</span>
-                    </div>
-                  </div>
-                ))}
+            <AccordionSection id="colors" title="Επεξεργασία Χρωμάτων" icon="◈" openId={openId} setOpenId={setOpenId}>
+              <div className={styles.colorSection}>
+                <div className={styles.colorGroupLabel}>Κείμενο</div>
+                <ColorRow label="Τίτλος καταστήματος" value={theme.titleColor}    onChange={v => set("titleColor", v)} />
+                <ColorRow label="Κατηγορίες"           value={theme.categoryColor} onChange={v => set("categoryColor", v)} />
+                <ColorRow label="Προϊόντα"             value={theme.productColor}  onChange={v => set("productColor", v)} />
+                <ColorRow label="Τιμές"                value={theme.priceColor}    onChange={v => set("priceColor", v)} />
+                <ColorRow label="Περιγραφή"            value={theme.descColor}     onChange={v => set("descColor", v)} />
+                <div className={styles.colorGroupLabel} style={{ marginTop:16 }}>Φόντο & Accent</div>
+                <ColorRow label="Φόντο σελίδας"        value={theme.bgColor}       onChange={v => set("bgColor", v)} />
+                <ColorRow label="Φόντο κάρτας"         value={theme.cardBgColor}   onChange={v => set("cardBgColor", v)} />
+                <ColorRow label="Accent / Διακοσμητικά" value={theme.accentColor}  onChange={v => set("accentColor", v)} />
               </div>
-            </section>
+            </AccordionSection>
 
-            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΑ */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Γραμματοσειρά</div>
-              <div className={styles.chipGroup}>
-                {FONTS.map(f => (
-                  <button key={f} className={`${styles.chip} ${theme.fontFamily === f ? styles.chipActive : ""}`}
-                    onClick={() => set("fontFamily", f)} style={{ fontFamily: f }}>
-                    {f}
-                  </button>
-                ))}
+            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΕΣ — Sprint C2 */}
+            <AccordionSection id="typography" title="Επεξεργασία Γραμματοσειράς" icon="Aa" openId={openId} setOpenId={setOpenId}>
+              <div className={styles.comingSoon}>
+                <span className={styles.comingSoonIcon}>⊕</span>
+                <span>Έρχεται στο Sprint C2</span>
               </div>
-              <div className={styles.subLabel}>Μέγεθος κειμένου</div>
-              <div className={styles.chipGroup}>
-                {FONT_SIZES.map(s => (
-                  <button key={s} className={`${styles.chip} ${theme.fontSize === s ? styles.chipActive : ""}`}
-                    onClick={() => set("fontSize", s)}>
-                    {s === "small" ? "Μικρό" : s === "medium" ? "Μεσαίο" : "Μεγάλο"}
-                  </button>
-                ))}
-              </div>
-            </section>
+            </AccordionSection>
 
-            {/* 3. ΓΩΝΙΕΣ & BORDERS */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Γωνίες & Borders</div>
-              <div className={styles.subLabel}>Στυλ γωνιών</div>
-              <div className={styles.chipGroup}>
-                {RADII.map(r => (
-                  <button key={r} className={`${styles.chip} ${theme.borderRadius === r ? styles.chipActive : ""}`}
-                    onClick={() => set("borderRadius", r)}>
-                    {r === "sharp" ? "Αιχμηρές" : r === "soft" ? "Απαλές" : "Στρογγυλές"}
-                  </button>
-                ))}
+            {/* 3. ΕΦΕ — Sprint C3 */}
+            <AccordionSection id="effects" title="Επεξεργασία Εφέ" icon="⟳" openId={openId} setOpenId={setOpenId}>
+              <div className={styles.comingSoon}>
+                <span className={styles.comingSoonIcon}>⊕</span>
+                <span>Έρχεται στο Sprint C3</span>
               </div>
-              <div className={styles.subLabel}>Περίγραμμα</div>
-              <div className={styles.chipGroup}>
-                {BORDERS.map(b => (
-                  <button key={b} className={`${styles.chip} ${theme.borderStyle === b ? styles.chipActive : ""}`}
-                    onClick={() => set("borderStyle", b)}>
-                    {b === "none" ? "Κανένα" : b === "minimal" ? "Minimal" : "Full"}
-                  </button>
-                ))}
-              </div>
-            </section>
+            </AccordionSection>
 
-            {/* 4. ΣΤΥΛ ΚΑΡΤΑΣ */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Στυλ Κάρτας Προϊόντος</div>
-              <div className={styles.chipGroup}>
-                {CARDS.map(c => (
-                  <button key={c} className={`${styles.chip} ${theme.cardStyle === c ? styles.chipActive : ""}`}
-                    onClick={() => set("cardStyle", c)}>
-                    {c.charAt(0).toUpperCase() + c.slice(1)}
-                  </button>
-                ))}
-              </div>
-              <div className={styles.subLabel}>Αδιαφάνεια glass effect</div>
-              <div className={styles.chipGroup}>
-                {OPACITIES.map(o => (
-                  <button key={o} className={`${styles.chip} ${theme.glassOpacity === o ? styles.chipActive : ""}`}
-                    onClick={() => set("glassOpacity", o)}>
-                    {o === "subtle" ? "Ελαφρύ" : o === "medium" ? "Μεσαίο" : "Έντονο"}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* 5. HEADER & LAYOUT */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Header & Layout</div>
-              <div className={styles.subLabel}>Στυλ header</div>
-              <div className={styles.chipGroup}>
-                {HEADERS.map(h => (
-                  <button key={h} className={`${styles.chip} ${theme.headerStyle === h ? styles.chipActive : ""}`}
-                    onClick={() => set("headerStyle", h)}>
-                    {h === "centered" ? "Κεντραρισμένο" : h === "left" ? "Αριστερά" : "Logo only"}
-                  </button>
-                ))}
-              </div>
-              <div className={styles.subLabel}>Layout μενού</div>
-              <div className={styles.chipGroup}>
-                {LAYOUTS.map(l => (
-                  <button key={l} className={`${styles.chip} ${theme.layoutMode === l ? styles.chipActive : ""}`}
-                    onClick={() => set("layoutMode", l)}>
-                    {l === "grid" ? "Grid" : l === "list" ? "Λίστα" : "Compact"}
-                  </button>
-                ))}
-              </div>
-              <div className={styles.subLabel}>Spacing</div>
-              <div className={styles.chipGroup}>
-                {SPACINGS.map(s => (
-                  <button key={s} className={`${styles.chip} ${theme.spacing === s ? styles.chipActive : ""}`}
-                    onClick={() => set("spacing", s)}>
-                    {s === "compact" ? "Compact" : s === "normal" ? "Normal" : "Relaxed"}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* 6. ANIMATIONS */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Animations</div>
-              <div className={styles.chipGroup}>
-                {ANIMATIONS.map(a => (
-                  <button key={a} className={`${styles.chip} ${theme.animationStyle === a ? styles.chipActive : ""}`}
-                    onClick={() => set("animationStyle", a)}>
-                    {a === "none" ? "Καμία" : a === "fade" ? "Fade" : "Slide"}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* 7. ΟΡΑΤΟΤΗΤΑ */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>Ορατότητα Στοιχείων</div>
-              {[
-                { key: "showPrices",        label: "Εμφάνιση τιμών" },
-                { key: "showDescriptions",  label: "Εμφάνιση περιγραφών" },
-                { key: "showStationBadges", label: "Badge σταθμού (Bar/Kitchen)" },
-                { key: "showCategoryCount", label: "Αριθμός προϊόντων ανά κατηγορία" },
-                { key: "showItemImages",    label: "Εικόνες προϊόντων" },
-                { key: "stickyHeader",      label: "Sticky header κατά το scroll" },
-              ].map(t => (
-                <div key={t.key} className={styles.toggleRow}>
-                  <span className={styles.toggleLabel}>{t.label}</span>
-                  <button
-                    className={`${styles.toggle} ${theme[t.key] ? styles.toggleOn : ""}`}
-                    onClick={() => set(t.key, !theme[t.key])}
-                  >
-                    <span className={`${styles.toggleKnob} ${theme[t.key] ? styles.toggleKnobOn : ""}`} />
-                  </button>
-                </div>
-              ))}
-            </section>
-
-            {/* 8. CUSTOM CSS */}
-            <section className={styles.section}>
-              <div className={styles.sectionTitle}>
-                Custom CSS <span className={styles.advancedBadge}>Advanced</span>
-              </div>
+            {/* Custom CSS */}
+            <AccordionSection id="css" title="Custom CSS" icon="{}" openId={openId} setOpenId={setOpenId}>
               <p style={{ fontSize:"0.76rem", color:"var(--text-muted)", marginBottom:10, fontWeight:300 }}>
-                Χρησιμοποίησε τις CSS variables: <code style={{ fontSize:"0.72rem" }}>--theme-primary</code>, <code style={{ fontSize:"0.72rem" }}>--theme-accent</code>, <code style={{ fontSize:"0.72rem" }}>--theme-bg</code>, <code style={{ fontSize:"0.72rem" }}>--theme-text</code>
+                Διαθέσιμες variables: <code style={{ fontSize:"0.72rem" }}>--theme-bg</code>, <code style={{ fontSize:"0.72rem" }}>--theme-accent</code>, <code style={{ fontSize:"0.72rem" }}>--theme-title-color</code> κ.α.
               </p>
               <textarea
                 className={styles.cssInput}
                 value={theme.customCss}
                 onChange={e => set("customCss", e.target.value)}
-                placeholder={"/* Παράδειγμα:\n.menu-item { border-radius: 12px; }\n.category-title { letter-spacing: 0.2em; } */"}
+                placeholder={"/* Παράδειγμα:\n.shop-name { letter-spacing: 0.3em; }\n.pprice { font-style: italic; } */"}
                 rows={7}
               />
-            </section>
+            </AccordionSection>
 
           </div>
 
@@ -339,6 +298,7 @@ export default function MenuAppearance() {
               </div>
             )}
           </div>
+
         </div>
       </main>
     </div>
