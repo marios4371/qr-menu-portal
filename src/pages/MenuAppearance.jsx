@@ -234,12 +234,194 @@ export default function MenuAppearance() {
               </div>
             </AccordionSection>
 
-            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΕΣ — Sprint C2 */}
+            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΕΣ */}
             <AccordionSection id="typography" title="Επεξεργασία Γραμματοσειράς" icon="Aa" openId={openId} setOpenId={setOpenId}>
-              <div className={styles.comingSoon}>
-                <span className={styles.comingSoonIcon}>⊕</span>
-                <span>Έρχεται στο Sprint C2</span>
+
+              {/* ── Τίτλος Καταστήματος ── */}
+              <div className={styles.typographyGroup}>
+                <div className={styles.typographyGroupLabel}>Τίτλος Καταστήματος</div>
+
+                <ChipGroup
+                  label="Γραμματοσειρά"
+                  options={FONTS.map(f => ({ value: f, label: f }))}
+                  value={theme.titleFont}
+                  onChange={v => set("titleFont", v)}
+                />
+
+                <div className={styles.typoRow}>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Μέγεθος</div>
+                    <select className={styles.typoSelect} value={theme.titleSize} onChange={e => set("titleSize", e.target.value)}>
+                      {["1.4rem","1.8rem","2rem","2.4rem","2.8rem","3rem","3.5rem"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Βάρος</div>
+                    <select className={styles.typoSelect} value={theme.titleWeight} onChange={e => set("titleWeight", e.target.value)}>
+                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Spacing</div>
+                    <select className={styles.typoSelect} value={theme.titleSpacing} onChange={e => set("titleSpacing", e.target.value)}>
+                      {[["0","Κανένα"],["0.05em","Μικρό"],["0.10em","Μεσαίο"],["0.18em","Μεγάλο"],["0.28em","Extra"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <ChipGroup
+                  label="Στοίχιση"
+                  options={[
+                    { value: "left",   label: "← Αριστερά" },
+                    { value: "center", label: "↔ Κέντρο" },
+                    { value: "right",  label: "→ Δεξιά" },
+                  ]}
+                  value={theme.titleAlign}
+                  onChange={v => set("titleAlign", v)}
+                />
               </div>
+
+              {/* ── Κατηγορίες ── */}
+              <div className={styles.typographyGroup}>
+                <div className={styles.typographyGroupLabel}>Κατηγορίες</div>
+
+                <ChipGroup
+                  label="Γραμματοσειρά"
+                  options={FONTS.map(f => ({ value: f, label: f }))}
+                  value={theme.categoryFont}
+                  onChange={v => set("categoryFont", v)}
+                />
+
+                <div className={styles.typoRow}>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Μέγεθος</div>
+                    <select className={styles.typoSelect} value={theme.categorySize} onChange={e => set("categorySize", e.target.value)}>
+                      {["0.75rem","0.85rem","0.95rem","1.0rem","1.1rem","1.25rem","1.4rem"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Βάρος</div>
+                    <select className={styles.typoSelect} value={theme.categoryWeight} onChange={e => set("categoryWeight", e.target.value)}>
+                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Spacing</div>
+                    <select className={styles.typoSelect} value={theme.categorySpacing} onChange={e => set("categorySpacing", e.target.value)}>
+                      {[["0","Κανένα"],["0.05em","Μικρό"],["0.08em","Μεσαίο"],["0.14em","Μεγάλο"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <ChipGroup
+                  label="Στοίχιση"
+                  options={[
+                    { value: "left",   label: "← Αριστερά" },
+                    { value: "center", label: "↔ Κέντρο" },
+                    { value: "right",  label: "→ Δεξιά" },
+                  ]}
+                  value={theme.categoryAlign}
+                  onChange={v => set("categoryAlign", v)}
+                />
+              </div>
+
+              {/* ── Προϊόντα ── */}
+              <div className={styles.typographyGroup}>
+                <div className={styles.typographyGroupLabel}>Προϊόντα</div>
+
+                <ChipGroup
+                  label="Γραμματοσειρά"
+                  options={FONTS.map(f => ({ value: f, label: f }))}
+                  value={theme.productFont}
+                  onChange={v => set("productFont", v)}
+                />
+
+                <div className={styles.typoRow}>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Μέγεθος</div>
+                    <select className={styles.typoSelect} value={theme.productSize} onChange={e => set("productSize", e.target.value)}>
+                      {["0.75rem","0.82rem","0.88rem","0.9rem","0.95rem","1.0rem","1.05rem"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Βάρος</div>
+                    <select className={styles.typoSelect} value={theme.productWeight} onChange={e => set("productWeight", e.target.value)}>
+                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Περιγραφή ── */}
+              <div className={styles.typographyGroup}>
+                <div className={styles.typographyGroupLabel}>Περιγραφή</div>
+
+                <ChipGroup
+                  label="Γραμματοσειρά"
+                  options={FONTS.map(f => ({ value: f, label: f }))}
+                  value={theme.descFont}
+                  onChange={v => set("descFont", v)}
+                />
+
+                <div className={styles.typoRow}>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Μέγεθος</div>
+                    <select className={styles.typoSelect} value={theme.descSize} onChange={e => set("descSize", e.target.value)}>
+                      {["0.68rem","0.72rem","0.76rem","0.82rem","0.88rem"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Τιμή ── */}
+              <div className={styles.typographyGroup} style={{ borderBottom: "none", paddingBottom: 0 }}>
+                <div className={styles.typographyGroupLabel}>Τιμή</div>
+
+                <ChipGroup
+                  label="Γραμματοσειρά"
+                  options={FONTS.map(f => ({ value: f, label: f }))}
+                  value={theme.priceFont}
+                  onChange={v => set("priceFont", v)}
+                />
+
+                <div className={styles.typoRow}>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Μέγεθος</div>
+                    <select className={styles.typoSelect} value={theme.priceSize} onChange={e => set("priceSize", e.target.value)}>
+                      {["0.78rem","0.85rem","0.9rem","0.95rem","1.0rem","1.1rem"].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={styles.typoField}>
+                    <div className={styles.controlLabel}>Βάρος</div>
+                    <select className={styles.typoSelect} value={theme.priceWeight} onChange={e => set("priceWeight", e.target.value)}>
+                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
+                        <option key={v} value={v}>{l}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
             </AccordionSection>
 
             {/* 3. ΕΦΕ — Sprint C3 */}

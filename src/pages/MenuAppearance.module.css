@@ -320,3 +320,47 @@
   .appearanceLayout { grid-template-columns: 1fr; }
   .preview { position: static; }
 }
+
+/* ── Typography ── */
+.typographyGroup {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.typographyGroup:first-child { padding-top: 8px; }
+
+.typographyGroupLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.typoRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.typoField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.typoSelect {
+  font-family: var(--font);
+  font-size: 0.78rem;
+  color: var(--text-sub);
+  background: var(--bg);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  cursor: pointer;
+  outline: none;
+  width: 100%;
+}
+.typoSelect:focus { border-color: var(--border-hi); }
