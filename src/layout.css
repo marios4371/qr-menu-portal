@@ -1,0 +1,113 @@
+/* ──────────────────────────────────────────────────────────────
+   QRMenu — Layout & Sidebar styles
+   ────────────────────────────────────────────────────────────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  min-height: 0;
+}
+
+.sb {
+  background: rgba(232,223,200,0.5);
+  border-right: 1px solid var(--border-md);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  align-self: start;
+  overflow-y: auto;
+}
+
+.sb-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-head .brand { font-family: var(--font); font-weight: 600; color: var(--text); font-size: 0.95rem; letter-spacing: -0.01em; }
+.sb-head .brand .dot { display: inline-block; width: 7px; height: 7px; background: var(--accent); border-radius: 50%; margin-right: 8px; vertical-align: middle; transform: translateY(-1px); }
+
+.sb-section { display: flex; flex-direction: column; gap: 2px; }
+.sb-grow { flex: 1; }
+.sb-nav { display: flex; flex-direction: column; gap: 1px; }
+
+.sb-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: transparent; border: none; cursor: pointer;
+  font-family: var(--font); font-size: 0.86rem; color: var(--text-sub);
+  text-align: left; border-radius: var(--radius);
+  transition: background 0.13s, color 0.13s;
+  position: relative;
+}
+.sb-item:hover { background: rgba(26,22,16,0.04); color: var(--text); }
+.sb-item.on { background: var(--accent); color: var(--bg); }
+.sb-item.locked { opacity: 0.45; cursor: not-allowed; }
+.sb-tick { position: absolute; right: 10px; width: 4px; height: 4px; background: var(--bg); border-radius: 50%; }
+
+.sb-foot { gap: 12px; padding-top: 14px; border-top: 1px solid var(--border); }
+
+.sb-plan {
+  width: 100%;
+  padding: 12px 12px 10px;
+  background: rgba(255,255,255,0.4);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-family: var(--font);
+  text-align: left;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: background 0.13s, border-color 0.13s;
+}
+.sb-plan:hover { background: rgba(255,255,255,0.6); border-color: var(--border-hi); }
+.sb-plan-row { display: flex; align-items: center; justify-content: space-between; }
+.sb-plan-name { font-size: 0.92rem; font-weight: 600; color: var(--text); letter-spacing: 0.04em; font-family: var(--font-mono); }
+.sb-plan-bar { display: flex; gap: 3px; }
+.sb-plan-seg { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+.sb-plan-seg.on { background: var(--accent); }
+
+.sb-owner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 4px;
+}
+.sb-avatar {
+  width: 32px; height: 32px;
+  background: var(--accent); color: var(--bg);
+  font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius); flex-shrink: 0; letter-spacing: 0.04em;
+}
+.sb-owner-text { min-width: 0; flex: 1; overflow: hidden; }
+.sb-owner-name { font-size: 0.82rem; color: var(--text); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-owner-mail { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-mono); }
+
+.sb-logout { width: 100%; justify-content: center; }
+
+/* Page main */
+.page-main {
+  padding: 32px 40px 60px;
+  max-width: 100%;
+  min-width: 0;
+}
+.page-main.narrow { max-width: 1100px; margin: 0 auto; }
+
+/* PageHeader */
+.ph {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap; margin-bottom: 32px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border);
+}
+.ph-left { min-width: 0; flex: 1; }
+.ph-title { font-family: var(--font); font-size: 1.9rem; font-weight: 500; letter-spacing: -0.035em; color: var(--text); line-height: 1.05; }
+.ph-sub { color: var(--text-sub); font-size: 0.92rem; font-weight: 300; margin-top: 6px; max-width: 540px; line-height: 1.55; }
+.ph-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sb { display: none; }
+  .page-main { padding: 20px 18px 40px; }
+}

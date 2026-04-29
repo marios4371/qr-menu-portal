@@ -1,488 +1,248 @@
-import { useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
-import { saveAppearance } from "../services/api";
-import layout from "./Layout.module.css";
-import styles from "./MenuAppearance.module.css";
-
-const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
-
-const FONTS = [
-  "DM Sans", "Inter", "Playfair Display", "Lato",
-  "Roboto", "Syne", "Merriweather", "Montserrat",
-];
+// src/pages/MenuAppearance.jsx
+import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { Icon, PageHeader } from '../components/Primitives';
+import { saveAppearance } from '../services/api';
 
 const DEFAULT_THEME = {
-  // ── Χρώματα ────────────────────────────────────────────────
-  titleColor:       "#F0EBE0",
-  categoryColor:    "#C9A84C",
-  productColor:     "#F0EBE0",
-  priceColor:       "#C9A84C",
-  descColor:        "#7A7268",
-  bgColor:          "#0C0C0D",
-  accentColor:      "#C9A84C",
-  cardBgColor:      "#1A1A1B",
-
-  // ── Γραμματοσειρές ─────────────────────────────────────────
-  titleFont:        "Playfair Display",
-  titleSize:        "2.4rem",
-  titleWeight:      "400",
-  titleSpacing:     "0.18em",
-  titleAlign:       "center",
-
-  categoryFont:     "DM Sans",
-  categorySize:     "1.1rem",
-  categoryWeight:   "400",
-  categorySpacing:  "0.08em",
-  categoryAlign:    "left",
-
-  productFont:      "DM Sans",
-  productSize:      "0.9rem",
-  productWeight:    "400",
-
-  descFont:         "DM Sans",
-  descSize:         "0.76rem",
-
-  priceFont:        "Playfair Display",
-  priceSize:        "0.95rem",
-  priceWeight:      "400",
-
-  // ── Εφέ & Layout ────────────────────────────────────────────
-  layoutMode:       "tabs",       // "tabs" | "accordion"
-  cardStyle:        "flat",       // "flat" | "glass" | "solid" | "outline"
-  spacing:          "normal",     // "compact" | "normal" | "relaxed"
-  animationStyle:   "fade",       // "none" | "fade" | "slide"
-  borderRadius:     "soft",       // "sharp" | "soft" | "rounded"
-  stickyHeader:     true,
-  showPrices:       true,
-  showDescriptions: true,
-  showStationBadges:false,
-
-  customCss: "",
+  bgColor: '#0E0D0B', textColor: '#F5EDD8', accentColor: '#C9A56C',
+  cardColor: '#181612', borderColor: '#2A251D',
+  fontFamily: 'Geist', headingFont: 'Instrument Serif',
+  fontSize: 'medium', density: 'comfortable', borderRadius: 'soft',
+  layout: 'list', showImages: true,
 };
 
-// ─── Accordion Section Component ──────────────────────────────
-function AccordionSection({ id, title, icon, openId, setOpenId, children }) {
-  const isOpen = openId === id;
-  return (
-    <div className={`${styles.accordionItem} ${isOpen ? styles.accordionOpen : ""}`}>
-      <button
-        className={styles.accordionHeader}
-        onClick={() => setOpenId(isOpen ? null : id)}
-      >
-        <span className={styles.accordionIcon}>{icon}</span>
-        <span className={styles.accordionTitle}>{title}</span>
-        <span className={`${styles.accordionChevron} ${isOpen ? styles.accordionChevronOpen : ""}`}>›</span>
-      </button>
-      {isOpen && (
-        <div className={styles.accordionBody}>
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
+const FONT_OPTIONS = ['Geist','Inter','Helvetica Neue','Georgia','Instrument Serif','JetBrains Mono'];
+const DENSITY_OPTIONS = [{value:'compact',label:'Compact'},{value:'comfortable',label:'Άνετο'},{value:'spacious',label:'Ευρύ'}];
+const RADIUS_OPTIONS  = [{value:'sharp',label:'Sharp'},{value:'soft',label:'Soft'},{value:'round',label:'Round'}];
+const LAYOUT_OPTIONS  = [{value:'list',label:'List'},{value:'grid',label:'Grid'},{value:'cards',label:'Cards'}];
+const SIZE_OPTIONS    = [{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}];
 
-// ─── Reusable Controls ─────────────────────────────────────────
-function ColorRow({ label, value, onChange }) {
-  return (
-    <div className={styles.colorRow}>
-      <span className={styles.colorLabel}>{label}</span>
-      <div className={styles.colorRight}>
-        <input type="color" value={value || "#000000"} onChange={e => onChange(e.target.value)} className={styles.colorInput} />
-        <span className={styles.colorHex}>{value}</span>
-      </div>
-    </div>
-  );
-}
-
-function ChipGroup({ label, options, value, onChange }) {
-  return (
-    <div className={styles.controlGroup}>
-      {label && <div className={styles.controlLabel}>{label}</div>}
-      <div className={styles.chipGroup}>
-        {options.map(opt => (
-          <button
-            key={opt.value}
-            className={`${styles.chip} ${value === opt.value ? styles.chipActive : ""}`}
-            onClick={() => onChange(opt.value)}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ToggleRow({ label, value, onChange }) {
-  return (
-    <div className={styles.toggleRow}>
-      <span className={styles.toggleLabel}>{label}</span>
-      <button
-        className={`${styles.toggle} ${value ? styles.toggleOn : ""}`}
-        onClick={() => onChange(!value)}
-      >
-        <span className={`${styles.toggleKnob} ${value ? styles.toggleKnobOn : ""}`} />
-      </button>
-    </div>
-  );
-}
-
-// ─── Main Component ────────────────────────────────────────────
 export default function MenuAppearance() {
-  const { owner, shops, logout } = useAuth();
-  const navigate    = useNavigate();
-  const shop        = shops?.[0];
-  const currentPlan = owner?.plan || "STANDARD";
-  const iframeRef   = useRef(null);
+  const { owner, shops, setShops } = useAuth();
+  const [currentShopId, setCurrentShopId] = useState(shops[0]?.shop_id ?? null);
+  const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
 
-  const [theme, setTheme]     = useState({ ...DEFAULT_THEME, ...shop?.theme });
-  const [openId, setOpenId]   = useState("colors"); // πρώτο section ανοιχτό
-  const [saving, setSaving]   = useState(false);
-  const [saved,  setSaved]    = useState(false);
-  const [error,  setError]    = useState("");
+  const [theme, setTheme] = useState({ ...DEFAULT_THEME, ...(shop?.theme || {}) });
+  const [openSection, setOpenSection] = useState('colors');
+  const [savedToast, setSavedToast] = useState(false);
+  const [saveErr, setSaveErr] = useState('');
 
-  const set = (key, val) => setTheme(t => ({ ...t, [key]: val }));
+  useEffect(() => {
+    if (shop) setTheme({ ...DEFAULT_THEME, ...(shop.theme || {}) });
+  }, [shop?.shop_id]);
 
-  const menuPreviewUrl = shop?.shopSlug
-    ? `${LAMBDA_URL}/menu/${shop.shopSlug}`
-    : null;
+  const set = (k, v) => setTheme(t => ({ ...t, [k]: v }));
 
-  const refreshPreview = () => {
-    if (iframeRef.current && menuPreviewUrl) {
-      iframeRef.current.src = `${menuPreviewUrl}?t=${Date.now()}`;
-    }
-  };
-
-  const handleSave = async () => {
-    setSaving(true); setError(""); setSaved(false);
+  const save = async () => {
+    setSaveErr('');
     try {
       await saveAppearance({ shopId: shop.shop_id, theme });
-      setSaved(true);
-      setTimeout(() => { refreshPreview(); setSaved(false); }, 800);
+      setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, theme } : s));
+      setSavedToast(true);
+      setTimeout(() => setSavedToast(false), 1800);
     } catch (e) {
-      setError(e.message);
-    } finally {
-      setSaving(false);
+      setSaveErr(e.message || 'Σφάλμα αποθήκευσης');
     }
   };
 
-  return (
-    <div className={layout.layout}>
-      {/* ── SIDEBAR ── */}
-      <aside className={layout.sidebar}>
-        <div className={layout.sidebarLogo}>QRMenu</div>
-        <nav className={layout.nav}>
-          <Link to="/dashboard"       className={layout.navItem}>Αρχική</Link>
-          <Link to="/menu-editor"     className={layout.navItem}>Επεξεργασία Μενού</Link>
-          <Link to="/menu-appearance" className={`${layout.navItem} ${layout.navActive}`}>Εμφάνιση Μενού</Link>
-        </nav>
-        <div className={layout.sidebarFooter}>
-          <button className={styles.upgradePlanBtn} onClick={() => navigate("/dashboard")}>
-            <span className={styles.upgradePlanLabel}>{currentPlan} Πακέτο</span>
-            <span className={styles.upgradePlanArrow}>↑ Αναβάθμιση</span>
-          </button>
-          <div className={layout.ownerInfo}>
-            <div className={layout.ownerAvatar}>{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
-            <div className={layout.ownerInfoText}>
-              <div className={layout.ownerName}>{owner?.firstName} {owner?.lastName}</div>
-              <div className={layout.ownerEmail}>{owner?.email}</div>
-            </div>
-          </div>
-          <button className="btn btn-ghost btn-sm" onClick={() => { logout(); navigate("/login"); }} style={{ width:"100%", marginTop:12 }}>
-            Αποσύνδεση
-          </button>
-        </div>
-      </aside>
+  const sections = [
+    { id:'colors',     icon:'color',  title:'Χρώματα',          meta: theme.accentColor },
+    { id:'typography', icon:'type',   title:'Γραμματοσειρά',    meta: theme.fontFamily },
+    { id:'layout',     icon:'grid',   title:'Διάταξη',          meta: theme.layout },
+    { id:'spacing',    icon:'menu',   title:'Spacing & Border', meta: `${theme.density} · ${theme.borderRadius}` },
+  ];
 
-      {/* ── MAIN ── */}
-      <main className={layout.main}>
-        <header className={layout.header}>
-          <div>
-            <h1 className={layout.heading}>Εμφάνιση Μενού</h1>
-            <p className={layout.headingSub}>Προσαρμόστε την εμφάνιση του μενού σας.</p>
-          </div>
-          <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-            {saved && <span className="msg-success" style={{ fontSize:13 }}>Αποθηκεύτηκε ✓</span>}
-            {error && <span className="msg-error"   style={{ fontSize:13 }}>{error}</span>}
-            <button className="btn btn-ghost btn-sm" onClick={refreshPreview}>↻ Preview</button>
-            <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={saving}>
-              {saving ? <span className="spinner" /> : "Αποθήκευση"}
-            </button>
-          </div>
-        </header>
+  const right = (
+    <>
+      <div className="dash-shop-select-wrap">
+        <span className="dash-shop-select-lab">SHOP</span>
+        <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
+          {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
+        </select>
+      </div>
+      <button className="btn btn-ghost btn-sm" onClick={() => setTheme(DEFAULT_THEME)}>Επαναφορά</button>
+      <button className="btn btn-primary btn-sm" onClick={save}><Icon name="save" size={12}/>Αποθήκευση</button>
+    </>
+  );
 
-        <div className={styles.appearanceLayout}>
+  if (!shop) return null;
 
-          {/* ── LEFT: Accordion Controls ── */}
-          <div className={styles.controls}>
-
-            {/* 1. ΧΡΩΜΑΤΑ */}
-            <AccordionSection id="colors" title="Επεξεργασία Χρωμάτων" icon="◈" openId={openId} setOpenId={setOpenId}>
-              <div className={styles.colorSection}>
-                <div className={styles.colorGroupLabel}>Κείμενο</div>
-                <ColorRow label="Τίτλος καταστήματος" value={theme.titleColor}    onChange={v => set("titleColor", v)} />
-                <ColorRow label="Κατηγορίες"           value={theme.categoryColor} onChange={v => set("categoryColor", v)} />
-                <ColorRow label="Προϊόντα"             value={theme.productColor}  onChange={v => set("productColor", v)} />
-                <ColorRow label="Τιμές"                value={theme.priceColor}    onChange={v => set("priceColor", v)} />
-                <ColorRow label="Περιγραφή"            value={theme.descColor}     onChange={v => set("descColor", v)} />
-                <div className={styles.colorGroupLabel} style={{ marginTop:16 }}>Φόντο & Accent</div>
-                <ColorRow label="Φόντο σελίδας"        value={theme.bgColor}       onChange={v => set("bgColor", v)} />
-                <ColorRow label="Φόντο κάρτας"         value={theme.cardBgColor}   onChange={v => set("cardBgColor", v)} />
-                <ColorRow label="Accent / Διακοσμητικά" value={theme.accentColor}  onChange={v => set("accentColor", v)} />
-              </div>
-            </AccordionSection>
-
-            {/* 2. ΓΡΑΜΜΑΤΟΣΕΙΡΕΣ */}
-            <AccordionSection id="typography" title="Επεξεργασία Γραμματοσειράς" icon="Aa" openId={openId} setOpenId={setOpenId}>
-
-              {/* ── Τίτλος Καταστήματος ── */}
-              <div className={styles.typographyGroup}>
-                <div className={styles.typographyGroupLabel}>Τίτλος Καταστήματος</div>
-
-                <ChipGroup
-                  label="Γραμματοσειρά"
-                  options={FONTS.map(f => ({ value: f, label: f }))}
-                  value={theme.titleFont}
-                  onChange={v => set("titleFont", v)}
-                />
-
-                <div className={styles.typoRow}>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Μέγεθος</div>
-                    <select className={styles.typoSelect} value={theme.titleSize} onChange={e => set("titleSize", e.target.value)}>
-                      {["1.4rem","1.8rem","2rem","2.4rem","2.8rem","3rem","3.5rem"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Βάρος</div>
-                    <select className={styles.typoSelect} value={theme.titleWeight} onChange={e => set("titleWeight", e.target.value)}>
-                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Spacing</div>
-                    <select className={styles.typoSelect} value={theme.titleSpacing} onChange={e => set("titleSpacing", e.target.value)}>
-                      {[["0","Κανένα"],["0.05em","Μικρό"],["0.10em","Μεσαίο"],["0.18em","Μεγάλο"],["0.28em","Extra"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <ChipGroup
-                  label="Στοίχιση"
-                  options={[
-                    { value: "left",   label: "← Αριστερά" },
-                    { value: "center", label: "↔ Κέντρο" },
-                    { value: "right",  label: "→ Δεξιά" },
-                  ]}
-                  value={theme.titleAlign}
-                  onChange={v => set("titleAlign", v)}
-                />
-              </div>
-
-              {/* ── Κατηγορίες ── */}
-              <div className={styles.typographyGroup}>
-                <div className={styles.typographyGroupLabel}>Κατηγορίες</div>
-
-                <ChipGroup
-                  label="Γραμματοσειρά"
-                  options={FONTS.map(f => ({ value: f, label: f }))}
-                  value={theme.categoryFont}
-                  onChange={v => set("categoryFont", v)}
-                />
-
-                <div className={styles.typoRow}>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Μέγεθος</div>
-                    <select className={styles.typoSelect} value={theme.categorySize} onChange={e => set("categorySize", e.target.value)}>
-                      {["0.75rem","0.85rem","0.95rem","1.0rem","1.1rem","1.25rem","1.4rem"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Βάρος</div>
-                    <select className={styles.typoSelect} value={theme.categoryWeight} onChange={e => set("categoryWeight", e.target.value)}>
-                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Spacing</div>
-                    <select className={styles.typoSelect} value={theme.categorySpacing} onChange={e => set("categorySpacing", e.target.value)}>
-                      {[["0","Κανένα"],["0.05em","Μικρό"],["0.08em","Μεσαίο"],["0.14em","Μεγάλο"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <ChipGroup
-                  label="Στοίχιση"
-                  options={[
-                    { value: "left",   label: "← Αριστερά" },
-                    { value: "center", label: "↔ Κέντρο" },
-                    { value: "right",  label: "→ Δεξιά" },
-                  ]}
-                  value={theme.categoryAlign}
-                  onChange={v => set("categoryAlign", v)}
-                />
-              </div>
-
-              {/* ── Προϊόντα ── */}
-              <div className={styles.typographyGroup}>
-                <div className={styles.typographyGroupLabel}>Προϊόντα</div>
-
-                <ChipGroup
-                  label="Γραμματοσειρά"
-                  options={FONTS.map(f => ({ value: f, label: f }))}
-                  value={theme.productFont}
-                  onChange={v => set("productFont", v)}
-                />
-
-                <div className={styles.typoRow}>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Μέγεθος</div>
-                    <select className={styles.typoSelect} value={theme.productSize} onChange={e => set("productSize", e.target.value)}>
-                      {["0.75rem","0.82rem","0.88rem","0.9rem","0.95rem","1.0rem","1.05rem"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Βάρος</div>
-                    <select className={styles.typoSelect} value={theme.productWeight} onChange={e => set("productWeight", e.target.value)}>
-                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Περιγραφή ── */}
-              <div className={styles.typographyGroup}>
-                <div className={styles.typographyGroupLabel}>Περιγραφή</div>
-
-                <ChipGroup
-                  label="Γραμματοσειρά"
-                  options={FONTS.map(f => ({ value: f, label: f }))}
-                  value={theme.descFont}
-                  onChange={v => set("descFont", v)}
-                />
-
-                <div className={styles.typoRow}>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Μέγεθος</div>
-                    <select className={styles.typoSelect} value={theme.descSize} onChange={e => set("descSize", e.target.value)}>
-                      {["0.68rem","0.72rem","0.76rem","0.82rem","0.88rem"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Τιμή ── */}
-              <div className={styles.typographyGroup} style={{ borderBottom: "none", paddingBottom: 0 }}>
-                <div className={styles.typographyGroupLabel}>Τιμή</div>
-
-                <ChipGroup
-                  label="Γραμματοσειρά"
-                  options={FONTS.map(f => ({ value: f, label: f }))}
-                  value={theme.priceFont}
-                  onChange={v => set("priceFont", v)}
-                />
-
-                <div className={styles.typoRow}>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Μέγεθος</div>
-                    <select className={styles.typoSelect} value={theme.priceSize} onChange={e => set("priceSize", e.target.value)}>
-                      {["0.78rem","0.85rem","0.9rem","0.95rem","1.0rem","1.1rem"].map(s => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={styles.typoField}>
-                    <div className={styles.controlLabel}>Βάρος</div>
-                    <select className={styles.typoSelect} value={theme.priceWeight} onChange={e => set("priceWeight", e.target.value)}>
-                      {[["300","Light"],["400","Regular"],["500","Medium"],["600","SemiBold"],["700","Bold"]].map(([v,l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-            </AccordionSection>
-
-            {/* 3. ΕΦΕ — Sprint C3 */}
-            <AccordionSection id="effects" title="Επεξεργασία Εφέ" icon="⟳" openId={openId} setOpenId={setOpenId}>
-              <div className={styles.comingSoon}>
-                <span className={styles.comingSoonIcon}>⊕</span>
-                <span>Έρχεται στο Sprint C3</span>
-              </div>
-            </AccordionSection>
-
-            {/* Custom CSS */}
-            <AccordionSection id="css" title="Custom CSS" icon="{}" openId={openId} setOpenId={setOpenId}>
-              <p style={{ fontSize:"0.76rem", color:"var(--text-muted)", marginBottom:10, fontWeight:300 }}>
-                Διαθέσιμες variables: <code style={{ fontSize:"0.72rem" }}>--theme-bg</code>, <code style={{ fontSize:"0.72rem" }}>--theme-accent</code>, <code style={{ fontSize:"0.72rem" }}>--theme-title-color</code> κ.α.
-              </p>
-              <textarea
-                className={styles.cssInput}
-                value={theme.customCss}
-                onChange={e => set("customCss", e.target.value)}
-                placeholder={"/* Παράδειγμα:\n.shop-name { letter-spacing: 0.3em; }\n.pprice { font-style: italic; } */"}
-                rows={7}
-              />
-            </AccordionSection>
-
-          </div>
-
-          {/* ── RIGHT: Live Preview ── */}
-          <div className={styles.preview}>
-            <div className={styles.previewLabelRow}>
-              <span className={styles.previewLabel}>Live Preview</span>
-              <div style={{ display:"flex", gap:8, alignItems:"center" }}>
-                <span style={{ fontSize:"0.7rem", color:"var(--text-muted)" }}>
-                  Αποθήκευσε για να δεις τις αλλαγές
-                </span>
-                {menuPreviewUrl && (
-                  <a href={menuPreviewUrl} target="_blank" rel="noopener noreferrer"
-                    className="btn btn-ghost btn-sm" style={{ fontSize:"0.72rem", padding:"4px 10px" }}>
-                    Άνοιγμα ↗
-                  </a>
-                )}
-              </div>
-            </div>
-            {menuPreviewUrl ? (
-              <div className={styles.iframeWrapper}>
-                <iframe
-                  ref={iframeRef}
-                  src={menuPreviewUrl}
-                  className={styles.previewIframe}
-                  title="Menu Preview"
-                  sandbox="allow-scripts allow-same-origin"
-                />
-              </div>
-            ) : (
-              <div className={styles.previewEmpty}>
-                <p>Δεν υπάρχει διαθέσιμο URL μενού.</p>
-              </div>
-            )}
-          </div>
-
+  if (owner?.plan === 'STANDARD') {
+    return (
+      <main className="page-main">
+        <PageHeader kicker="03 / Εμφάνιση" title="Εμφάνιση μενού" sub="Διαθέσιμο σε Premium και Exclusive πλάνα."/>
+        <div className="me-empty">
+          <Icon name="lock" size={28}/>
+          <span>Η προσαρμογή εμφάνισης απαιτεί <strong>Premium</strong> ή <strong>Exclusive</strong> πλάνο.</span>
         </div>
       </main>
+    );
+  }
+
+  return (
+    <main className="page-main">
+      <PageHeader
+        kicker="03 / Εμφάνιση Μενού"
+        title="Σχεδίαση μενού"
+        sub="Παραμετροποιήστε το ψηφιακό σας μενού. Οι αλλαγές εμφανίζονται live στην προεπισκόπηση."
+        right={right}
+      />
+
+      {saveErr && <div className="msg-error" style={{marginBottom:14}}>{saveErr}</div>}
+
+      <div className="ma-layout">
+        <div className="ma-acc">
+          {sections.map(sec => {
+            const isOpen = openSection === sec.id;
+            return (
+              <div key={sec.id} className={`ma-acc-item ${isOpen ? 'open' : ''} ticks`}>
+                <button className="ma-acc-head" onClick={() => setOpenSection(isOpen ? null : sec.id)}>
+                  <span className="ma-acc-icon"><Icon name={sec.icon} size={14}/></span>
+                  <span className="ma-acc-title">{sec.title}</span>
+                  <span className="ma-acc-meta">{sec.meta}</span>
+                  <span className={`ma-acc-chev ${isOpen ? 'on' : ''}`}><Icon name="chev-r" size={12}/></span>
+                </button>
+                {isOpen && (
+                  <div className="ma-acc-body fade-up">
+                    {sec.id === 'colors' && (
+                      <>
+                        <ColorRow label="Φόντο"         value={theme.bgColor}     onChange={v => set('bgColor', v)}/>
+                        <ColorRow label="Κείμενο"       value={theme.textColor}   onChange={v => set('textColor', v)}/>
+                        <ColorRow label="Accent"        value={theme.accentColor} onChange={v => set('accentColor', v)}/>
+                        <ColorRow label="Κάρτες"        value={theme.cardColor}   onChange={v => set('cardColor', v)}/>
+                        <ColorRow label="Διαχωριστικά"  value={theme.borderColor} onChange={v => set('borderColor', v)}/>
+                      </>
+                    )}
+                    {sec.id === 'typography' && (
+                      <>
+                        <div className="ma-group">
+                          <span className="ma-group-lab">FONT BODY</span>
+                          <div className="chip-group">
+                            {FONT_OPTIONS.map(f => <button key={f} className={`chip ${theme.fontFamily === f ? 'on' : ''}`} onClick={() => set('fontFamily', f)} style={{fontFamily:f}}>{f}</button>)}
+                          </div>
+                        </div>
+                        <div className="ma-group">
+                          <span className="ma-group-lab">FONT HEADINGS</span>
+                          <div className="chip-group">
+                            {FONT_OPTIONS.map(f => <button key={f} className={`chip ${theme.headingFont === f ? 'on' : ''}`} onClick={() => set('headingFont', f)} style={{fontFamily:f}}>{f}</button>)}
+                          </div>
+                        </div>
+                        <div className="ma-group">
+                          <span className="ma-group-lab">SIZE</span>
+                          <div className="chip-group">
+                            {SIZE_OPTIONS.map(o => <button key={o.value} className={`chip ${theme.fontSize === o.value ? 'on' : ''}`} onClick={() => set('fontSize', o.value)}>{o.label}</button>)}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {sec.id === 'layout' && (
+                      <div className="ma-group">
+                        <span className="ma-group-lab">LAYOUT</span>
+                        <div className="chip-group">
+                          {LAYOUT_OPTIONS.map(o => <button key={o.value} className={`chip ${theme.layout === o.value ? 'on' : ''}`} onClick={() => set('layout', o.value)}>{o.label}</button>)}
+                        </div>
+                        <span className="ma-group-lab" style={{marginTop:6}}>IMAGES</span>
+                        <div className="chip-group">
+                          <button className={`chip ${theme.showImages ? 'on' : ''}`} onClick={() => set('showImages', true)}>Εμφάνιση</button>
+                          <button className={`chip ${!theme.showImages ? 'on' : ''}`} onClick={() => set('showImages', false)}>Απόκρυψη</button>
+                        </div>
+                      </div>
+                    )}
+                    {sec.id === 'spacing' && (
+                      <>
+                        <div className="ma-group">
+                          <span className="ma-group-lab">DENSITY</span>
+                          <div className="chip-group">
+                            {DENSITY_OPTIONS.map(o => <button key={o.value} className={`chip ${theme.density === o.value ? 'on' : ''}`} onClick={() => set('density', o.value)}>{o.label}</button>)}
+                          </div>
+                        </div>
+                        <div className="ma-group">
+                          <span className="ma-group-lab">BORDER RADIUS</span>
+                          <div className="chip-group">
+                            {RADIUS_OPTIONS.map(o => <button key={o.value} className={`chip ${theme.borderRadius === o.value ? 'on' : ''}`} onClick={() => set('borderRadius', o.value)}>{o.label}</button>)}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="ma-preview">
+          <div className="ma-preview-head">
+            <span className="ma-preview-lab">/ LIVE PREVIEW</span>
+            <span className="tag tag-live"><span className="tag-dot"/>SYNCED</span>
+          </div>
+          <div className="ma-preview-frame">
+            <PreviewMenu theme={theme} shop={shop}/>
+          </div>
+        </div>
+      </div>
+
+      {savedToast && <div className="toast">✓ Το θέμα αποθηκεύτηκε</div>}
+    </main>
+  );
+}
+
+function ColorRow({ label, value, onChange }) {
+  return (
+    <div className="ma-color-row">
+      <span className="ma-color-lab">{label}</span>
+      <div className="ma-color-r">
+        <span className="ma-color-hex">{value.toUpperCase()}</span>
+        <input type="color" value={value} onChange={e => onChange(e.target.value)} className="ma-color-input"/>
+      </div>
+    </div>
+  );
+}
+
+function PreviewMenu({ theme, shop }) {
+  const radiusMap = { sharp: 0, soft: 6, round: 14 };
+  const sizeMap   = { small: 13, medium: 14, large: 16 };
+  const padMap    = { compact: 6, comfortable: 10, spacious: 14 };
+  const radius = radiusMap[theme.borderRadius];
+  const size   = sizeMap[theme.fontSize];
+  const pad    = padMap[theme.density];
+
+  return (
+    <div className="ma-preview-inner" style={{
+      background: theme.bgColor, color: theme.textColor,
+      fontFamily: theme.fontFamily, fontSize: size, borderRadius: radius,
+    }}>
+      <div className="ma-preview-shop" style={{borderColor: theme.borderColor}}>
+        <div style={{fontFamily: theme.headingFont, fontSize: size+6, lineHeight:1.1, color: theme.textColor}}>{shop.shopName}</div>
+        <div style={{fontSize: size-4, opacity:0.6, marginTop:4, letterSpacing:'0.06em', textTransform:'uppercase'}}>{shop.businessType}</div>
+      </div>
+      <div style={{display:'flex', flexDirection:'column', gap: pad+4, overflowY:'auto'}}>
+        {(shop.menu || []).slice(0,3).map(cat => (
+          <div key={cat.id} className="ma-preview-cat">
+            <div className="ma-preview-cat-h" style={{
+              fontFamily: theme.headingFont, color: theme.accentColor,
+              borderColor: theme.borderColor, fontSize: size-1, letterSpacing:'0.02em',
+            }}>{cat.name}</div>
+            {(cat.items || []).slice(0,3).map(p => (
+              <div key={p.id} className="ma-preview-prod" style={{
+                background: theme.layout === 'cards' ? theme.cardColor : 'transparent',
+                padding: theme.layout === 'cards' ? `${pad}px ${pad+2}px` : `${pad-2}px 0`,
+                borderRadius: theme.layout === 'cards' ? radius : 0,
+                border: theme.layout === 'cards' ? `1px solid ${theme.borderColor}` : 'none',
+              }}>
+                <div style={{flex:1}}>
+                  <div className="nm" style={{fontSize:size-2}}>{p.name}</div>
+                  {p.description && <div className="ds" style={{fontSize:size-4}}>{p.description}</div>}
+                </div>
+                <span className="pr" style={{fontSize:size-2, color:theme.accentColor, fontWeight:500}}>
+                  {Number(p.price).toFixed(2).replace('.',',')}€
+                </span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

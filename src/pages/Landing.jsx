@@ -1,219 +1,158 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import styles from "./Landing.module.css";
-
-const SERVICES = [
-  { title: "Ψηφιακό Μενού QR", desc: "Σάρωση QR — το μενού εμφανίζεται αμέσως στο κινητό. Χωρίς app, χωρίς εγγραφή πελάτη." },
-  { title: "Real-time Παραγγελίες", desc: "Κάθε παραγγελία φτάνει στον σωστό σταθμό — Bar ή Kitchen — σε δευτερόλεπτα." },
-  { title: "Staff Dashboard", desc: "Web-based dashboard για σερβιτόρους, αναλήψεις τραπεζιών και πληρωμές." },
-  { title: "Σύστημα Κρατήσεων", desc: "Διαχείριση κρατήσεων απευθείας από το portal. Διαθέσιμο στο Premium πλάνο." },
-  { title: "Analytics & Αναφορές", desc: "Στατιστικά παραγγελιών, κορυφαία προϊόντα, έσοδα ανά μήνα. Exclusive πλάνο." },
-  { title: "Διαχείριση Κάβας", desc: "Αποθεματολόγιο και μαζικές παραγγελίες προς προμηθευτές με export αρχείου." },
-];
-
-const PLANS = [
-  {
-    value: "STANDARD", name: "Standard", price: "12,00", period: "€ / μήνα",
-    features: ["1 κατάστημα", "Universal digital menu", "Επεξεργασία μενού", "URL: /menu/{slug}", "Email support"],
-    cta: "Ξεκινήστε", highlight: false,
-  },
-  {
-    value: "PREMIUM", name: "Premium", price: "16,70", period: "€ / μήνα",
-    features: ["Όλα του Standard", "Gallery templates", "Προσαρμογή εμφάνισης", "Φωτογραφίες προϊόντων", "Παραγγελιοληψία (toggle)", "Πίνακες παραγγελιών", "Κρατήσεις"],
-    cta: "Επιλέξτε Premium", highlight: true,
-  },
-  {
-    value: "EXCLUSIVE", name: "Exclusive", price: "25,00", period: "€ / μήνα",
-    features: ["Όλα του Premium", "Business analytics", "Κάβα & απόθεμα", "Μαζικές παραγγελίες", "Export CSV", "Dedicated support"],
-    cta: "Επιλέξτε Exclusive", highlight: false,
-  },
-];
+// src/pages/Landing.jsx
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Icon } from '../components/Primitives';
+import { SERVICES, PLANS } from '../constants';
 
 export default function Landing() {
-  const [scrolled, setScrolled]           = useState(false);
-  const [activeSection, setActiveSection] = useState(null);
-
-  // Nav becomes solid after scrolling past hero
-  // Disable browser scroll restoration + scroll to top on mount
-  useEffect(() => {
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    window.scrollTo(0, 0);
-  }, []);
+  const navigate = useNavigate();
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState('hero');
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Track which section is in viewport → underline active nav link
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) setActiveSection(entry.target.id);
-        });
-      },
-      { rootMargin: "-40% 0px -55% 0px" } // trigger when section is in middle 5% of viewport
-    );
-    ["about", "services", "plans"].forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
+    const onScroll = () => {
+      setScrolled(window.scrollY > 30);
+      for (const id of ['hero', 'services', 'plans']) {
+        const el = document.getElementById(id);
+        if (el) {
+          const r = el.getBoundingClientRect();
+          if (r.top <= 120 && r.bottom > 120) { setActive(id); break; }
+        }
+      }
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
-    if (!el) return;
-    // Offset for fixed nav height (~60px)
-    const top = el.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top, behavior: "smooth" });
+    if (el) window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
   };
 
   return (
-    <div className={styles.page}>
-
-      {/* ── NAV ── */}
-      <nav className={`${styles.nav} ${scrolled ? styles.navBorder : ""}`}>
-        <div className={`container ${styles.navInner}`}>
-
-          <button className={styles.logo} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            QRMenu
-          </button>
-
-          <div className={styles.navLinks}>
-            {[
-              { id: "about",    label: "Σχετικά με εμάς" },
-              { id: "services", label: "Υπηρεσίες" },
-              { id: "plans",    label: "Πακέτα" },
-            ].map(({ id, label }) => (
-              <button
-                key={id}
-                className={`${styles.navLink} ${activeSection === id ? styles.navLinkActive : ""}`}
-                onClick={() => scrollTo(id)}
-              >
-                {label}
-              </button>
-            ))}
+    <div className="lp">
+      <nav className={`lp-nav ${scrolled ? 'solid' : ''}`}>
+        <div className="container lp-nav-inner">
+          <button className="lp-logo" onClick={() => scrollTo('hero')}><span className="dot"/>QRMenu</button>
+          <div className="lp-nav-links">
+            <button className={`lp-nav-link ${active === 'services' ? 'active' : ''}`} onClick={() => scrollTo('services')}>Πλατφόρμα</button>
+            <button className={`lp-nav-link ${active === 'plans' ? 'active' : ''}`} onClick={() => scrollTo('plans')}>Πλάνα</button>
           </div>
-
-          <div className={styles.navActions}>
-            <Link to="/login"    state={{ from: "nav" }} className="btn btn-ghost btn-sm">Σύνδεση</Link>
-            <Link to="/register" state={{ from: "nav" }} className="btn btn-primary btn-sm">Ξεκινήστε Δωρεάν</Link>
+          <div className="lp-nav-actions">
+            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>Σύνδεση</button>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/register')}>Ξεκινήστε <Icon name="arrow" size={12}/></button>
           </div>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section className={styles.hero}>
+      <section id="hero" className="lp-hero">
         <div className="container">
-          <p className={styles.eyebrow}>Ψηφιακή παραγγελιοληψία για επιχειρήσεις εστίασης</p>
-          <h1 className={styles.headline}>
-            Το μενού σας,<br />
-            <span className={styles.headlineLight}>παντού και πάντα.</span>
-          </h1>
-          <p className={styles.sub}>
-            Από το QR code στο τραπέζι μέχρι την κουζίνα και το bar —
-            χωρίς εγκατάσταση, χωρίς συντήρηση, χωρίς κόστος ανά παραγγελία.
-          </p>
-          <div className={styles.heroCta}>
-            <Link to="/register" state={{ from: null }} className="btn btn-primary btn-lg">
-              Δημιουργία λογαριασμού
-            </Link>
-            <Link to="/login" state={{ from: null }} className={styles.heroLink}>Σύνδεση →</Link>
-          </div>
-        </div>
-
-      </section>
-
-      {/* ── ABOUT ── */}
-      <section id="about" className={styles.section}>
-        <div className="container">
-          <p className={styles.eyebrow}>Σχετικά με εμάς</p>
-          <h2 className={styles.sectionTitle}>Φτιαγμένο για την εστίαση.</h2>
-          <p className={styles.sectionIntro}>
-            Το QRMenu είναι μια B2B2C πλατφόρμα που γεφυρώνει την εμπειρία του πελάτη
-            με την επιχειρησιακή λειτουργία. Serverless αρχιτεκτονική, μηδέν idle κόστος,
-            real-time routing από το τραπέζι στον σωστό σταθμό παρασκευής.
-          </p>
-          <div className={styles.aboutCards}>
-            {[
-              ["Serverless αρχιτεκτονική", "100% AWS. Αυτόματη κλιμάκωση, μηδέν συντήρηση, χωρίς σταθερό κόστος υποδομής."],
-              ["Multi-tenant SaaS", "Κάθε επιχείρηση έχει το δικό της URL, μενού και ρυθμίσεις. Πλήρης απομόνωση δεδομένων."],
-              ["Real-time routing", "Κάθε προϊόν γνωρίζει πού πηγαίνει. Άμεση ειδοποίηση στον σωστό σταθμό — Bar ή Kitchen."],
-            ].map(([title, desc], i) => (
-              <div key={i} className={styles.infoCard}>
-                <span className={styles.infoNum}>0{i+1}</span>
-                <div className={styles.infoTitle}>{title}</div>
-                <div className={styles.infoDesc}>{desc}</div>
+          <div className="lp-hero-grid">
+            <div>
+              <div className="lp-eyebrow">QR/01 — Restaurant Operations</div>
+              <h1 className="lp-headline">
+                Παραγγελίες <em>χωρίς τριβή.</em><br/>
+                Από το QR στο τραπέζι, στην κουζίνα.
+              </h1>
+              <p className="lp-sub">
+                Πλατφόρμα ψηφιακού μενού & παραγγελιών για εστιατόρια, καφέ και bars.
+                Φτιάξτε το μενού, βάλτε QR στο τραπέζι, παρακολουθήστε real-time κίνηση.
+              </p>
+              <div className="lp-cta">
+                <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Δοκιμάστε δωρεάν 30 μέρες</button>
+                <button className="lp-cta-link" onClick={() => scrollTo('services')}>Δείτε τι κάνει →</button>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
 
-      {/* ── SERVICES ── */}
-      <section id="services" className={styles.section}>
-        <div className="container">
-          <p className={styles.eyebrow}>Υπηρεσίες</p>
-          <h2 className={styles.sectionTitle}>Ό,τι χρειάζεται η επιχείρησή σας.</h2>
-          <div className={styles.infoCards}>
-            {SERVICES.map((s, i) => (
-              <div key={i} className={styles.infoCard}>
-                <span className={styles.infoNum}>0{i+1}</span>
-                <div className={styles.infoTitle}>{s.title}</div>
-                <div className={styles.infoDesc}>{s.desc}</div>
+            <div className="lp-hero-card ticks">
+              <div className="lp-hero-card-bar">
+                <span className="lp-dot live"/><span className="lp-path">/api/orders/live</span>
+                <span className="lp-method">STREAM</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── PLANS ── */}
-      <section id="plans" className={styles.section}>
-        <div className="container">
-          <p className={styles.eyebrow}>Πακέτα</p>
-          <h2 className={styles.sectionTitle}>Απλή τιμολόγηση.</h2>
-          <p className={styles.sectionIntro}>
-            Κανένα ποσοστό ανά παραγγελία. Σταθερή μηνιαία συνδρομή.
-          </p>
-          <div className={styles.plansGrid}>
-            {PLANS.map((p) => (
-              <div key={p.name} className={`${styles.planCard} ${p.highlight ? styles.planCardDark : ""}`}>
-                {p.highlight && <div className={styles.planTag}>Δημοφιλές</div>}
-                <div className={styles.planHeader}>
-                  <span className={styles.planName}>{p.name}</span>
-                  <div className={styles.planPrice}>
-                    <span className={styles.planAmount}>{p.price}</span>
-                    <span className={styles.planPeriod}>{p.period}</span>
+              <div className="lp-feed">
+                {[
+                  { time:'14:32:08', route:'BAR',     item:'Espresso × 2',      price:'4,00€' },
+                  { time:'14:32:14', route:'KITCHEN',  item:'Σουβλάκι χοιρινό',  price:'3,20€' },
+                  { time:'14:32:21', route:'KITCHEN',  item:'Χωριάτικη',          price:'7,50€' },
+                  { time:'14:32:29', route:'BAR',      item:'Μύθος 500ml × 3',   price:'10,50€' },
+                ].map((r, i) => (
+                  <div key={i} className="lp-feed-row">
+                    <span className="lp-time">{r.time}</span>
+                    <span className={`lp-route ${r.route === 'BAR' ? 'bar' : 'kit'}`}>{r.route}</span>
+                    <span className="lp-item">{r.item}</span>
+                    <span className="lp-price">{r.price}</span>
                   </div>
+                ))}
+              </div>
+              <div className="lp-feed-stats">
+                {[['428','orders / day'],['2.4s','avg latency'],['99.9','% uptime']].map(([n,l]) => (
+                  <div key={l} className="lp-feed-stat">
+                    <div className="lp-feed-stat-num">{n}</div>
+                    <div className="lp-feed-stat-lab">{l}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="services" className="lp-section">
+        <div className="container">
+          <div className="lp-section-head">
+            <div><div className="hr-tick"><span style={{flex:'none'}}>02 / Πλατφόρμα</span></div></div>
+            <div>
+              <h2 className="lp-section-title">Όλα όσα χρειάζεστε για να <em>τρέχει</em> το μαγαζί.</h2>
+              <p className="lp-section-intro">Ένα ολοκληρωμένο σύστημα: ψηφιακό μενού, παραγγελιοληψία, παρακολούθηση σταθμών, κρατήσεις, αναφορές.</p>
+            </div>
+          </div>
+          <div className="lp-info-grid">
+            {SERVICES.map((s, i) => (
+              <div key={i} className="lp-info-card">
+                <div className="lp-info-num">{String(i+1).padStart(2,'0')} / {String(SERVICES.length).padStart(2,'0')}</div>
+                <div className="lp-info-title">{s.title}</div>
+                <div className="lp-info-desc">{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="plans" className="lp-section">
+        <div className="container">
+          <div className="lp-section-head">
+            <div><div className="hr-tick"><span style={{flex:'none'}}>03 / Πλάνα</span></div></div>
+            <div>
+              <h2 className="lp-section-title">Διαλέξτε το πλάνο που <em>ταιριάζει</em>.</h2>
+              <p className="lp-section-intro">Όλα τα πλάνα περιλαμβάνουν δωρεάν δοκιμή 30 ημερών. Αλλαγή ή ακύρωση οποτεδήποτε.</p>
+            </div>
+          </div>
+          <div className="lp-plans-grid">
+            {PLANS.map(p => (
+              <div key={p.value} className={`lp-plan ${p.highlight ? 'dark' : ''} ticks`}>
+                {p.highlight && <span className="lp-plan-tag">RECOMMENDED</span>}
+                <div className="lp-plan-name">{p.name}</div>
+                <div className="lp-plan-price">
+                  <span className="lp-plan-amount">{p.price}</span>
+                  <span className="lp-plan-period">{p.period}</span>
                 </div>
-                <ul className={styles.planFeatures}>
-                  {p.features.map((f) => (
-                    <li key={f} className={styles.planFeature}>
-                      <span className={styles.planCheck}>—</span>{f}
-                    </li>
+                <ul className="lp-plan-features">
+                  {p.features.map((f, j) => (
+                    <li key={j} className="lp-plan-feat"><span className="lp-plan-check">→</span><span>{f}</span></li>
                   ))}
                 </ul>
-                <Link to="/register" state={{ from: "plans", selectedPlan: p.value }} className={`btn btn-full ${p.highlight ? "btn-primary" : "btn-ghost"}`} style={{ marginTop: "auto" }}>
-                  {p.cta}
-                </Link>
+                <button className={`btn ${p.highlight ? 'btn-ghost' : 'btn-primary'} btn-full`}
+                        onClick={() => navigate('/register')}>{p.cta}</button>
               </div>
             ))}
           </div>
-          <p className={styles.customNote}>
-            Χρειάζεστε custom λύση;{" "}
-            <span className={styles.customLink}>Επικοινωνήστε μαζί μας</span>
-          </p>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className={styles.footer}>
-        <div className="container">
-          <button className={styles.footerLogo} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>QRMenu</button>
-          <span className={styles.footerCopy}>© 2026</span>
+      <footer className="lp-foot">
+        <div className="container lp-foot-inner">
+          <span className="lp-foot-meta">© 2026 QRMenu — eu-central-1</span>
+          <span className="lp-foot-meta">v1.4.0 · made in Athens</span>
         </div>
       </footer>
     </div>

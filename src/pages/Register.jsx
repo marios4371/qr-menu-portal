@@ -1,330 +1,179 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { register, checkSlug, getOwnerDashboard } from "../services/api";
-import { useAuth } from "../hooks/useAuth";
-import styles from "./Auth.module.css";
+// src/pages/Register.jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Icon } from '../components/Primitives';
+import { useAuth } from '../hooks/useAuth';
+import { register } from '../services/api';
+import { PLANS, BUSINESS_TYPES } from '../constants';
 
-// Eye icons
-const EyeOpen = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-    <circle cx="12" cy="12" r="3"/>
-  </svg>
-);
-const EyeClosed = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-    <line x1="1" y1="1" x2="23" y2="23"/>
-  </svg>
-);
-
-const STEPS = ["Επιλογή πλάνου", "Στοιχεία λογαριασμού", "Το μαγαζί σας", "Επιβεβαίωση"];
-
-const BUSINESS_TYPES = [
-  { value: "RESTAURANT", label: "Εστιατόριο" },
-  { value: "CAFE",       label: "Καφέ" },
-  { value: "BAR",        label: "Bar" },
-];
-
-const PLANS = [
-  {
-    value: "STANDARD",
-    name: "Standard",
-    price: "12,00 € / μήνα",
-    features: ["Digital menu", "Επεξεργασία μενού", "URL: /menu/{slug}"],
-  },
-  {
-    value: "PREMIUM",
-    name: "Premium",
-    price: "16,70 € / μήνα",
-    features: ["Όλα του Standard", "Παραγγελιοληψία", "Κρατήσεις", "Gallery templates"],
-  },
-  {
-    value: "EXCLUSIVE",
-    name: "Exclusive",
-    price: "25,00 € / μήνα",
-    features: ["Όλα του Premium", "Analytics", "Κάβα & απόθεμα", "Export CSV"],
-  },
-];
-
-function useDebounce(value, delay) {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(t);
-  }, [value, delay]);
-  return debounced;
-}
-
-function previewSlug(name) {
-  return name.toLowerCase().normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim().replace(/\s+/g, "-").replace(/-+/g, "-").substring(0, 50);
-}
+const slugify = (s) => s.toLowerCase()
+  .replace(/[άα]/g,'a').replace(/[έε]/g,'e').replace(/[ήη]/g,'i')
+  .replace(/[ίιϊΐ]/g,'i').replace(/[όο]/g,'o').replace(/[ύυϋΰ]/g,'y')
+  .replace(/[ώω]/g,'o').replace(/[β]/g,'b').replace(/[γ]/g,'g')
+  .replace(/[δ]/g,'d').replace(/[ζ]/g,'z').replace(/[θ]/g,'th')
+  .replace(/[κ]/g,'k').replace(/[λ]/g,'l').replace(/[μ]/g,'m')
+  .replace(/[ν]/g,'n').replace(/[ξ]/g,'x').replace(/[π]/g,'p')
+  .replace(/[ρ]/g,'r').replace(/[σς]/g,'s').replace(/[τ]/g,'t')
+  .replace(/[φ]/g,'f').replace(/[χ]/g,'ch').replace(/[ψ]/g,'ps')
+  .replace(/[^a-z0-9-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
 
 export default function Register() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const { login }  = useAuth();
-  const handleBack = () => navigate(-1);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState({
+    firstName:'', lastName:'', email:'', password:'', confirmPassword:'',
+    shopName:'', shopSlug:'', businessType:'RESTAURANT', plan:'PREMIUM',
+  });
+  const [showPw, setShowPw] = useState(false);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  // If coming from a plan card in Landing, pre-select that plan and skip to step 1
-  const preselectedPlan = location.state?.selectedPlan ?? null;
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const slugFromName = slugify(form.shopName);
+  const slugOk = slugFromName.length >= 3;
 
-  const [step, setStep]       = useState(() => preselectedPlan ? 1 : 0);
-  const [error, setError]     = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Step 0 — Plan
-  const [selectedPlan, setSelectedPlan] = useState(() => preselectedPlan);
-
-  // Step 1 — Account
-  const [firstName, setFirstName]         = useState("");
-  const [lastName, setLastName]           = useState("");
-  const [email, setEmail]                 = useState("");
-  const [password, setPassword]           = useState("");
-  const [confirmPassword, setConfirmPass] = useState("");
-  const [showPass, setShowPass]           = useState(false);
-  const [showConfirm, setShowConfirm]     = useState(false);
-  const [businessType, setBusinessType]   = useState("RESTAURANT");
-
-  // Step 2 — Shop
-  const [shopName, setShopName]         = useState("");
-  const [slugAvailable, setSlugAvail]   = useState(null);
-  const [slugChecking, setSlugChecking] = useState(false);
-
-  const slug          = previewSlug(shopName);
-  const debouncedSlug = useDebounce(slug, 450);
-
-  useEffect(() => {
-    if (debouncedSlug.length < 2) { setSlugAvail(null); return; }
-    setSlugChecking(true);
-    checkSlug(debouncedSlug)
-      .then(res => setSlugAvail(res.available))
-      .catch(() => setSlugAvail(null))
-      .finally(() => setSlugChecking(false));
-  }, [debouncedSlug]);
-
-  const validateStep0 = () => {
-    if (!selectedPlan) return "Παρακαλώ επιλέξτε ένα πλάνο για να συνεχίσετε.";
-    return null;
-  };
-  const validateStep1 = () => {
-    if (!firstName.trim() || !lastName.trim()) return "Συμπληρώστε όνομα και επώνυμο";
-    if (!email.trim() || !email.includes("@")) return "Εισάγετε έγκυρο email";
-    if (password.length < 8) return "Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες";
-    if (password !== confirmPassword) return "Οι κωδικοί δεν ταιριάζουν";
-    return null;
-  };
-  const validateStep2 = () => {
-    if (!shopName.trim()) return "Εισάγετε όνομα μαγαζιού";
-    if (slug.length < 2)  return "Το όνομα μαγαζιού είναι πολύ κοντό";
-    if (slugAvailable === false) return "Αυτό το URL χρησιμοποιείται ήδη.";
-    return null;
-  };
-
-  const validators = [validateStep0, validateStep1, validateStep2, () => null];
-
-  const nextStep = () => {
-    setError("");
-    const err = validators[step]();
-    if (err) { setError(err); return; }
+  const next = () => {
+    setErr('');
+    if (step === 1) {
+      if (!form.firstName || !form.lastName) return setErr('Συμπληρώστε όνομα και επώνυμο');
+      if (!form.email.includes('@')) return setErr('Μη έγκυρο email');
+      if (form.password.length < 6) return setErr('Κωδικός τουλάχιστον 6 χαρακτήρες');
+      if (form.password !== form.confirmPassword) return setErr('Οι κωδικοί δεν ταιριάζουν');
+    }
+    if (step === 2) {
+      if (!form.shopName || form.shopName.length < 2) return setErr('Συμπληρώστε το όνομα του καταστήματος');
+      if (!slugOk) return setErr('Μη έγκυρο όνομα — διορθώστε');
+      set('shopSlug', slugFromName);
+    }
     setStep(s => s + 1);
   };
+  const back = () => { setErr(''); setStep(s => Math.max(1, s - 1)); };
 
-  const handleSubmit = async () => {
-    setError(""); setLoading(true);
+  const submit = async () => {
+    setBusy(true);
+    setErr('');
     try {
-      const data = await register({
-        firstName, lastName, email, password,
-        businessType, shopName,
-        plan: selectedPlan,           // ← περνάμε το επιλεγμένο πλάνο
+      const { token, owner, shops } = await register({
+        firstName: form.firstName, lastName: form.lastName,
+        email: form.email, password: form.password,
+        businessType: form.businessType, shopName: form.shopName, plan: form.plan,
       });
-      localStorage.setItem("qrmenu_token", data.token);
-      const dashData = await getOwnerDashboard();
-      login(data.token, dashData.owner, dashData.shops);
-      navigate("/dashboard");
-    } catch (e) {
-      setError(e.message);
-      localStorage.removeItem("qrmenu_token");
-      setStep(0);
+      login(token, owner, shops || []);
+      navigate('/dashboard');
+    } catch (error) {
+      setErr(error.message || 'Σφάλμα εγγραφής');
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   };
 
-  const planInfo = PLANS.find(p => p.value === selectedPlan);
+  const STEP_LABELS = ['Λογαριασμός', 'Κατάστημα', 'Πλάνο'];
 
   return (
-    <div className={styles.page}>
-      <button onClick={handleBack} className={styles.back}>←</button>
+    <div className="auth">
+      <button className="auth-back" onClick={() => navigate('/')}><Icon name="back" size={12}/>Πίσω</button>
+      <div className="auth-card wide ticks">
+        <div className="auth-logo"><span className="dot"/>QRMenu</div>
 
-      <div className={styles.card} style={{ maxWidth: step === 0 ? 720 : 490 }}>
-        <span className={styles.logo}>QRMenu</span>
-
-        {/* Step indicator */}
-        <div className={styles.steps}>
-          {STEPS.map((label, i) => (
-            <div key={i} className={`${styles.stepItem} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
-              <div className={styles.stepCircle}>{i < step ? "✓" : i + 1}</div>
-              <span className={styles.stepLabel}>{label}</span>
-              {i < STEPS.length - 1 && <div className={styles.stepLine} />}
-            </div>
-          ))}
+        <div className="auth-steps">
+          {STEP_LABELS.map((lab, i) => {
+            const n = i + 1;
+            const cls = step === n ? 'active' : step > n ? 'done' : '';
+            return (
+              <>
+                <div key={n} className={`auth-step ${cls}`}>
+                  <div className="auth-step-circle">{step > n ? <Icon name="check" size={11}/> : n}</div>
+                </div>
+                {n < STEP_LABELS.length && <div key={`line-${n}`} className="auth-step-line"/>}
+              </>
+            );
+          })}
         </div>
 
-        <hr className="divider" />
+        <h1 className="auth-title">
+          {step === 1 ? 'Φτιάξτε λογαριασμό.' : step === 2 ? 'Στοιχεία καταστήματος.' : 'Επιλέξτε πλάνο.'}
+        </h1>
+        <p className="auth-sub">
+          {step === 1 && 'Στοιχεία ιδιοκτήτη. Θα τα χρησιμοποιείτε για σύνδεση.'}
+          {step === 2 && 'Όνομα και τύπος επιχείρησης — εμφανίζονται στο μενού.'}
+          {step === 3 && 'Δωρεάν 30 μέρες. Ακύρωση οποτεδήποτε.'}
+        </p>
 
-        {/* ── Step 0: Plan selection ── */}
-        {step === 0 && (
-          <div className="fade-up">
-            <h2 className={styles.title}>Επιλέξτε πλάνο</h2>
-            <p className={styles.sub}>Μπορείτε να αλλάξετε πλάνο οποιαδήποτε στιγμή από το dashboard σας.</p>
-
-            <div className={styles.planGrid}>
-              {PLANS.map((p) => (
-                <button
-                  key={p.value}
-                  type="button"
-                  className={`${styles.planCard} ${selectedPlan === p.value ? styles.planCardSelected : ""}`}
-                  onClick={() => { setSelectedPlan(p.value); setError(""); }}
-                >
-                  <div className={styles.planCardName}>{p.name}</div>
-                  <div className={styles.planCardPrice}>{p.price}</div>
-                  <ul className={styles.planCardFeatures}>
-                    {p.features.map(f => (
-                      <li key={f} className={styles.planCardFeature}>
-                        <span className={styles.planCardCheck}>—</span>{f}
-                      </li>
-                    ))}
-                  </ul>
-                </button>
-              ))}
+        {step === 1 && (
+          <div className="fade-up" style={{display:'flex', flexDirection:'column', gap:12}}>
+            <div className="auth-formgrid">
+              <div className="form-group"><label>ΟΝΟΜΑ</label><input value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="Νίκος"/></div>
+              <div className="form-group"><label>ΕΠΩΝΥΜΟ</label><input value={form.lastName} onChange={e => set('lastName', e.target.value)} placeholder="Παπαδόπουλος"/></div>
+            </div>
+            <div className="form-group"><label>EMAIL</label><input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="you@business.com"/></div>
+            <div className="auth-formgrid">
+              <div className="form-group">
+                <label>ΚΩΔΙΚΟΣ</label>
+                <div className="password-wrap">
+                  <input type={showPw ? 'text' : 'password'} value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••"/>
+                  <button type="button" className="password-eye" onClick={() => setShowPw(s => !s)}><Icon name={showPw ? 'eye-off' : 'eye'} size={14}/></button>
+                </div>
+              </div>
+              <div className="form-group"><label>ΕΠΑΛΗΘΕΥΣΗ</label><input type={showPw ? 'text' : 'password'} value={form.confirmPassword} onChange={e => set('confirmPassword', e.target.value)} placeholder="••••••••"/></div>
             </div>
           </div>
         )}
 
-        {/* ── Step 1: Account ── */}
-        {step === 1 && (
-          <div className="fade-up">
-            <h2 className={styles.title}>Δημιουργία λογαριασμού</h2>
-            <div className={styles.planChip}>{planInfo?.name} Πακέτο — {planInfo?.price}</div>
-
-            <div className={styles.formGrid}>
-              <div className="form-group">
-                <label>Όνομα</label>
-                <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="π.χ. Νίκος" />
-              </div>
-              <div className="form-group">
-                <label>Επώνυμο</label>
-                <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="π.χ. Παπαδόπουλος" />
-              </div>
+        {step === 2 && (
+          <div className="fade-up" style={{display:'flex', flexDirection:'column', gap:12}}>
+            <div className="form-group"><label>ΟΝΟΜΑ ΚΑΤΑΣΤΗΜΑΤΟΣ</label><input value={form.shopName} onChange={e => set('shopName', e.target.value)} placeholder="π.χ. Souvlaki tou Niku"/></div>
+            <div className="slug-preview">
+              <span className="slug-label">QR URL</span>
+              <span className="slug-code">qrmenu.app/menu/<strong>{slugFromName || 'your-shop'}</strong></span>
+              {form.shopName && (slugOk ? <span className="slug-ok">✓ διαθέσιμο</span> : <span className="slug-bad">✗ πολύ μικρό</span>)}
             </div>
-            <div className="form-group" style={{ marginTop:14 }}>
-              <label>Email</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com" />
-            </div>
-            <div className="form-group" style={{ marginTop:14 }}>
-              <label>Κωδικός πρόσβασης</label>
-              <div className={styles.passwordWrap}>
-                <input type={showPass ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="Τουλάχιστον 8 χαρακτήρες" />
-                <button type="button" className={styles.eyeBtn} onClick={() => setShowPass(v => !v)} tabIndex={-1}>
-                  {showPass ? <EyeClosed /> : <EyeOpen />}
-                </button>
-              </div>
-            </div>
-            <div className="form-group" style={{ marginTop:14 }}>
-              <label>Επιβεβαίωση κωδικού</label>
-              <div className={styles.passwordWrap}>
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={e => setConfirmPass(e.target.value)}
-                  placeholder="Επαναλάβετε τον κωδικό"
-                  style={confirmPassword && password !== confirmPassword ? { borderColor:"var(--error)" }
-                    : confirmPassword && password === confirmPassword ? { borderColor:"var(--success)" } : {}}
-                />
-                <button type="button" className={styles.eyeBtn} onClick={() => setShowConfirm(v => !v)} tabIndex={-1}>
-                  {showConfirm ? <EyeClosed /> : <EyeOpen />}
-                </button>
-              </div>
-            </div>
-            <div className="form-group" style={{ marginTop:14 }}>
-              <label>Τύπος επιχείρησης</label>
-              <select value={businessType} onChange={e => setBusinessType(e.target.value)}>
-                {BUSINESS_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+            <div className="form-group">
+              <label>ΤΥΠΟΣ ΕΠΙΧΕΙΡΗΣΗΣ</label>
+              <select value={form.businessType} onChange={e => set('businessType', e.target.value)}>
+                {BUSINESS_TYPES.map(b => <option key={b.value} value={b.value}>{b.label}</option>)}
               </select>
             </div>
           </div>
         )}
 
-        {/* ── Step 2: Shop ── */}
-        {step === 2 && (
-          <div className="fade-up">
-            <h2 className={styles.title}>Το μαγαζί σας</h2>
-            <p className={styles.sub}>Δώστε όνομα στο μαγαζί σας. Αυτό θα γίνει το URL του μενού σας.</p>
-            <div className="form-group" style={{ marginTop:8 }}>
-              <label>Όνομα μαγαζιού</label>
-              <input value={shopName} onChange={e => setShopName(e.target.value)} placeholder="π.χ. Souvlaki tou Niku" autoFocus />
-            </div>
-            {shopName.trim().length > 0 && (
-              <div className={styles.slugPreview}>
-                <span className={styles.slugLabel}>URL μενού:</span>
-                <code className={styles.slugCode}>…/menu/<strong>{slug || "…"}</strong></code>
-                {slugChecking && <span className="spinner" style={{ width:13, height:13 }} />}
-                {!slugChecking && slugAvailable === true  && <span className={styles.slugOk}>✓ Διαθέσιμο</span>}
-                {!slugChecking && slugAvailable === false && <span className={styles.slugTaken}>✗ Μη διαθέσιμο</span>}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Step 3: Confirmation ── */}
         {step === 3 && (
-          <div className="fade-up">
-            <h2 className={styles.title}>Όλα έτοιμα!</h2>
-            <p className={styles.sub}>Ελέγξτε τα στοιχεία σας πριν δημιουργήσετε τον λογαριασμό.</p>
-            <div className={styles.summary}>
-              {[
-                ["Πλάνο",      `${planInfo?.name} — ${planInfo?.price}`],
-                ["Όνομα",      `${firstName} ${lastName}`],
-                ["Email",      email],
-                ["Επιχείρηση", BUSINESS_TYPES.find(t => t.value === businessType)?.label],
-                ["Μαγαζί",     shopName],
-                ["URL μενού",  `…/menu/${slug}`],
-              ].map(([k, v]) => (
-                <div key={k} className={styles.summaryRow}>
-                  <span className={styles.summaryKey}>{k}</span>
-                  <span className={styles.summaryVal}>{v}</span>
-                </div>
+          <div className="fade-up" style={{display:'flex', flexDirection:'column', gap:14}}>
+            <div className="auth-plan-grid">
+              {PLANS.map(p => (
+                <button key={p.value} type="button" className={`auth-plan-card ${form.plan === p.value ? 'selected' : ''}`} onClick={() => set('plan', p.value)}>
+                  <div className="auth-plan-name">{p.name}</div>
+                  <div className="auth-plan-price">{p.price} {p.period}</div>
+                  <ul className="auth-plan-feat-list">
+                    {p.features.slice(0, 4).map((f, i) => <li key={i} className="auth-plan-feat"><span>→</span><span>{f}</span></li>)}
+                  </ul>
+                </button>
               ))}
             </div>
+            <div className="auth-summary">
+              <div className="auth-sum-row"><span className="auth-sum-key">Ιδιοκτήτης</span><span className="auth-sum-val">{form.firstName} {form.lastName}</span></div>
+              <div className="auth-sum-row"><span className="auth-sum-key">Email</span><span className="auth-sum-val">{form.email}</span></div>
+              <div className="auth-sum-row"><span className="auth-sum-key">Κατάστημα</span><span className="auth-sum-val">{form.shopName}</span></div>
+              <div className="auth-sum-row"><span className="auth-sum-key">URL</span><span className="auth-sum-val">qrmenu.app/menu/{slugFromName}</span></div>
+              <div className="auth-sum-row"><span className="auth-sum-key">Πλάνο</span><span className="auth-sum-val">{PLANS.find(p => p.value === form.plan)?.name}</span></div>
+            </div>
           </div>
         )}
 
-        {error && <div className="msg-error" style={{ marginTop:16 }}>{error}</div>}
+        {err && <div className="msg-error" style={{marginTop:14}}>{err}</div>}
 
-        <div className={styles.actions}>
-          {step > 0 && (
-            <button className="btn btn-ghost" onClick={() => { setError(""); setStep(s => s - 1); }}>
-              ← Πίσω
-            </button>
-          )}
-          {step < STEPS.length - 1 ? (
-            <button className="btn btn-primary" style={{ flex:1 }} onClick={nextStep}>
-              Συνέχεια →
-            </button>
-          ) : (
-            <button className="btn btn-primary" style={{ flex:1 }} onClick={handleSubmit} disabled={loading}>
-              {loading ? <span className="spinner" /> : "Δημιουργία λογαριασμού"}
+        <div className="auth-actions">
+          {step > 1 && <button className="btn btn-ghost" onClick={back}><Icon name="back" size={12}/>Πίσω</button>}
+          <div style={{flex:1}}/>
+          {step < 3 && <button className="btn btn-primary btn-lg" onClick={next}>Συνέχεια<Icon name="arrow" size={12}/></button>}
+          {step === 3 && (
+            <button className="btn btn-primary btn-lg" onClick={submit} disabled={busy}>
+              {busy ? <><span className="spinner"/>Δημιουργία…</> : <>Ολοκλήρωση<Icon name="check" size={13}/></>}
             </button>
           )}
         </div>
 
-        <p className={styles.footer}>
-          Έχετε ήδη λογαριασμό; <Link to="/login" state={location.state}>Σύνδεση</Link>
-        </p>
+        <div className="auth-foot">Έχετε ήδη λογαριασμό; <button onClick={() => navigate('/login')}>Σύνδεση →</button></div>
       </div>
     </div>
   );

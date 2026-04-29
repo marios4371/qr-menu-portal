@@ -20,7 +20,7 @@ function touchActivity() {
 
 function isSessionExpired() {
   const lastActive = localStorage.getItem(LAST_ACTIVE_KEY);
-  if (!lastActive) return true; // Αν δεν υπάρχει timestamp → expired
+  if (!lastActive) return true;
   return Date.now() - Number(lastActive) > SESSION_TIMEOUT_MS;
 }
 
@@ -28,35 +28,30 @@ export function AuthProvider({ children }) {
   const [owner,   setOwner]   = useState(null);
   const [shops,   setShops]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const logoutRef = useRef(null); // reference για χρήση μέσα στους listeners
+  const logoutRef = useRef(null);
 
-  // ─── Activity listeners: ανανέωση timestamp με κάθε interaction ──────────
   useEffect(() => {
     const events = ["click", "keydown", "mousemove", "touchstart", "scroll"];
     const handler = () => {
-      // Ανανέωση μόνο αν υπάρχει ενεργή session
       if (localStorage.getItem(TOKEN_KEY)) touchActivity();
     };
     events.forEach(e => window.addEventListener(e, handler, { passive: true }));
     return () => events.forEach(e => window.removeEventListener(e, handler));
   }, []);
 
-  // ─── Periodic check: κάθε λεπτό ελέγχουμε αν η session έχει λήξει ───────
   useEffect(() => {
     const interval = setInterval(() => {
       if (localStorage.getItem(TOKEN_KEY) && isSessionExpired()) {
         logoutRef.current?.();
       }
-    }, 60_000); // κάθε 1 λεπτό
+    }, 60_000);
     return () => clearInterval(interval);
   }, []);
 
-  // ─── Rehydration κατά το mount ────────────────────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) { setLoading(false); return; }
 
-    // Πρώτος έλεγχος: inactivity timeout ΠΡΙΝ καλέσουμε το API
     if (isSessionExpired()) {
       clearSession();
       setLoading(false);
@@ -67,10 +62,9 @@ export function AuthProvider({ children }) {
       .then((data) => {
         setOwner(data.owner);
         setShops(data.shops);
-        touchActivity(); // Επιτυχής rehydration → refresh timestamp
+        touchActivity();
       })
       .catch(() => {
-        // Token expired (backend) ή network error → καθαρίζουμε
         clearSession();
       })
       .finally(() => setLoading(false));
@@ -78,7 +72,7 @@ export function AuthProvider({ children }) {
 
   const login = (token, ownerData, shopsData) => {
     localStorage.setItem(TOKEN_KEY, token);
-    touchActivity(); // Ξεκινάμε το inactivity clock από το login
+    touchActivity();
     setOwner(ownerData);
     setShops(shopsData || []);
   };
@@ -89,11 +83,10 @@ export function AuthProvider({ children }) {
     setShops([]);
   };
 
-  // Κρατάμε ref ενημερωμένο ώστε ο periodic check να έχει πρόσβαση
   logoutRef.current = logout;
 
   return (
-    <AuthContext.Provider value={{ owner, shops, loading, login, logout, setShops }}>
+    <AuthContext.Provider value={{ owner, shops, loading, login, logout, setShops, setOwner }}>
       {children}
     </AuthContext.Provider>
   );
