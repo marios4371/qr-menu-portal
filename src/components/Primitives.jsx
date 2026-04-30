@@ -1,7 +1,7 @@
 // src/components/Primitives.jsx
 // Shared UI primitives: Icon, Sidebar, PageHeader
 
-import { useState, useEffect } from 'react';
+
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
@@ -62,16 +62,6 @@ const JUMP_PATHS = {
   analytics:  '/analytics',
 };
 
-// ── Real-time clock ───────────────────────────────────────────────────────────
-function useClock() {
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return now;
-}
-
 // ── AppBar — kept for compatibility, hidden via CSS ───────────────────────────
 export function AppBar() {
   return null;
@@ -82,14 +72,8 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   const location = useLocation();
   const navigate  = useNavigate();
   const { owner } = useAuth();
-  const now = useClock();
 
   const page = PATH_MAP[location.pathname] || 'dashboard';
-  const PLAN_ORDER = ['STANDARD', 'PREMIUM', 'EXCLUSIVE'];
-
-  const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-  const dateStr = now.toLocaleDateString('el-GR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
-
   const items = [
     { key: 'dashboard',  label: 'Dashboard',        icon: 'home' },
     { key: 'editor',     label: 'Menu Editor',       icon: 'edit' },
@@ -102,16 +86,9 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
       {/* Brand */}
       <div className="sb-head">
         <span className="brand"><span className="dot"/>QRMenu</span>
-        <span className="kicker" style={{ fontSize: '0.55rem', opacity: 0.6 }}>ADMIN</span>
       </div>
 
-      {/* Live clock */}
-      <div className="sb-clock">
-        <div className="sb-clock-time">{timeStr}</div>
-        <div className="sb-clock-date">{dateStr}</div>
-      </div>
-
-      {/* Nav */}
+{/* Nav */}
       <div className="sb-section">
         <div className="sb-section-label">Navigation</div>
         <nav className="sb-nav">
@@ -136,30 +113,14 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
 
       <div className="sb-grow"/>
 
-      {/* Command palette hint */}
-      {onCmdOpen && (
-        <button className="sb-cmd-hint" onClick={onCmdOpen}>
-          <Icon name="cmd" size={12}/>
-          <span>Command palette</span>
-          <span className="sb-cmd-keys">
-            <span className="sb-cmd-key">⌘K</span>
-          </span>
-        </button>
-      )}
-
       {/* Footer */}
       <div className="sb-section sb-foot">
-        <button className="sb-plan ticks" onClick={onPlanClick}>
+        <button className="sb-plan" onClick={onPlanClick}>
           <div className="sb-plan-row">
-            <span className="kicker" style={{ fontSize: '0.55rem', opacity: 0.7 }}>Current Plan</span>
-            <span className="kicker" style={{ fontSize: '0.55rem', color: 'var(--accent)', opacity: 0.8 }}>↑ Upgrade</span>
+            <span style={{ fontSize: '10px', color: 'var(--sb-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Πλάνο</span>
+            <span style={{ fontSize: '10px', color: 'var(--sb-active-text)' }}>↑ Αναβάθμιση</span>
           </div>
           <div className="sb-plan-name">{owner?.plan || 'STANDARD'}</div>
-          <div className="sb-plan-bar">
-            {PLAN_ORDER.map(p => (
-              <span key={p} className={`sb-plan-seg ${PLAN_ORDER.indexOf(owner?.plan) >= PLAN_ORDER.indexOf(p) ? 'on' : ''}`}/>
-            ))}
-          </div>
         </button>
 
         <div className="sb-owner">
