@@ -3,6 +3,9 @@
 
 const LAMBDA_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
 
+// Βάση URL για τα δημόσια μενού (GET /menu/:slug)
+export const MENU_BASE_URL = "https://jqh5mcshzzlag7z26d76elkf6u0vtgzw.lambda-url.eu-central-1.on.aws";
+
 async function request(path, options = {}) {
   const token = localStorage.getItem("qrmenu_token");
   const headers = { "Content-Type": "application/json" };

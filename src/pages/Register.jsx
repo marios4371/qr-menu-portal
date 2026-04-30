@@ -1,9 +1,9 @@
 // src/pages/Register.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../components/Primitives';
 import { useAuth } from '../hooks/useAuth';
-import { register } from '../services/api';
+import { register, checkSlug } from '../services/api';
 import { PLANS, BUSINESS_TYPES } from '../constants';
 
 const slugify = (s) => s.toLowerCase()
@@ -17,34 +17,62 @@ const slugify = (s) => s.toLowerCase()
   .replace(/[φ]/g,'f').replace(/[χ]/g,'ch').replace(/[ψ]/g,'ps')
   .replace(/[^a-z0-9-]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
 
+// slugStatus: 'idle' | 'checking' | 'ok' | 'taken' | 'error'
+function SlugBadge({ status }) {
+  if (status === 'idle')     return null;
+  if (status === 'checking') return <span className="slug-checking">…</span>;
+  if (status === 'ok')       return <span className="slug-ok">✓ διαθέσιμο</span>;
+  if (status === 'taken')    return <span className="slug-bad">✗ μη διαθέσιμο</span>;
+  return <span className="slug-bad">✗ σφάλμα ελέγχου</span>;
+}
+
 export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     firstName:'', lastName:'', email:'', password:'', confirmPassword:'',
-    shopName:'', shopSlug:'', businessType:'RESTAURANT', plan:'PREMIUM',
+    shopName:'', businessType:'RESTAURANT', plan:'PREMIUM',
   });
   const [showPw, setShowPw] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [slugStatus, setSlugStatus] = useState('idle');
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const slugFromName = slugify(form.shopName);
   const slugOk = slugFromName.length >= 3;
 
+  // Debounced slug availability check
+  useEffect(() => {
+    if (!slugOk) { setSlugStatus('idle'); return; }
+    setSlugStatus('checking');
+    const timer = setTimeout(async () => {
+      try {
+        const { available } = await checkSlug(slugFromName);
+        setSlugStatus(available ? 'ok' : 'taken');
+      } catch {
+        setSlugStatus('error');
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [slugFromName]);
+
   const next = () => {
     setErr('');
     if (step === 1) {
       if (!form.firstName || !form.lastName) return setErr('Συμπληρώστε όνομα και επώνυμο');
-      if (!form.email.includes('@')) return setErr('Μη έγκυρο email');
-      if (form.password.length < 6) return setErr('Κωδικός τουλάχιστον 6 χαρακτήρες');
+      if (!form.email.includes('@'))          return setErr('Μη έγκυρο email');
+      if (form.password.length < 6)           return setErr('Κωδικός τουλάχιστον 6 χαρακτήρες');
       if (form.password !== form.confirmPassword) return setErr('Οι κωδικοί δεν ταιριάζουν');
     }
     if (step === 2) {
       if (!form.shopName || form.shopName.length < 2) return setErr('Συμπληρώστε το όνομα του καταστήματος');
-      if (!slugOk) return setErr('Μη έγκυρο όνομα — διορθώστε');
-      set('shopSlug', slugFromName);
+      if (!slugOk)                return setErr('Μη έγκυρο slug — πολύ σύντομο');
+      if (slugStatus === 'checking') return setErr('Αναμείνετε τον έλεγχο διαθεσιμότητας…');
+      if (slugStatus === 'taken')    return setErr('Αυτό το slug χρησιμοποιείται ήδη — αλλάξτε το όνομα');
+      if (slugStatus === 'error')    return setErr('Αδυναμία ελέγχου slug — δοκιμάστε ξανά');
+      if (slugStatus !== 'ok')       return setErr('Αναμείνατε τον έλεγχο διαθεσιμότητας');
     }
     setStep(s => s + 1);
   };
@@ -122,11 +150,14 @@ export default function Register() {
 
         {step === 2 && (
           <div className="fade-up" style={{display:'flex', flexDirection:'column', gap:12}}>
-            <div className="form-group"><label>ΟΝΟΜΑ ΚΑΤΑΣΤΗΜΑΤΟΣ</label><input value={form.shopName} onChange={e => set('shopName', e.target.value)} placeholder="π.χ. Souvlaki tou Niku"/></div>
+            <div className="form-group">
+              <label>ΟΝΟΜΑ ΚΑΤΑΣΤΗΜΑΤΟΣ</label>
+              <input value={form.shopName} onChange={e => set('shopName', e.target.value)} placeholder="π.χ. Souvlaki tou Niku"/>
+            </div>
             <div className="slug-preview">
               <span className="slug-label">QR URL</span>
-              <span className="slug-code">qrmenu.app/menu/<strong>{slugFromName || 'your-shop'}</strong></span>
-              {form.shopName && (slugOk ? <span className="slug-ok">✓ διαθέσιμο</span> : <span className="slug-bad">✗ πολύ μικρό</span>)}
+              <span className="slug-code">…/menu/<strong>{slugFromName || 'your-shop'}</strong></span>
+              {form.shopName && <SlugBadge status={slugStatus}/>}
             </div>
             <div className="form-group">
               <label>ΤΥΠΟΣ ΕΠΙΧΕΙΡΗΣΗΣ</label>
@@ -154,7 +185,7 @@ export default function Register() {
               <div className="auth-sum-row"><span className="auth-sum-key">Ιδιοκτήτης</span><span className="auth-sum-val">{form.firstName} {form.lastName}</span></div>
               <div className="auth-sum-row"><span className="auth-sum-key">Email</span><span className="auth-sum-val">{form.email}</span></div>
               <div className="auth-sum-row"><span className="auth-sum-key">Κατάστημα</span><span className="auth-sum-val">{form.shopName}</span></div>
-              <div className="auth-sum-row"><span className="auth-sum-key">URL</span><span className="auth-sum-val">qrmenu.app/menu/{slugFromName}</span></div>
+              <div className="auth-sum-row"><span className="auth-sum-key">URL</span><span className="auth-sum-val">…/menu/{slugFromName}</span></div>
               <div className="auth-sum-row"><span className="auth-sum-key">Πλάνο</span><span className="auth-sum-val">{PLANS.find(p => p.value === form.plan)?.name}</span></div>
             </div>
           </div>
@@ -165,7 +196,12 @@ export default function Register() {
         <div className="auth-actions">
           {step > 1 && <button className="btn btn-ghost" onClick={back}><Icon name="back" size={12}/>Πίσω</button>}
           <div style={{flex:1}}/>
-          {step < 3 && <button className="btn btn-primary btn-lg" onClick={next}>Συνέχεια<Icon name="arrow" size={12}/></button>}
+          {step < 3 && (
+            <button className="btn btn-primary btn-lg" onClick={next}
+                    disabled={step === 2 && slugStatus === 'checking'}>
+              Συνέχεια<Icon name="arrow" size={12}/>
+            </button>
+          )}
           {step === 3 && (
             <button className="btn btn-primary btn-lg" onClick={submit} disabled={busy}>
               {busy ? <><span className="spinner"/>Δημιουργία…</> : <>Ολοκλήρωση<Icon name="check" size={13}/></>}

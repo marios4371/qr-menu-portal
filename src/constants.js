@@ -65,4 +65,9 @@ export const BUSINESS_TYPES = [
   { value: "RESTAURANT", label: "Εστιατόριο" },
   { value: "CAFE",       label: "Καφέ" },
   { value: "BAR",        label: "Bar" },
+  { value: "BEACH_BAR",  label: "Beach Bar" },
+  { value: "FAST_FOOD",  label: "Fast Food" },
+  { value: "BAKERY",     label: "Αρτοποιείο / Ζαχαροπλαστείο" },
+  { value: "HOTEL",      label: "Ξενοδοχείο" },
+  { value: "CLUB",       label: "Club / Νυχτερινό" },
 ];

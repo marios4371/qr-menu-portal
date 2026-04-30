@@ -12,15 +12,14 @@ const DEFAULT_THEME = {
   layout: 'list', showImages: true,
 };
 
-const FONT_OPTIONS = ['Geist','Inter','Helvetica Neue','Georgia','Instrument Serif','JetBrains Mono'];
+const FONT_OPTIONS    = ['Geist','Inter','Helvetica Neue','Georgia','Instrument Serif','JetBrains Mono'];
 const DENSITY_OPTIONS = [{value:'compact',label:'Compact'},{value:'comfortable',label:'Άνετο'},{value:'spacious',label:'Ευρύ'}];
 const RADIUS_OPTIONS  = [{value:'sharp',label:'Sharp'},{value:'soft',label:'Soft'},{value:'round',label:'Round'}];
 const LAYOUT_OPTIONS  = [{value:'list',label:'List'},{value:'grid',label:'Grid'},{value:'cards',label:'Cards'}];
 const SIZE_OPTIONS    = [{value:'small',label:'S'},{value:'medium',label:'M'},{value:'large',label:'L'}];
 
 export default function MenuAppearance() {
-  const { owner, shops, setShops } = useAuth();
-  const [currentShopId, setCurrentShopId] = useState(shops[0]?.shop_id ?? null);
+  const { owner, shops, setShops, currentShopId, setCurrentShopId } = useAuth();
   const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
 
   const [theme, setTheme] = useState({ ...DEFAULT_THEME, ...(shop?.theme || {}) });

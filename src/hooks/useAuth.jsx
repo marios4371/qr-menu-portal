@@ -4,7 +4,6 @@ import { getOwnerDashboard } from "../services/api";
 
 const AuthContext = createContext(null);
 
-// 8 ώρες αδράνεια -> αυτόματο logout
 const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000;
 const LAST_ACTIVE_KEY    = "qrmenu_last_active";
 const TOKEN_KEY          = "qrmenu_token";
@@ -13,11 +12,9 @@ function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(LAST_ACTIVE_KEY);
 }
-
 function touchActivity() {
   localStorage.setItem(LAST_ACTIVE_KEY, String(Date.now()));
 }
-
 function isSessionExpired() {
   const lastActive = localStorage.getItem(LAST_ACTIVE_KEY);
   if (!lastActive) return true;
@@ -25,11 +22,21 @@ function isSessionExpired() {
 }
 
 export function AuthProvider({ children }) {
-  const [owner,   setOwner]   = useState(null);
-  const [shops,   setShops]   = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [owner,          setOwner]          = useState(null);
+  const [shops,          setShops]          = useState([]);
+  const [currentShopId,  setCurrentShopId]  = useState(null);
+  const [loading,        setLoading]        = useState(true);
   const logoutRef = useRef(null);
 
+  // Sync currentShopId: αρχικοποίηση στο πρώτο shop όταν φορτωθούν τα shops,
+  // αλλά μόνο αν δεν έχει ήδη επιλεγεί κάποιο (π.χ. μετά από login).
+  useEffect(() => {
+    if (shops.length > 0 && !currentShopId) {
+      setCurrentShopId(shops[0].shop_id);
+    }
+  }, [shops]);
+
+  // Activity listeners
   useEffect(() => {
     const events = ["click", "keydown", "mousemove", "touchstart", "scroll"];
     const handler = () => {
@@ -39,6 +46,7 @@ export function AuthProvider({ children }) {
     return () => events.forEach(e => window.removeEventListener(e, handler));
   }, []);
 
+  // Periodic inactivity check
   useEffect(() => {
     const interval = setInterval(() => {
       if (localStorage.getItem(TOKEN_KEY) && isSessionExpired()) {
@@ -48,25 +56,20 @@ export function AuthProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Rehydration
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) { setLoading(false); return; }
-
-    if (isSessionExpired()) {
-      clearSession();
-      setLoading(false);
-      return;
-    }
+    if (isSessionExpired()) { clearSession(); setLoading(false); return; }
 
     getOwnerDashboard()
       .then((data) => {
         setOwner(data.owner);
         setShops(data.shops);
+        if (data.shops?.length > 0) setCurrentShopId(data.shops[0].shop_id);
         touchActivity();
       })
-      .catch(() => {
-        clearSession();
-      })
+      .catch(() => clearSession())
       .finally(() => setLoading(false));
   }, []);
 
@@ -75,18 +78,25 @@ export function AuthProvider({ children }) {
     touchActivity();
     setOwner(ownerData);
     setShops(shopsData || []);
+    if (shopsData?.length > 0) setCurrentShopId(shopsData[0].shop_id);
   };
 
   const logout = () => {
     clearSession();
     setOwner(null);
     setShops([]);
+    setCurrentShopId(null);
   };
 
   logoutRef.current = logout;
 
   return (
-    <AuthContext.Provider value={{ owner, shops, loading, login, logout, setShops, setOwner }}>
+    <AuthContext.Provider value={{
+      owner, shops, loading,
+      login, logout,
+      setShops, setOwner,
+      currentShopId, setCurrentShopId,
+    }}>
       {children}
     </AuthContext.Provider>
   );

@@ -5,8 +5,7 @@ import { Icon, PageHeader } from '../components/Primitives';
 import { saveMenu } from '../services/api';
 
 export default function MenuEditor() {
-  const { shops, setShops } = useAuth();
-  const [currentShopId, setCurrentShopId] = useState(shops[0]?.shop_id ?? null);
+  const { shops, setShops, currentShopId, setCurrentShopId } = useAuth();
   const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
 
   const [menu, setMenu] = useState(shop?.menu || []);
@@ -49,6 +48,7 @@ export default function MenuEditor() {
       : c));
   };
   const deleteProduct = (catId, pid) => {
+    if (!window.confirm('Διαγραφή προϊόντος;')) return;
     update(menu.map(c => c.id === catId ? { ...c, items: c.items.filter(p => p.id !== pid) } : c));
   };
 
@@ -56,7 +56,6 @@ export default function MenuEditor() {
     setSaveErr('');
     try {
       await saveMenu({ shopId: shop.shop_id, data: { menu } });
-      // update shops in context
       setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, menu } : s));
       setDirty(false);
       setSavedToast(true);
