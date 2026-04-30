@@ -15,6 +15,7 @@ import Register       from './pages/Register';
 import Dashboard      from './pages/Dashboard';
 import MenuEditor     from './pages/MenuEditor';
 import MenuAppearance from './pages/MenuAppearance';
+import Analytics      from './pages/Analytics';
 
 const TWEAK_DEFAULTS = {
   showGrid:  true,
@@ -199,6 +200,7 @@ function AppContent() {
           <Route path="/dashboard"       element={<Dashboard/>}/>
           <Route path="/menu-editor"     element={<MenuEditor/>}/>
           <Route path="/menu-appearance" element={<MenuAppearance/>}/>
+          <Route path="/analytics"       element={<Analytics/>}/>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace/>}/>

@@ -53,11 +53,13 @@ const PATH_MAP = {
   '/dashboard':       'dashboard',
   '/menu-editor':     'editor',
   '/menu-appearance': 'appearance',
+  '/analytics':       'analytics',
 };
 const JUMP_PATHS = {
-  dashboard: '/dashboard',
-  editor:    '/menu-editor',
-  appearance:'/menu-appearance',
+  dashboard:  '/dashboard',
+  editor:     '/menu-editor',
+  appearance: '/menu-appearance',
+  analytics:  '/analytics',
 };
 
 // ── Real-time clock ───────────────────────────────────────────────────────────
@@ -92,6 +94,7 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
     { key: 'dashboard',  label: 'Dashboard',        icon: 'home' },
     { key: 'editor',     label: 'Menu Editor',       icon: 'edit' },
     { key: 'appearance', label: 'Εμφάνιση',          icon: 'palette', premium: true },
+    { key: 'analytics',  label: 'Analytics',         icon: 'stat',    premium: true },
   ];
 
   return (
@@ -175,7 +178,7 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   );
 }
 
-// ── PageHeader ────────────────────────────────────────────────────────────────
+// ── PageHeader ───────────────────────────────────────────────────────────────────────────
 export function PageHeader({ kicker, title, sub, right }) {
   return (
     <header className="ph">
