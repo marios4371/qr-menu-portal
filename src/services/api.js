@@ -90,22 +90,3 @@ export const getOrdersAnalytics = (filters = {}) => {
   });
   return request(`/orders/analytics?${params.toString()}`);
 };
-// ─── Legacy Shop Claim ────────────────────────────────────────────────────────
-
-export const claimShop = ({ shopId, password }) =>
-  request("/claim-shop", {
-    method: "POST",
-    body: JSON.stringify({ shopId, password }),
-  });
-
-// ─── Orders Analytics ─────────────────────────────────────────────────────────
-// Builds a query-string from the filter object and calls GET /orders/analytics.
-// Filters: { shopId, from, to, status, paymentStatus, tableNumber, source, minAmount }
-
-export const getOrdersAnalytics = (filters = {}) => {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([k, v]) => {
-    if (v !== null && v !== undefined && v !== "") params.append(k, v);
-  });
-  return request(`/orders/analytics?${params.toString()}`);
-};
