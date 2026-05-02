@@ -166,7 +166,7 @@
 .chipActive {
   background: var(--accent) !important;
   border-color: var(--accent) !important;
-  color: #F0E8D8 !important;
+  color: var(--accent-fg) !important;
 }
 
 /* ── Toggles ── */
@@ -258,7 +258,7 @@
   border: 1px solid var(--border-md);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  background: #0a0a0a;
+  background: var(--bg);
   width: 100%;
   aspect-ratio: 9 / 16;
   max-height: 700px;
@@ -301,7 +301,7 @@
   border-color: var(--accent);
 }
 .upgradePlanBtn:hover .upgradePlanLabel,
-.upgradePlanBtn:hover .upgradePlanArrow { color: #F0E8D8; }
+.upgradePlanBtn:hover .upgradePlanArrow { color: var(--accent-fg); }
 
 .upgradePlanLabel {
   font-size: 0.76rem;

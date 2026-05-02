@@ -115,9 +115,9 @@
   border-radius: var(--radius);
 }
 .statusActive {
-  background: rgba(45,122,79,0.10);
+  background: var(--success-soft);
   color: var(--success);
-  border: 1px solid rgba(45,122,79,0.18);
+  border: 1px solid rgba(34,197,94,0.25);
 }
 
 /* URL block */
@@ -359,9 +359,9 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(26,20,15,0.35);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -378,7 +378,7 @@
   max-width: 480px;
   overflow: hidden;
   animation: fadeUp 0.18s ease both;
-  box-shadow: 0 16px 48px rgba(30,20,10,0.14);
+  box-shadow: var(--shadow-lg);
 }
 
 .modalHeader {
@@ -445,12 +445,13 @@
 .planChoiceCard:disabled { opacity: 0.6; cursor: default; }
 
 .planChoiceCurrent {
-  background: var(--accent) !important;
+  background: var(--accent-soft) !important;
   border-color: var(--accent) !important;
+  box-shadow: var(--shadow-glow-accent);
 }
 .planChoiceCurrent .planChoiceName,
 .planChoiceCurrent .planChoicePrice {
-  color: #F0E8D8 !important;
+  color: var(--accent) !important;
 }
 
 .planChoiceName {
@@ -473,15 +474,15 @@
   top: -8px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg);
-  color: rgba(240,232,216,0.8);
+  background: var(--bg-card);
+  color: var(--text-muted);
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 2px 8px;
   border-radius: var(--radius);
-  border: 1px solid rgba(240,232,216,0.2);
+  border: 1px solid var(--border);
   white-space: nowrap;
 }
 
@@ -514,7 +515,7 @@
 }
 .upgradePlanBtn:hover .upgradePlanLabel,
 .upgradePlanBtn:hover .upgradePlanArrow {
-  color: #F0E8D8;
+  color: var(--accent-fg);
 }
 
 .upgradePlanLabel {
@@ -533,9 +534,9 @@
 
 /* ─── FEATURES PANEL ─────────────────────────────────────────────────────── */
 .featuresSection {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 6px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 24px;
   margin-top: 20px;
 }
@@ -548,9 +549,9 @@
 }
 
 .featureCard {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 5px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -565,7 +566,7 @@
 
 .featureIcon {
   font-size: 18px;
-  color: #fff;
+  color: var(--text-sub);
   line-height: 1;
 }
 
@@ -573,18 +574,18 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #4ade80;
-  box-shadow: 0 0 6px #4ade80aa;
+  background: var(--success);
+  box-shadow: 0 0 6px rgba(34,197,94,0.5);
 }
 
 .featureLabel {
   font-size: 13px;
   font-weight: 600;
-  color: rgba(255,255,255,0.85);
+  color: var(--text);
 }
 
 .featureDesc {
   font-size: 11.5px;
-  color: rgba(255,255,255,0.40);
+  color: var(--text-muted);
   line-height: 1.5;
 }

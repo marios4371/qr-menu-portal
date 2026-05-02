@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-/* ── Vertical grid lines — same as Landing but on auth pages ── */
+/* ── Vertical grid lines — subtle on dark bg ── */
 .page::before {
   content: '';
   position: absolute;
@@ -18,8 +18,8 @@
     90deg,
     transparent,
     transparent calc((100% / 6) - 1px),
-    rgba(26,22,16,0.055) calc((100% / 6) - 1px),
-    rgba(26,22,16,0.055) calc(100% / 6)
+    rgba(255,255,255,0.03) calc((100% / 6) - 1px),
+    rgba(255,255,255,0.03) calc(100% / 6)
   );
   pointer-events: none;
   z-index: 0;
@@ -54,19 +54,15 @@
 
 /* ── Card ── */
 .card {
-  background: rgba(255,255,255,0.52);
-  border: 1px solid var(--border-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   padding: 40px 38px;
   width: 100%;
   position: relative;
   z-index: 1;
   animation: fadeUp 0.35s ease both;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow:
-    0 8px 32px rgba(30,20,10,0.08),
-    0 1px 4px   rgba(30,20,10,0.05);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ── Logo ── */
@@ -112,8 +108,8 @@
   width: 26px;
   height: 26px;
   border-radius: var(--radius);
-  border: 1px solid var(--border-md);
-  background: rgba(255,255,255,0.6);
+  border: 1px solid var(--border);
+  background: var(--bg-card-2);
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 600;
@@ -125,9 +121,9 @@
 }
 .stepActive .stepCircle {
   border-color: var(--accent);
-  background: rgba(26,22,16,0.06);
+  background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(26,22,16,0.05);
+  box-shadow: var(--shadow-glow-accent);
 }
 .stepDone .stepCircle {
   border-color: var(--success);
@@ -192,8 +188,8 @@
   gap: 10px;
   margin-top: 10px;
   padding: 10px 14px;
-  background: rgba(26,22,16,0.04);
-  border: 1px solid var(--border-md);
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   flex-wrap: wrap;
 }
@@ -216,8 +212,8 @@
 
 /* ── Summary ── */
 .summary {
-  background: rgba(26,22,16,0.03);
-  border: 1px solid var(--border-md);
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
   margin-top: 8px;
@@ -290,8 +286,8 @@
 }
 
 .planCard {
-  background: rgba(255,255,255,0.35);
-  border: 1px solid var(--border-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 22px 18px;
   display: flex;
@@ -304,20 +300,20 @@
   position: relative;
 }
 .planCard:hover {
-  background: rgba(255,255,255,0.55);
-  border-color: var(--border-hi);
+  background: var(--bg-card-2);
+  border-color: var(--border-md);
 }
 /* Selected state */
 .planCardSelected {
-  background: var(--accent) !important;
+  background: var(--accent-soft) !important;
   border-color: var(--accent) !important;
-  box-shadow: 0 4px 16px rgba(26,22,16,0.18);
+  box-shadow: var(--shadow-glow-accent);
 }
 .planCardSelected .planCardName,
 .planCardSelected .planCardPrice,
 .planCardSelected .planCardFeature,
 .planCardSelected .planCardCheck {
-  color: #F0E8D8 !important;
+  color: var(--accent) !important;
 }
 
 .planCardName {
@@ -339,7 +335,7 @@
   border-bottom: 1px solid var(--border);
 }
 .planCardSelected .planCardPrice {
-  border-bottom-color: rgba(240,232,216,0.18) !important;
+  border-bottom-color: rgba(163,230,53,0.25) !important;
 }
 
 .planCardFeatures {

@@ -73,10 +73,10 @@
 .editIcon { font-size:0.7rem; color:var(--text-muted); opacity:0; transition:opacity 0.13s; }
 .inlineText:hover .editIcon { opacity:1; }
 .inlineInput {
-  font-size:0.92rem; font-weight:600; background:rgba(255,255,255,0.6);
+  font-size:0.92rem; font-weight:600; background:var(--bg-card-2);
   border:1px solid var(--accent); border-radius:var(--radius);
   color:var(--text); padding:2px 8px; flex:1;
-  box-shadow:0 0 0 3px rgba(26,22,16,0.06); outline:none;
+  box-shadow:var(--shadow-glow-accent); outline:none;
 }
 
 .catName { flex:1; min-width:0; }
@@ -114,13 +114,13 @@
   color:var(--text-muted); font-size:0.86rem; font-family:var(--font); cursor:pointer;
   transition:border-color 0.15s, color 0.15s, background 0.15s; margin-top:4px;
 }
-.addCatBtn:hover { border-color:var(--accent); color:var(--text); background:rgba(26,22,16,0.03); }
+.addCatBtn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-soft); }
 
 /* ── Modal ── */
 .modalOverlay {
   position:fixed; inset:0;
-  background:rgba(26,20,15,0.35);
-  backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
   display:flex; align-items:center; justify-content:center;
   z-index:200; padding:20px; animation:fadeIn 0.14s ease both;
 }
@@ -129,7 +129,7 @@
   border:1px solid var(--border-md); border-radius:var(--radius-xl);
   width:100%; max-width:448px;
   animation:fadeUp 0.18s ease both; overflow:hidden;
-  box-shadow:0 16px 48px rgba(30,20,10,0.14),0 2px 8px rgba(30,20,10,0.08);
+  box-shadow:var(--shadow-lg);
 }
 .modalHeader { display:flex; align-items:center; justify-content:space-between; padding:16px 22px 12px; border-bottom:1px solid var(--border); background:var(--bg); }
 .modalTitle { font-size:0.95rem; font-weight:600; color:var(--text); letter-spacing:-0.01em; }

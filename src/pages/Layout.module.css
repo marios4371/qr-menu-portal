@@ -62,8 +62,8 @@
   color: var(--text);
 }
 .navActive {
-  background: rgba(26,22,16,0.06) !important;
-  color: var(--text) !important;
+  background: var(--bg-card-2) !important;
+  color: var(--accent) !important;
   border-left-color: var(--accent) !important;
   font-weight: 500;
 }
