@@ -1,13 +1,218 @@
 // src/pages/MenuEditor.jsx
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { saveMenu } from '../services/api';
+import { saveMenu, saveAppearance } from '../services/api';
+
+// ── Layout modes (display-mode picker) ────────────────────────────────────────
+const LAYOUT_MODES = [
+  { key: 'accordion', name: 'Vertical Accordion', desc: 'Όλες οι κατηγορίες stacked, ξεδιπλώνουν με click. Compact.', tier: 'STANDARD' },
+  { key: 'sticky-tabs', name: 'Sticky Tab Bar',     desc: 'efood-style: tabs sticky στο header, click → scroll στη section.', tier: 'PREMIUM' },
+  { key: 'side-tabs',   name: 'Side Tabs',          desc: 'Desktop: vertical λίστα κατηγοριών αριστερά, προϊόντα δεξιά.',   tier: 'PREMIUM' },
+  { key: 'grid-mosaic', name: 'Grid Mosaic',        desc: 'Pinterest/masonry. Image-heavy. Bars, signature dishes.',         tier: 'PREMIUM' },
+  { key: 'magazine',    name: 'Magazine Pages',     desc: 'One category per scroll page. Hero + items. Cinematic.',          tier: 'PREMIUM' },
+  { key: 'compact',     name: 'Compact List',       desc: 'Text-only. Πολύ γρήγορο για παραδοσιακά μεγάλα μενού.',           tier: 'PREMIUM' },
+  { key: 'hero',        name: 'Hero Featured',      desc: '2-4 highlighted items πάνω, υπόλοιπα σε compact list.',           tier: 'PREMIUM' },
+];
+
+const TIER_ORDER = { STANDARD: 0, PREMIUM: 1, EXCLUSIVE: 2 };
+
+function LayoutThumb({ mode }) {
+  switch (mode) {
+    case 'accordion':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-bar short"/>
+          <div className="lay-thumb-row dark"/>
+          <div className="lay-thumb-row"/>
+          <div className="lay-thumb-row"/>
+          <div className="lay-thumb-row dark"/>
+          <div className="lay-thumb-row dark"/>
+        </div>
+      );
+    case 'sticky-tabs':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-bar short"/>
+          <div className="lay-thumb-tabs">
+            <span className="lay-thumb-tab on"/>
+            <span className="lay-thumb-tab"/>
+            <span className="lay-thumb-tab"/>
+            <span className="lay-thumb-tab"/>
+          </div>
+          <div className="lay-thumb-row"/>
+          <div className="lay-thumb-row"/>
+          <div className="lay-thumb-row"/>
+        </div>
+      );
+    case 'side-tabs':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-bar short"/>
+          <div className="lay-thumb-side">
+            <div/>
+            <div><span/><span/><span/></div>
+          </div>
+        </div>
+      );
+    case 'grid-mosaic':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-bar short"/>
+          <div className="lay-thumb-grid" style={{ flex: 1 }}>
+            <div className="lay-thumb-cell tall"/>
+            <div className="lay-thumb-cell"/>
+            <div className="lay-thumb-cell"/>
+            <div className="lay-thumb-cell"/>
+            <div className="lay-thumb-cell tall"/>
+          </div>
+        </div>
+      );
+    case 'magazine':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-hero"/>
+          <div className="lay-thumb-row"/>
+          <div className="lay-thumb-row"/>
+        </div>
+      );
+    case 'compact':
+      return (
+        <div className="lay-thumb">
+          <div className="lay-thumb-bar short"/>
+          <div className="lay-thumb-line"><span/><span/></div>
+          <div className="lay-thumb-line"><span/><span/></div>
+          <div className="lay-thumb-line"><span/><span/></div>
+          <div className="lay-thumb-line"><span/><span/></div>
+          <div className="lay-thumb-line"><span/><span/></div>
+        </div>
+      );
+    case 'hero':
+      return (
+        <div className="lay-thumb">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 3 }}>
+            <div className="lay-thumb-cell lime" style={{ height: 28 }}/>
+            <div className="lay-thumb-cell" style={{ height: 28 }}/>
+            <div className="lay-thumb-cell" style={{ height: 28 }}/>
+            <div className="lay-thumb-cell" style={{ height: 28 }}/>
+          </div>
+          <div className="lay-thumb-line"><span/><span/></div>
+          <div className="lay-thumb-line"><span/><span/></div>
+        </div>
+      );
+    default: return <div className="lay-thumb"/>;
+  }
+}
+
+// ── Layout tab body ───────────────────────────────────────────────────────────
+function LayoutPicker({ shop, owner, onSaved }) {
+  const initial = shop?.theme?.layout || 'accordion';
+  const [selected, setSelected] = useState(initial);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const [savedToast, setSavedToast] = useState(false);
+
+  const userTier = TIER_ORDER[owner?.plan] ?? 0;
+  const dirty = selected !== initial;
+
+  const isLocked = (mode) => TIER_ORDER[mode.tier] > userTier;
+  const isLegacy = !!shop?.isLegacy;
+
+  const save = async () => {
+    if (!dirty) return;
+    setBusy(true); setErr('');
+    try {
+      const newTheme = { ...(shop.theme || {}), layout: selected };
+      await saveAppearance({ shopId: shop.shop_id, theme: newTheme });
+      onSaved?.(newTheme);
+      setSavedToast(true);
+      setTimeout(() => setSavedToast(false), 2000);
+    } catch (e) {
+      setErr(e.message || 'Σφάλμα αποθήκευσης διάταξης');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  if (isLegacy) {
+    return (
+      <div className="lay-wrap">
+        <div className="lay-head">
+          <span className="ph-kicker">02 / ΔΙΑΤΑΞΗ</span>
+          <h2>Custom template</h2>
+          <p>
+            Το κατάστημά σας χρησιμοποιεί δικό του custom HTML/CSS template (legacy shop). Η αλλαγή layout δεν είναι διαθέσιμη — οι αλλαγές περιεχομένου εμφανίζονται όμως κανονικά.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="lay-wrap">
+      <div className="lay-head">
+        <span className="ph-kicker">02 / ΔΙΑΤΑΞΗ</span>
+        <h2>Πώς θα βλέπουν οι πελάτες σας το μενού;</h2>
+        <p>Επιλέξτε μία από τις {LAYOUT_MODES.length} διατάξεις. Η αλλαγή εφαρμόζεται άμεσα στο live μενού — δεν χάνονται δεδομένα.</p>
+      </div>
+
+      <div className="lay-grid">
+        {LAYOUT_MODES.map((m, i) => {
+          const locked = isLocked(m);
+          const isOn = selected === m.key;
+          return (
+            <button
+              key={m.key}
+              className={`lay-card ${isOn ? 'on' : ''}`}
+              onClick={() => !locked && setSelected(m.key)}
+              disabled={locked}
+            >
+              {isOn && <span className="lay-card-active">ACTIVE</span>}
+              {locked && !isOn && <span className="lay-card-lock"><Icon name="lock" size={12}/></span>}
+              <span className="lay-card-num">{String(i+1).padStart(2,'0')}</span>
+              <LayoutThumb mode={m.key}/>
+              <div>
+                <div className="lay-card-name">{m.name}</div>
+                <div className="lay-card-desc">{m.desc}</div>
+                {locked && (
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 6, letterSpacing: '0.04em' }}>
+                    // διαθέσιμο σε {m.tier}
+                  </div>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {err && <div className="msg-error" style={{ marginTop: 16 }}>{err}</div>}
+
+      <div className="lay-foot">
+        <span className="lay-foot-info">
+          Επιλεγμένη: <strong>{LAYOUT_MODES.find(m => m.key === selected)?.name}</strong>
+        </span>
+        <span className="lay-foot-warn">// αλλαγή εφαρμόζεται άμεσα στο live μενού</span>
+        <span className="grow"/>
+        <button className="btn btn-ghost btn-sm" onClick={() => setSelected(initial)} disabled={!dirty || busy}>
+          Επαναφορά
+        </button>
+        <button className="btn btn-primary btn-sm" onClick={save} disabled={!dirty || busy}>
+          {busy ? <><span className="spinner"/>Αποθήκευση…</> : <><Icon name="save" size={12}/>Αποθήκευση</>}
+        </button>
+      </div>
+
+      {savedToast && <div className="toast">✓ Διάταξη αποθηκεύτηκε</div>}
+    </div>
+  );
+}
 
 export default function MenuEditor() {
-  const { shops, setShops, currentShopId, setCurrentShopId } = useAuth();
+  const navigate = useNavigate();
+  const { owner, shops, setShops, currentShopId, setCurrentShopId } = useAuth();
   const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
 
+  const [tab, setTab] = useState('content');
   const [menu, setMenu] = useState(shop?.menu || []);
   const [open, setOpen] = useState({ [shop?.menu?.[0]?.id]: true });
   const [editingCat, setEditingCat] = useState(null);
@@ -84,6 +289,8 @@ export default function MenuEditor() {
 
   if (!shop) return null;
 
+  const isPremiumPlus = owner?.plan === 'PREMIUM' || owner?.plan === 'EXCLUSIVE';
+
   return (
     <main className="page-main">
       <PageHeader
@@ -92,6 +299,34 @@ export default function MenuEditor() {
         sub="Προσθέστε κατηγορίες και προϊόντα. Οι αλλαγές αποθηκεύονται στο μενού του πελάτη."
         right={right}
       />
+
+      <div className="me-tabs">
+        <button className={`me-tab ${tab === 'content' ? 'on' : ''}`} onClick={() => setTab('content')}>
+          <Icon name="list" size={12}/>Περιεχόμενο
+        </button>
+        <button className={`me-tab ${tab === 'layout' ? 'on' : ''}`} onClick={() => setTab('layout')}>
+          <Icon name="grid" size={12}/>Διάταξη
+        </button>
+        <button
+          className="me-tab"
+          onClick={() => isPremiumPlus && navigate('/menu-appearance')}
+          disabled={!isPremiumPlus}
+          title={isPremiumPlus ? 'Ανοιχτό σε /menu-appearance' : 'Διαθέσιμο σε Premium+'}
+        >
+          <Icon name="palette" size={12}/>Εμφάνιση
+          {!isPremiumPlus && <Icon name="lock" size={11} stroke={1.4}/>}
+        </button>
+      </div>
+
+      {tab === 'layout' && (
+        <LayoutPicker
+          shop={shop}
+          owner={owner}
+          onSaved={(newTheme) => setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, theme: newTheme } : s))}
+        />
+      )}
+
+      {tab === 'content' && <>
 
       <div className="me-toolbar">
         <div className="me-search">
@@ -159,6 +394,7 @@ export default function MenuEditor() {
       <button className="me-add-cat" onClick={addCat}><Icon name="plus" size={12}/>Προσθήκη κατηγορίας</button>
 
       {savedToast && <div className="toast">✓ Οι αλλαγές αποθηκεύτηκαν</div>}
+      </>}
     </main>
   );
 }

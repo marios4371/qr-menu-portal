@@ -41,6 +41,8 @@ export function Icon({ name, size = 14, stroke = 1.6 }) {
     case "color":   return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>;
     case "spark":   return <svg {...p}><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>;
     case "cmd":     return <svg {...p}><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>;
+    case "settings":return <svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>;
+    case "package": return <svg {...p}><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>;
     default:        return <svg {...p}><circle cx="12" cy="12" r="9"/></svg>;
   }
 }
@@ -54,12 +56,16 @@ const PATH_MAP = {
   '/menu-editor':     'editor',
   '/menu-appearance': 'appearance',
   '/analytics':       'analytics',
+  '/inventory':       'inventory',
+  '/settings':        'settings',
 };
 const JUMP_PATHS = {
   dashboard:  '/dashboard',
   editor:     '/menu-editor',
   appearance: '/menu-appearance',
   analytics:  '/analytics',
+  inventory:  '/inventory',
+  settings:   '/settings',
 };
 
 // ── AppBar — kept for compatibility, hidden via CSS ───────────────────────────
@@ -74,11 +80,14 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   const { owner } = useAuth();
 
   const page = PATH_MAP[location.pathname] || 'dashboard';
+  const isExclusive = owner?.plan === 'EXCLUSIVE';
   const items = [
-    { key: 'dashboard',  label: 'Dashboard',        icon: 'home' },
+    { key: 'dashboard',  label: 'Dashboard',         icon: 'home' },
     { key: 'editor',     label: 'Menu Editor',       icon: 'edit' },
     { key: 'appearance', label: 'Εμφάνιση',          icon: 'palette', premium: true },
     { key: 'analytics',  label: 'Analytics',         icon: 'stat',    premium: true },
+    { key: 'inventory',  label: 'Απόθεμα',           icon: 'package', exclusive: true },
+    { key: 'settings',   label: 'Ρυθμίσεις',         icon: 'settings' },
   ];
 
   return (
@@ -93,7 +102,9 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
         <div className="sb-section-label">Navigation</div>
         <nav className="sb-nav">
           {items.map(it => {
-            const locked = it.premium && owner?.plan === 'STANDARD';
+            const lockedByPremium   = it.premium   && owner?.plan === 'STANDARD';
+            const lockedByExclusive = it.exclusive && !isExclusive;
+            const locked = lockedByPremium || lockedByExclusive;
             return (
               <button
                 key={it.key}

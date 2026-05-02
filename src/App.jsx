@@ -16,6 +16,8 @@ import Dashboard      from './pages/Dashboard';
 import MenuEditor     from './pages/MenuEditor';
 import MenuAppearance from './pages/MenuAppearance';
 import Analytics      from './pages/Analytics';
+import Inventory      from './pages/Inventory';
+import Settings       from './pages/Settings';
 
 const TWEAK_DEFAULTS = {
   showGrid:  true,
@@ -201,6 +203,8 @@ function AppContent() {
           <Route path="/menu-editor"     element={<MenuEditor/>}/>
           <Route path="/menu-appearance" element={<MenuAppearance/>}/>
           <Route path="/analytics"       element={<Analytics/>}/>
+          <Route path="/inventory"       element={<Inventory/>}/>
+          <Route path="/settings"        element={<Settings/>}/>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace/>}/>
