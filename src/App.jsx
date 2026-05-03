@@ -231,7 +231,8 @@ function AppContent() {
   );
 }
 
-// ── Root ──────────────────────────────────────────────────────────────────────
+
+// ── Root ────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <BrowserRouter basename={import.meta.env.PROD ? '/admin' : '/'}>

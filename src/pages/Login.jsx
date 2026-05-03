@@ -32,20 +32,23 @@ export default function Login() {
 
   return (
     <div className="auth">
-      <button className="auth-back" onClick={() => navigate('/')}><Icon name="back" size={12}/>Πίσω</button>
-      <div className="auth-card ticks">
-        <div className="auth-logo"><span className="dot"/>QRMenu</div>
-        <h1 className="auth-title">Καλώς ήρθατε πίσω.</h1>
-        <p className="auth-sub">Συνδεθείτε στον λογαριασμό σας για να συνεχίσετε.</p>
+      {/* Brand — fixed top-left */}
+      <button className="auth-brand" onClick={() => navigate('/')}>
+        <span className="dot"/>QRMenu
+      </button>
+
+      <div className="auth-card">
+        <h1 className="auth-title">Καλώς ήρθατε πίσω</h1>
+        <p className="auth-sub">Συνδεθείτε στο λογαριασμό σας</p>
 
         <form onSubmit={submit} style={{display:'flex', flexDirection:'column', gap:14}}>
           <div className="form-group">
-            <label htmlFor="email">EMAIL</label>
+            <label htmlFor="email">Email</label>
             <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)}
                    placeholder="you@business.com" autoComplete="email"/>
           </div>
           <div className="form-group">
-            <label htmlFor="pw">ΚΩΔΙΚΟΣ</label>
+            <label htmlFor="pw">Password</label>
             <div className="password-wrap">
               <input id="pw" type={showPw ? 'text' : 'password'} value={password}
                      onChange={e => setPassword(e.target.value)} placeholder="••••••••"
@@ -54,17 +57,20 @@ export default function Login() {
                 <Icon name={showPw ? 'eye-off' : 'eye'} size={14}/>
               </button>
             </div>
+            <button type="button" className="auth-forgot">Ξεχάσατε τον κωδικό;</button>
           </div>
 
           {err && <div className="msg-error">{err}</div>}
 
-          <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={busy}>
-            {busy ? <><span className="spinner"/>Σύνδεση…</> : <>Σύνδεση<Icon name="arrow" size={12}/></>}
+          <button type="submit" className="btn btn-primary btn-lg btn-full" disabled={busy}
+                  style={{marginTop: 4}}>
+            {busy ? <><span className="spinner"/>Σύνδεση…</> : 'Σύνδεση'}
           </button>
         </form>
 
+        <hr className="auth-divider"/>
         <div className="auth-foot">
-          Δεν έχετε λογαριασμό; <button onClick={() => navigate('/register')}>Εγγραφή →</button>
+          Νέος χρήστης; <button onClick={() => navigate('/register')}>Εγγραφή →</button>
         </div>
       </div>
     </div>
