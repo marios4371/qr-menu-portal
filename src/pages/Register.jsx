@@ -109,7 +109,6 @@ export default function Register() {
         plan: planValue || form.plan,
       });
       login(token, owner, shops || []);
-      navigate('/dashboard');
     } catch (error) {
       setErr(error.message || 'Σφάλμα εγγραφής');
       setStep(2);

@@ -1,12 +1,12 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { Icon } from '../components/Primitives';
 import { useAuth } from '../hooks/useAuth';
 import { ownerLogin } from '../services/api';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // still needed for brand logo + register link
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +22,6 @@ export default function Login() {
     try {
       const { token, owner, shops } = await ownerLogin({ email, password });
       login(token, owner, shops || []);
-      navigate('/dashboard');
     } catch (error) {
       setErr(error.message || 'Λάθος email ή κωδικός');
     } finally {

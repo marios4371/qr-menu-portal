@@ -488,11 +488,27 @@
   background: var(--bg-card); flex-shrink: 0;
 }
 .ma-preview-lab  { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; }
-.ma-preview-frame { flex: 1; overflow: hidden; padding: 24px; display: flex; align-items: flex-start; justify-content: center; }
+.ma-preview-frame { flex: 1; overflow-y: auto; padding: 24px; display: flex; align-items: flex-start; justify-content: center; }
 .ma-preview-inner {
-  width: 100%; max-width: 360px; max-height: 100%;
-  border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-md);
-  border: 1px solid var(--border-md); display: flex; flex-direction: column;
+  width: 320px; flex-shrink: 0;
+  height: 660px;
+  border-radius: 36px; overflow: hidden; box-shadow: 0 0 0 8px #1a1a1e, 0 0 0 9px var(--border-md), var(--shadow-lg);
+  border: none; display: flex; flex-direction: column;
+  position: relative;
+}
+/* Phone notch bar */
+.ma-preview-inner::before {
+  content: '';
+  display: block; flex-shrink: 0;
+  height: 28px; background: #1a1a1e;
+  border-radius: 0 0 18px 18px;
+  margin: 0 auto; width: 90px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+}
+/* Scrollable content area */
+.ma-preview-inner > div {
+  flex: 1; overflow-y: auto; padding-top: 12px;
 }
 
 .ma-acc-item { border-bottom: 1px solid var(--border); }
