@@ -164,6 +164,7 @@ export default function MenuAppearance() {
   const { owner, shops, setShops, currentShopId, setCurrentShopId } = useAuth();
   const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
 
+  const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
   const [theme,       setTheme]       = useState({ ...DEFAULT_THEME, ...(shop?.theme || {}) });
   const [openSection, setOpenSection] = useState('colors');
   const [busy,        setBusy]        = useState(false);
@@ -363,11 +364,21 @@ export default function MenuAppearance() {
         <div className="ma-preview">
           <div className="ma-preview-head">
             <span className="ma-preview-lab">Προεπισκόπηση</span>
-            <span className="tag tag-live"><span className="tag-dot"/>Live</span>
+            {isLegacy
+              ? <span className="tag" style={{fontSize:10,color:'var(--text-muted)'}}>Legacy template</span>
+              : <span className="tag tag-live"><span className="tag-dot"/>Live</span>
+            }
           </div>
           <div className="ma-preview-frame">
             <div className="ma-preview-inner" style={{ borderColor: theme.borderColor }}>
-              <PreviewMenu theme={theme} shop={shop}/>
+              {isLegacy
+                ? <iframe
+                    src={`https://1f6nesbrjk.execute-api.eu-central-1.amazonaws.com/default/?shop=${shop.shop_id}`}
+                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                    title="Live menu preview"
+                  />
+                : <PreviewMenu theme={theme} shop={shop}/>
+              }
             </div>
           </div>
         </div>

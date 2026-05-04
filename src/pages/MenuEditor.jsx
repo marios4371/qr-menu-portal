@@ -117,7 +117,7 @@ function LayoutPicker({ shop, owner, onSaved }) {
   const dirty = selected !== initial;
 
   const isLocked = (mode) => TIER_ORDER[mode.tier] > userTier;
-  const isLegacy = !!shop?.isLegacy;
+  const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
 
   const save = async () => {
     if (!dirty) return;

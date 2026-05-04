@@ -127,7 +127,11 @@ export default function Dashboard() {
   const enabledFeatures = planFeatures.length;
   const isExclusive    = owner?.plan === 'EXCLUSIVE';
 
-  const menuUrl = `${MENU_BASE_URL}/menu/${shop.shopSlug}`;
+  const LEGACY_MENU_BASE = 'https://1f6nesbrjk.execute-api.eu-central-1.amazonaws.com/default/';
+  const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
+  const menuUrl  = isLegacy
+    ? `${LEGACY_MENU_BASE}?shop=${shop.shop_id}`
+    : `${MENU_BASE_URL}/menu/${shop.shopSlug}`;
   const copyUrl = () => navigator.clipboard?.writeText(menuUrl);
 
   const right = (
@@ -166,7 +170,11 @@ export default function Dashboard() {
           </div>
           <div className="dash-shop-url">
             <Icon name="qr" size={14}/>
-            <span className="dash-shop-url-text" style={{fontSize:'0.7rem'}}>{MENU_BASE_URL.replace('https://','').split('.')[0]}…/menu/{shop.shopSlug}</span>
+            <span className="dash-shop-url-text" style={{fontSize:'0.7rem'}}>
+              {isLegacy
+                ? `1f6nesbrjk…/default/?shop=${shop.shop_id}`
+                : `${MENU_BASE_URL.replace('https://','').split('.')[0]}…/menu/${shop.shopSlug}`}
+            </span>
             <div className="dash-shop-url-act">
               <button onClick={copyUrl}><Icon name="copy" size={11}/>Copy</button>
               <button onClick={() => window.open(menuUrl, '_blank')}><Icon name="ext" size={11}/>Open</button>
