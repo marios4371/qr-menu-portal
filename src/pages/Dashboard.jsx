@@ -142,7 +142,7 @@ export default function Dashboard() {
       <div className="dash-shop-select-wrap">
         <span className="dash-shop-select-lab">SHOP</span>
         <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
-          {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
+          {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}{!s.shop_id?.startsWith('SHOP#') ? ' [LEGACY]' : ''}</option>)}
         </select>
       </div>
     </div>
@@ -163,7 +163,7 @@ export default function Dashboard() {
           <div className="dash-shop-top">
             <div>
               <div className="dash-shop-lab">CURRENT SHOP</div>
-              <div className="dash-shop-name">{shop.shopName}</div>
+              <div className="dash-shop-name" style={{display:'flex',alignItems:'center',gap:8}}>{shop.shopName}{isLegacy && <span style={{fontSize:'0.55rem',fontFamily:'var(--font-mono)',letterSpacing:'0.08em',padding:'2px 6px',border:'1px solid var(--accent)',color:'var(--accent)',borderRadius:3,opacity:0.75,flexShrink:0}}>LEGACY</span>}</div>
               <div className="dash-shop-type">{shop.businessType}</div>
             </div>
             <span className="dash-shop-live"><span className="d"/>LIVE</span>

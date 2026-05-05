@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { saveAppearance } from '../services/api';
+import { saveAppearance, MENU_BASE_URL } from '../services/api';
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 const DEFAULT_THEME = {
@@ -169,6 +169,7 @@ export default function MenuAppearance() {
   const [openSection, setOpenSection] = useState('colors');
   const [busy,        setBusy]        = useState(false);
   const [savedToast,  setSavedToast]  = useState(false);
+  const [previewKey,  setPreviewKey]  = useState(0);
   const [saveErr,     setSaveErr]     = useState('');
 
   useEffect(() => {
@@ -184,6 +185,7 @@ export default function MenuAppearance() {
       await saveAppearance({ shopId: shop.shop_id, theme });
       setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, theme } : s));
       setSavedToast(true);
+      setPreviewKey(k => k + 1);
       setTimeout(() => setSavedToast(false), 2000);
     } catch (e) {
       setSaveErr(e.message || 'Σφάλμα αποθήκευσης. Ελέγξτε τη σύνδεσή σας.');
@@ -377,7 +379,12 @@ export default function MenuAppearance() {
                     style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
                     title="Live menu preview"
                   />
-                : <PreviewMenu theme={theme} shop={shop}/>
+                : <iframe
+                    key={previewKey}
+                    src={`${MENU_BASE_URL}/menu/${shop.shopSlug}`}
+                    style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                    title="Live menu preview"
+                  />
               }
             </div>
           </div>
