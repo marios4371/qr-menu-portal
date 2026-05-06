@@ -23,7 +23,7 @@ function AccountTab({ owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">01 / ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ</span>
+            <span className="dash-panel-kicker">ΣΤΟΙΧΕΙΑ ΛΟΓΑΡΙΑΣΜΟΥ</span>
             <span className="dash-panel-title">Προσωπικά στοιχεία</span>
           </div>
         </div>
@@ -56,7 +56,7 @@ function AccountTab({ owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">02 / ΓΛΩΣΣΑ &amp; ΠΕΡΙΟΧΗ</span>
+            <span className="dash-panel-kicker">ΓΛΩΣΣΑ &amp; ΠΕΡΙΟΧΗ</span>
             <span className="dash-panel-title">Προτιμήσεις διεπαφής</span>
           </div>
         </div>
@@ -101,7 +101,7 @@ function PlanTab({ owner, onPlanClick }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">01 / ΤΡΕΧΟΝ ΠΛΑΝΟ</span>
+            <span className="dash-panel-kicker">ΤΡΕΧΟΝ ΠΛΑΝΟ</span>
             <span className="dash-panel-title">{currentPlan.name} · {currentPlan.price} {currentPlan.period}</span>
           </div>
           {!isExclusive && (
@@ -119,7 +119,7 @@ function PlanTab({ owner, onPlanClick }) {
           </div>
           <div className="set-stat">
             <div className="set-stat-lab">ΕΠΟΜΕΝΗ ΧΡΕΩΣΗ</div>
-            <div className="set-stat-val mono">15/05/2026</div>
+            <div className="set-stat-val mono">15/2026</div>
             <div className="set-stat-sub mono">{currentPlan.price} €</div>
           </div>
           <div className="set-stat">
@@ -133,7 +133,7 @@ function PlanTab({ owner, onPlanClick }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">02 / ΛΕΙΤΟΥΡΓΙΕΣ ΠΛΑΝΟΥ</span>
+            <span className="dash-panel-kicker">ΛΕΙΤΟΥΡΓΙΕΣ ΠΛΑΝΟΥ</span>
             <span className="dash-panel-title">Τι περιλαμβάνεται στο {currentPlan.name}</span>
           </div>
         </div>
@@ -150,7 +150,7 @@ function PlanTab({ owner, onPlanClick }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">03 / ΙΣΤΟΡΙΚΟ ΧΡΕΩΣΕΩΝ</span>
+            <span className="dash-panel-kicker">ΙΣΤΟΡΙΚΟ ΧΡΕΩΣΕΩΝ</span>
             <span className="dash-panel-title">Τιμολόγια</span>
           </div>
           <span className="set-hint">// mock data — backend integration: επόμενο sprint</span>
@@ -186,7 +186,7 @@ function ShopsTab({ shops, owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">01 / ΕΝΕΡΓΑ ΚΑΤΑΣΤΗΜΑΤΑ</span>
+            <span className="dash-panel-kicker">ΕΝΕΡΓΑ ΚΑΤΑΣΤΗΜΑΤΑ</span>
             <span className="dash-panel-title">{shops.length} / {limit === 999 ? '∞' : limit} καταστήματα</span>
           </div>
           <button className="btn btn-primary btn-sm" disabled={!canAdd}>
@@ -246,7 +246,7 @@ function SecurityTab({ owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">01 / ΚΩΔΙΚΟΣ</span>
+            <span className="dash-panel-kicker">ΚΩΔΙΚΟΣ</span>
             <span className="dash-panel-title">Αλλαγή κωδικού πρόσβασης</span>
           </div>
         </div>
@@ -266,7 +266,7 @@ function SecurityTab({ owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">02 / ΕΝΕΡΓΗ ΣΥΝΕΔΡΙΑ</span>
+            <span className="dash-panel-kicker">ΕΝΕΡΓΗ ΣΥΝΕΔΡΙΑ</span>
             <span className="dash-panel-title">Διαχείριση sessions</span>
           </div>
         </div>
@@ -282,7 +282,7 @@ function SecurityTab({ owner }) {
       <div className="dash-panel ticks">
         <div className="dash-panel-head">
           <div className="dash-panel-head-l">
-            <span className="dash-panel-kicker">03 / 2FA</span>
+            <span className="dash-panel-kicker">2FA</span>
             <span className="dash-panel-title">Two-factor authentication</span>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function Settings() {
   return (
     <main className="page-main">
       <PageHeader
-        kicker="06 / Ρυθμίσεις"
+        kicker="Ρυθμίσεις"
         title="Λογαριασμός & Διαχείριση"
         sub="Στοιχεία λογαριασμού, πλάνο, καταστήματα και ασφάλεια."
       />

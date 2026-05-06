@@ -139,7 +139,6 @@ function LayoutPicker({ shop, owner, onSaved }) {
     return (
       <div className="lay-wrap">
         <div className="lay-head">
-          <span className="ph-kicker">02 / ΔΙΑΤΑΞΗ</span>
           <h2>Custom template</h2>
           <p>
             Το κατάστημά σας χρησιμοποιεί δικό του custom HTML/CSS template (legacy shop). Η αλλαγή layout δεν είναι διαθέσιμη — οι αλλαγές περιεχομένου εμφανίζονται όμως κανονικά.
@@ -152,7 +151,7 @@ function LayoutPicker({ shop, owner, onSaved }) {
   return (
     <div className="lay-wrap">
       <div className="lay-head">
-        <span className="ph-kicker">02 / ΔΙΑΤΑΞΗ</span>
+        <span className="ph-kicker">ΔΙΑΤΑΞΗ</span>
         <h2>Πώς θα βλέπουν οι πελάτες σας το μενού;</h2>
         <p>Επιλέξτε μία από τις {LAYOUT_MODES.length} διατάξεις. Η αλλαγή εφαρμόζεται άμεσα στο live μενού — δεν χάνονται δεδομένα.</p>
       </div>
@@ -220,6 +219,7 @@ export default function MenuEditor() {
   const [dirty, setDirty] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const [saveErr, setSaveErr] = useState('');
+  const [productModalCat, setProductModalCat] = useState(null);
 
   useEffect(() => {
     if (shop) {
@@ -241,10 +241,9 @@ export default function MenuEditor() {
     setOpen(o => ({ ...o, [id]: true }));
     setEditingCat(id);
   };
-  const addProduct = (catId) => {
-    const id = 'p' + Date.now();
+  const addProduct = (catId, productData) => {
     update(menu.map(c => c.id === catId
-      ? { ...c, items: [...c.items, { id, name: 'Νέο προϊόν', price: 0, description: '', station: 'KITCHEN' }] }
+      ? { ...c, items: [...c.items, productData] }
       : c));
   };
   const updateProduct = (catId, pid, patch) => {
@@ -294,9 +293,8 @@ export default function MenuEditor() {
   return (
     <main className="page-main">
       <PageHeader
-        kicker="02 / Επεξεργασία Μενού"
-        title="Διαχείριση μενού"
-        sub="Προσθέστε κατηγορίες και προϊόντα. Οι αλλαγές αποθηκεύονται στο μενού του πελάτη."
+        title="Επεξεργασία μενού"
+        sub="Προσθέστε κατηγορίες και προϊόντα. Οι αλλαγές αποθηκεύονται αυτόματα."
         right={right}
       />
 
@@ -329,9 +327,9 @@ export default function MenuEditor() {
       {tab === 'content' && <>
 
       <div className="me-toolbar">
-        <div className="me-search">
-          <Icon name="search" size={13}/>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Αναζήτηση προϊόντων…"/>
+        <div className="me-search-wrap">
+          <Icon name="search" size={16}/>
+          <input className="me-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Αναζήτηση προϊόντων…"/>
         </div>
         <div className="me-counter">
           <span className={dirty ? 'me-dirty' : ''}>
@@ -373,7 +371,7 @@ export default function MenuEditor() {
               </div>
               <span className="me-cat-count">{cat.items.length} items</span>
               <div className="me-cat-acts" onClick={e => e.stopPropagation()}>
-                <button className="btn btn-ghost btn-sm" onClick={() => addProduct(cat.id)}><Icon name="plus" size={11}/>Προϊόν</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setProductModalCat(cat.id)}><Icon name="plus" size={11}/>Προϊόν</button>
                 <button className="btn btn-ghost btn-sm" onClick={() => deleteCat(cat.id)}><Icon name="trash" size={11}/></button>
               </div>
             </div>
@@ -394,8 +392,124 @@ export default function MenuEditor() {
       <button className="me-add-cat" onClick={addCat}><Icon name="plus" size={12}/>Προσθήκη κατηγορίας</button>
 
       {savedToast && <div className="toast">✓ Οι αλλαγές αποθηκεύτηκαν</div>}
+
+      {productModalCat && (
+        <ProductModal
+          onClose={() => setProductModalCat(null)}
+          onAdd={(productData) => {
+            addProduct(productModalCat, productData);
+            setProductModalCat(null);
+          }}
+        />
+      )}
       </>}
     </main>
+  );
+}
+
+/* ─── Product Modal ───────────────────────────────────────────────────── */
+function ProductModal({ onClose, onAdd }) {
+  const [name, setName]               = useState('');
+  const [price, setPrice]             = useState('');
+  const [description, setDescription] = useState('');
+  const [station, setStation]         = useState('KITCHEN');
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    onAdd({
+      id:          'p' + Date.now(),
+      name:        name.trim(),
+      price:       parseFloat(price) || 0,
+      description: description.trim(),
+      station,
+    });
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+
+        {/* Head */}
+        <div className="modal-head">
+          <h3>Νέο Προϊόν</h3>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+
+        {/* Body */}
+        <div className="modal-body">
+
+          {/* Name */}
+          <div className="modal-field">
+            <label className="modal-label">Όνομα *</label>
+            <input
+              className="modal-input"
+              placeholder="π.χ. Espresso"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
+
+          {/* Price */}
+          <div className="modal-field">
+            <label className="modal-label">Τιμή (€)</label>
+            <input
+              className="modal-input"
+              type="number"
+              min="0"
+              step="0.10"
+              placeholder="0.00"
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="modal-field">
+            <label className="modal-label">Περιγραφή</label>
+            <textarea
+              className="modal-textarea"
+              placeholder="Προαιρετική περιγραφή…"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+            />
+          </div>
+
+          {/* Station */}
+          <div className="modal-field">
+            <label className="modal-label">Σταθμός</label>
+            <div className="modal-chips">
+              {['KITCHEN', 'BAR', 'GRILL', 'COLD'].map(s => (
+                <button
+                  key={s}
+                  className={'modal-chip' + (station === s ? ' modal-chip-active' : '')}
+                  onClick={() => setStation(s)}
+                >
+                  {s === 'KITCHEN' ? '🍳 Κουζίνα'
+                    : s === 'BAR'  ? '🍹 Bar'
+                    : s === 'GRILL'? '🔥 Grill'
+                    :                '❄️ Cold'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Foot */}
+        <div className="modal-foot">
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>Ακύρωση</button>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+          >
+            Προσθήκη
+          </button>
+        </div>
+
+      </div>
+    </div>
   );
 }
 

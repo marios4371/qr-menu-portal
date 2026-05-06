@@ -424,12 +424,21 @@
   padding: 12px 20px; border-bottom: 1px solid var(--border);
   background: var(--bg-card-2); flex-shrink: 0;
 }
-.me-search {
-  flex: 1; min-width: 160px; padding: 6px 10px; font-size: 13px;
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); outline: none; font-family: var(--font); color: var(--text);
+/* Search wrap: icon sits beside input */
+.me-search-wrap {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; max-width: 520px;
+  color: var(--text-muted);
 }
-.me-search:focus { border-color: var(--accent); }
+.me-search {
+  flex: 1; height: 38px; padding: 0 14px; font-size: 13.5px;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: var(--radius-md); outline: none;
+  font-family: var(--font); color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+.me-search:focus { border-color: var(--border-strong); background: var(--bg-card); }
+.me-search::placeholder { color: var(--text-muted); }
 
 .me-cat-list { padding: 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; overflow-y: auto; }
 .me-cat-head {
@@ -470,6 +479,91 @@
 .me-empty {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 10px; padding: 64px; color: var(--text-muted); font-size: 13px; text-align: center;
+}
+
+/* ── Modal (shared) ─────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 440px;
+  display: flex; flex-direction: column;
+  animation: slideUp 0.2s ease;
+  overflow: hidden;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 22px 0;
+}
+.modal-head h3 {
+  font-size: 1rem; font-weight: 600;
+  letter-spacing: -0.02em; color: var(--text); margin: 0;
+}
+.modal-close {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 1.1rem; line-height: 1;
+  padding: 4px; border-radius: var(--radius);
+  transition: color 0.13s, background 0.13s;
+}
+.modal-close:hover { color: var(--text); background: var(--bg-hover); }
+
+.modal-body {
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.modal-field { display: flex; flex-direction: column; gap: 5px; }
+.modal-label {
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.modal-input, .modal-textarea {
+  width: 100%; padding: 9px 12px; font-size: 0.875rem;
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: var(--radius); outline: none;
+  font-family: var(--font); color: var(--text);
+  transition: border-color 0.14s, background 0.14s;
+  box-sizing: border-box;
+}
+.modal-input:focus, .modal-textarea:focus {
+  border-color: var(--border-strong); background: var(--bg-card);
+}
+.modal-input::placeholder, .modal-textarea::placeholder { color: var(--text-muted); }
+.modal-textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+
+/* Station chip group */
+.modal-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.modal-chip {
+  padding: 6px 14px; border-radius: var(--radius);
+  border: 1px solid var(--border-md);
+  background: var(--bg-card); cursor: pointer;
+  font-family: var(--font); font-size: 0.8rem; font-weight: 500;
+  color: var(--text-sub);
+  transition: border-color 0.13s, background 0.13s, color 0.13s;
+}
+.modal-chip:hover { border-color: var(--border-hi); color: var(--text); }
+.modal-chip-active {
+  background: var(--accent); border-color: var(--accent);
+  color: var(--accent-fg) !important;
+}
+
+.modal-foot {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 0 22px 20px;
 }
 
 /* ── Menu Appearance ────────────────────────────────────────────────────── */

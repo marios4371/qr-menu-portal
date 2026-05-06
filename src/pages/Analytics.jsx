@@ -198,7 +198,7 @@ export default function Analytics() {
   if (!isPremium) {
     return (
       <main className="page-main">
-        <PageHeader kicker="04 / Analytics" title="Order Analytics" sub="Διαθέσιμο σε Premium και Exclusive πλάνο."/>
+        <PageHeader kicker="Analytics" title="Order Analytics" sub="Διαθέσιμο σε Premium και Exclusive πλάνο."/>
         <div className="an-gate ticks">
           <div className="an-gate-icon"><Icon name="stat" size={32}/></div>
           <div className="an-gate-title">Premium Feature</div>
@@ -226,7 +226,7 @@ export default function Analytics() {
   return (
     <main className="page-main">
       <PageHeader
-        kicker="04 / Analytics"
+        kicker="Analytics"
         title="Order Analytics"
         sub="Φιλτράρισε παραγγελίες. Κάθε επιλογή χτίζει ένα DynamoDB query."
         right={right}

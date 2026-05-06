@@ -158,7 +158,7 @@ export default function Inventory() {
   if (!isExclusive) {
     return (
       <main className="page-main">
-        <PageHeader kicker="05 / Απόθεμα" title="Διαχείριση κάβας" sub="Διαθέσιμο μόνο στο Exclusive πλάνο."/>
+        <PageHeader kicker="Απόθεμα" title="Διαχείριση κάβας" sub="Διαθέσιμο μόνο στο Exclusive πλάνο."/>
         <div className="an-gate ticks">
           <div className="an-gate-icon"><Icon name="package" size={32}/></div>
           <div className="an-gate-title">Exclusive Feature</div>
@@ -183,7 +183,7 @@ export default function Inventory() {
   return (
     <main className="page-main">
       <PageHeader
-        kicker="05 / Απόθεμα"
+        kicker="Απόθεμα"
         title="Διαχείριση κάβας"
         sub={
           items.length === 0
