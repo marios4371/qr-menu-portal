@@ -358,7 +358,6 @@ export default function MenuEditor() {
         {filtered.map((cat, i) => (
           <div key={cat.id} className={`me-cat ${open[cat.id] ? 'open' : ''} ticks`}>
             <div className="me-cat-head" onClick={() => toggleCat(cat.id)}>
-              <span className="me-cat-num">{String(i+1).padStart(2,'0')}</span>
               <button className={`me-cat-toggle ${open[cat.id] ? 'on' : ''}`}><Icon name="chev-r" size={13}/></button>
               <div className="me-cat-name" onClick={e => { e.stopPropagation(); setEditingCat(cat.id); }}>
                 {editingCat === cat.id ? (
