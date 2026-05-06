@@ -541,7 +541,7 @@
 @keyframes dashSpin { to { transform: rotate(360deg); } }
 
 /* ────────────────────────────────────────────────────────────
-   RESPONSIVE
+  RESPONSIVE
    ──────────────────────────────────────────────────────────── */
 @media (max-width: 1080px) {
   .topRow { grid-template-columns: 1fr; }
@@ -551,4 +551,5 @@
   .pageMain { padding: 20px; }
   .statsCol { grid-template-columns: 1fr; }
   .urlRow { flex-wrap: wrap; }
-  .sectionHead { flex-direction: column; alig
+  .sectionHead { flex-direction: column; align-items: flex-start; }
+}
