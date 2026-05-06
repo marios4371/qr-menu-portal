@@ -220,6 +220,7 @@ export default function MenuEditor() {
   const [savedToast, setSavedToast] = useState(false);
   const [saveErr, setSaveErr] = useState('');
   const [productModalCat, setProductModalCat] = useState(null);
+  const [emptyHintCat,    setEmptyHintCat]    = useState(null);
 
   useEffect(() => {
     if (shop) {
@@ -230,7 +231,17 @@ export default function MenuEditor() {
   }, [shop?.shop_id]);
 
   const update = (newMenu) => { setMenu(newMenu); setDirty(true); };
-  const toggleCat = (id) => setOpen(o => ({ ...o, [id]: !o[id] }));
+  const toggleCat = (id) => {
+    const isOpening = !open[id];
+    const cat = menu.find(c => c.id === id);
+    setOpen(o => ({ ...o, [id]: !o[id] }));
+    if (isOpening && cat && cat.items.length === 0) {
+      setEmptyHintCat(id);
+      setTimeout(() => setEmptyHintCat(null), 3000);
+    } else {
+      setEmptyHintCat(null);
+    }
+  };
   const renameCat = (id, name) => update(menu.map(c => c.id === id ? { ...c, name } : c));
   const deleteCat = (id) => {
     if (window.confirm('Διαγραφή κατηγορίας;')) update(menu.filter(c => c.id !== id));
@@ -358,7 +369,7 @@ export default function MenuEditor() {
         {filtered.map((cat, i) => (
           <div key={cat.id} className={`me-cat ${open[cat.id] ? 'open' : ''} ticks`}>
             <div className="me-cat-head" onClick={() => toggleCat(cat.id)}>
-              <button className={`me-cat-toggle ${open[cat.id] ? 'on' : ''}`}><Icon name="chev-r" size={13}/></button>
+              <span className={`me-cat-arrow ${open[cat.id] ? 'open' : ''}`}><Icon name="chev-r" size={14}/></span>
               <div className="me-cat-name" onClick={e => { e.stopPropagation(); setEditingCat(cat.id); }}>
                 {editingCat === cat.id ? (
                   <input autoFocus value={cat.name}
@@ -368,10 +379,18 @@ export default function MenuEditor() {
                          onClick={e => e.stopPropagation()}/>
                 ) : cat.name}
               </div>
-              <span className="me-cat-count">{cat.items.length} items</span>
+
               <div className="me-cat-acts" onClick={e => e.stopPropagation()}>
-                <button className="btn btn-ghost btn-sm" onClick={() => setProductModalCat(cat.id)}><Icon name="plus" size={11}/>Προϊόν</button>
-                <button className="btn btn-ghost btn-sm" onClick={() => deleteCat(cat.id)}><Icon name="trash" size={11}/></button>
+                <div className="me-cat-add-wrap">
+                  {emptyHintCat === cat.id && (
+                    <div className="me-cat-hint">Παρακαλώ εισάγετε προϊόν</div>
+                  )}
+                  <button
+                    className={`me-cat-add-btn${emptyHintCat === cat.id ? ' hint' : ''}`}
+                    onClick={() => { setProductModalCat(cat.id); setEmptyHintCat(null); }}
+                  ><Icon name="plus" size={11}/>Προϊόν</button>
+                </div>
+                <button className="me-cat-del-btn" onClick={() => deleteCat(cat.id)}><Icon name="trash" size={11}/></button>
               </div>
             </div>
             {open[cat.id] && (
