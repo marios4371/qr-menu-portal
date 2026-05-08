@@ -581,16 +581,16 @@ function ProductModal({ initialData, onClose, onSubmit }) {
           <div className="modal-field">
             <label className="modal-label">Σταθμός</label>
             <div className="modal-chips">
-              {['KITCHEN', 'BAR', 'GRILL', 'COLD'].map(s => (
+              {['KITCHEN', 'BAR'].map(s => (
                 <button
                   key={s}
                   className={'modal-chip' + (station === s ? ' modal-chip-active' : '')}
                   onClick={() => setStation(s)}
                 >
-                  {s === 'KITCHEN' ? '🍳 Κουζίνα'
-                    : s === 'BAR'  ? '🍹 Bar'
-                    : s === 'GRILL'? '🔥 Grill'
-                    :                '❄️ Cold'}
+                  {s === 'KITCHEN' ? 'Κουζίνα'
+                    : s === 'BAR'  ? 'Bar'
+                    : s === 'GRILL'? 'Grill'
+                    :                'Cold'}
                 </button>
               ))}
             </div>
