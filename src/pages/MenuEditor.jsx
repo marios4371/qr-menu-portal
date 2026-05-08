@@ -626,18 +626,28 @@ function ProductRow({ product, onEdit, onDelete }) {
 
   return (
     <div className="me-prod">
-      <div className="me-prod-info">
-        <span className="me-prod-name">{product.name}</span>
-        {product.description && (
-          <span className="me-prod-desc">{product.description}</span>
-        )}
+      <div className="me-prod-fields">
+        <div className="me-prod-field">
+          <span className="me-prod-field-lbl">Ποτό</span>
+          <span className="me-prod-field-val">{product.name}</span>
+        </div>
+        <div className="me-prod-field">
+          <span className="me-prod-field-lbl">Περιγραφή</span>
+          <span className="me-prod-field-val me-prod-field-muted">
+            {product.description || <em>—</em>}
+          </span>
+        </div>
+        <div className="me-prod-field">
+          <span className="me-prod-field-lbl">Τιμή</span>
+          <span className="me-prod-field-val me-prod-field-price">
+            {Number(product.price).toFixed(2).replace('.', ',')}€
+          </span>
+        </div>
+        <div className="me-prod-field">
+          <span className="me-prod-field-lbl">Ποστο</span>
+          <span className="me-prod-field-val">{stationLabel}</span>
+        </div>
       </div>
-      <span className={`me-prod-station ${product.station === 'BAR' ? 'bar' : 'kit'}`}>
-        {stationLabel}
-      </span>
-      <span className="me-prod-price">
-        {Number(product.price).toFixed(2).replace('.', ',')}€
-      </span>
       <div className="me-prod-acts">
         <button className="me-prod-edit-btn" onClick={onEdit} title="Επεξεργασία">
           <Icon name="edit" size={11}/>

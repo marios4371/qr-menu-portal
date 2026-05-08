@@ -546,10 +546,28 @@
   border-bottom: 1px solid var(--border); transition: background var(--transition);
 }
 .me-prod:hover { background: var(--bg-card-2); }
-.me-prod-info  { flex: 1; min-width: 0; }
-.me-prod-name  { font-size: 13px; font-weight: 500; color: var(--text); }
-.me-prod-desc  { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.me-prod-price { font-size: 13px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+
+/* Labeled fields row */
+.me-prod-fields {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+}
+.me-prod-field {
+  display: flex; align-items: baseline; gap: 5px; min-width: 0;
+}
+.me-prod-field-lbl {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--text-muted);
+  flex-shrink: 0;
+}
+.me-prod-field-lbl::after { content: ':'; }
+.me-prod-field-val {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.me-prod-field-muted { font-weight: 400; color: var(--text-sub); }
+.me-prod-field-price { font-weight: 700; color: var(--accent); }
+
 .me-prod-acts  { display: flex; gap: 4px; flex-shrink: 0; }
 
 /* Product edit button — solid black */
