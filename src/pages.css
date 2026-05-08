@@ -491,6 +491,19 @@
 }
 .me-cat-del-btn:hover { background: #DC2626; }
 
+/* Edit category button — gray outlined */
+.me-cat-edit-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; font-size: 12px; font-weight: 500;
+  font-family: var(--font);
+  background: var(--bg-card); color: var(--text-sub);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; flex-shrink: 0;
+  transition: background 0.13s, color 0.13s, border-color 0.13s;
+  white-space: nowrap;
+}
+.me-cat-edit-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--text-muted); }
+
 /* Tooltip wrapper + bubble */
 .me-cat-add-wrap {
   position: relative;
@@ -538,6 +551,26 @@
 .me-prod-desc  { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .me-prod-price { font-size: 13px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
 .me-prod-acts  { display: flex; gap: 4px; flex-shrink: 0; }
+
+/* Product edit button — solid black */
+.me-prod-edit-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--text); color: #FFFFFF;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  flex-shrink: 0; transition: background 0.13s;
+}
+.me-prod-edit-btn:hover { background: #262626; }
+
+/* Product delete button — solid black (hover red) */
+.me-prod-del-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: var(--text); color: #FFFFFF;
+  border: none; border-radius: var(--radius); cursor: pointer;
+  flex-shrink: 0; transition: background 0.13s;
+}
+.me-prod-del-btn:hover { background: #DC2626; }
 .me-prod-empty { padding: 32px; text-align: center; color: var(--text-muted); font-size: 13px; }
 .me-counter    { font-size: 11px; color: var(--text-muted); }
 
@@ -568,6 +601,8 @@
   overflow: hidden;
 }
 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal-sm { max-width: 360px; }
 
 .modal-head {
   display: flex; align-items: center; justify-content: space-between;

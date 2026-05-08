@@ -221,6 +221,10 @@ export default function MenuEditor() {
   const [saveErr, setSaveErr] = useState('');
   const [productModalCat, setProductModalCat] = useState(null);
   const [emptyHintCat,    setEmptyHintCat]    = useState(null);
+  // Category rename modal
+  const [editCatModalId, setEditCatModalId] = useState(null);
+  // Product edit modal: { catId, product }
+  const [editProductModal, setEditProductModal] = useState(null);
 
   useEffect(() => {
     if (shop) {
@@ -301,6 +305,9 @@ export default function MenuEditor() {
 
   const isPremiumPlus = owner?.plan === 'PREMIUM' || owner?.plan === 'EXCLUSIVE';
 
+  // Find cat being edited for CategoryModal
+  const editCat = editCatModalId ? menu.find(c => c.id === editCatModalId) : null;
+
   return (
     <main className="page-main">
       <PageHeader
@@ -370,17 +377,19 @@ export default function MenuEditor() {
           <div key={cat.id} className={`me-cat ${open[cat.id] ? 'open' : ''} ticks`}>
             <div className="me-cat-head" onClick={() => toggleCat(cat.id)}>
               <span className={`me-cat-arrow ${open[cat.id] ? 'open' : ''}`}><Icon name="chev-r" size={14}/></span>
-              <div className="me-cat-name" onClick={e => { e.stopPropagation(); setEditingCat(cat.id); }}>
-                {editingCat === cat.id ? (
-                  <input autoFocus value={cat.name}
-                         onChange={e => renameCat(cat.id, e.target.value)}
-                         onBlur={() => setEditingCat(null)}
-                         onKeyDown={e => e.key === 'Enter' && setEditingCat(null)}
-                         onClick={e => e.stopPropagation()}/>
-                ) : cat.name}
+              <div className="me-cat-name">
+                {cat.name}
               </div>
 
               <div className="me-cat-acts" onClick={e => e.stopPropagation()}>
+                {/* Edit category button */}
+                <button
+                  className="me-cat-edit-btn"
+                  title="Επεξεργασία κατηγορίας"
+                  onClick={() => setEditCatModalId(cat.id)}
+                ><Icon name="edit" size={11}/>Κατηγορία</button>
+
+                {/* Add product button */}
                 <div className="me-cat-add-wrap">
                   {emptyHintCat === cat.id && (
                     <div className="me-cat-hint">Παρακαλώ εισάγετε προϊόν</div>
@@ -390,6 +399,8 @@ export default function MenuEditor() {
                     onClick={() => { setProductModalCat(cat.id); setEmptyHintCat(null); }}
                   ><Icon name="plus" size={11}/>Προϊόν</button>
                 </div>
+
+                {/* Delete category button */}
                 <button className="me-cat-del-btn" onClick={() => deleteCat(cat.id)}><Icon name="trash" size={11}/></button>
               </div>
             </div>
@@ -397,9 +408,12 @@ export default function MenuEditor() {
               <div className="me-prod-list">
                 {cat.items.length === 0 && <div className="me-prod-empty">// Καμία προσθήκη ακόμα — πατήστε «+ Προϊόν»</div>}
                 {cat.items.map(p => (
-                  <ProductRow key={p.id} product={p}
-                              onUpdate={patch => updateProduct(cat.id, p.id, patch)}
-                              onDelete={() => deleteProduct(cat.id, p.id)}/>
+                  <ProductRow
+                    key={p.id}
+                    product={p}
+                    onEdit={() => setEditProductModal({ catId: cat.id, product: p })}
+                    onDelete={() => deleteProduct(cat.id, p.id)}
+                  />
                 ))}
               </div>
             )}
@@ -411,12 +425,37 @@ export default function MenuEditor() {
 
       {savedToast && <div className="toast">✓ Οι αλλαγές αποθηκεύτηκαν</div>}
 
+      {/* Add product modal */}
       {productModalCat && (
         <ProductModal
           onClose={() => setProductModalCat(null)}
-          onAdd={(productData) => {
+          onSubmit={(productData) => {
             addProduct(productModalCat, productData);
             setProductModalCat(null);
+          }}
+        />
+      )}
+
+      {/* Edit product modal */}
+      {editProductModal && (
+        <ProductModal
+          initialData={editProductModal.product}
+          onClose={() => setEditProductModal(null)}
+          onSubmit={(productData) => {
+            updateProduct(editProductModal.catId, editProductModal.product.id, productData);
+            setEditProductModal(null);
+          }}
+        />
+      )}
+
+      {/* Edit category modal */}
+      {editCat && (
+        <CategoryModal
+          initialName={editCat.name}
+          onClose={() => setEditCatModalId(null)}
+          onSave={(newName) => {
+            renameCat(editCatModalId, newName);
+            setEditCatModalId(null);
           }}
         />
       )}
@@ -425,17 +464,62 @@ export default function MenuEditor() {
   );
 }
 
-/* ─── Product Modal ───────────────────────────────────────────────────── */
-function ProductModal({ onClose, onAdd }) {
-  const [name, setName]               = useState('');
-  const [price, setPrice]             = useState('');
-  const [description, setDescription] = useState('');
-  const [station, setStation]         = useState('KITCHEN');
+/* ─── Category Modal ──────────────────────────────────────────────────────── */
+function CategoryModal({ initialName, onClose, onSave }) {
+  const [name, setName] = useState(initialName || '');
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onAdd({
-      id:          'p' + Date.now(),
+    onSave(name.trim());
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal modal-sm" onClick={e => e.stopPropagation()}>
+        <div className="modal-head">
+          <h3>Επεξεργασία κατηγορίας</h3>
+          <button className="modal-close" onClick={onClose}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="modal-field">
+            <label className="modal-label">Όνομα κατηγορίας *</label>
+            <input
+              className="modal-input"
+              placeholder="π.χ. Καφέδες"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+              autoFocus
+            />
+          </div>
+        </div>
+        <div className="modal-foot">
+          <button className="btn btn-ghost btn-sm" onClick={onClose}>Ακύρωση</button>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+          >
+            ΟΚ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Product Modal ───────────────────────────────────────────────────────── */
+function ProductModal({ initialData, onClose, onSubmit }) {
+  const isEdit = !!initialData;
+  const [name, setName]               = useState(initialData?.name        || '');
+  const [price, setPrice]             = useState(initialData?.price != null ? String(initialData.price) : '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [station, setStation]         = useState(initialData?.station      || 'KITCHEN');
+
+  const handleSubmit = () => {
+    if (!name.trim()) return;
+    onSubmit({
+      id:          initialData?.id || ('p' + Date.now()),
       name:        name.trim(),
       price:       parseFloat(price) || 0,
       description: description.trim(),
@@ -449,7 +533,7 @@ function ProductModal({ onClose, onAdd }) {
 
         {/* Head */}
         <div className="modal-head">
-          <h3>Νέο Προϊόν</h3>
+          <h3>{isEdit ? 'Επεξεργασία Προϊόντος' : 'Νέο Προϊόν'}</h3>
           <button className="modal-close" onClick={onClose}>✕</button>
         </div>
 
@@ -522,7 +606,7 @@ function ProductModal({ onClose, onAdd }) {
             onClick={handleSubmit}
             disabled={!name.trim()}
           >
-            Προσθήκη
+            {isEdit ? 'Αποθήκευση' : 'Προσθήκη'}
           </button>
         </div>
 
@@ -531,46 +615,36 @@ function ProductModal({ onClose, onAdd }) {
   );
 }
 
-function ProductRow({ product, onUpdate, onDelete }) {
-  const [editing, setEditing] = useState(null);
+/* ─── Product Row (read-only display) ────────────────────────────────────── */
+function ProductRow({ product, onEdit, onDelete }) {
+  const stationLabel = {
+    KITCHEN: '🍳 Κουζίνα',
+    BAR:     '🍹 Bar',
+    GRILL:   '🔥 Grill',
+    COLD:    '❄️ Cold',
+  }[product.station] || product.station;
+
   return (
     <div className="me-prod">
       <div className="me-prod-info">
-        {editing === 'name' ? (
-          <input autoFocus value={product.name} onChange={e => onUpdate({ name: e.target.value })}
-                 onBlur={() => setEditing(null)} onKeyDown={e => e.key === 'Enter' && setEditing(null)}
-                 style={{padding:'4px 8px', fontSize:'0.9rem'}}/>
-        ) : (
-          <span className="me-prod-name" onClick={() => setEditing('name')}>{product.name}</span>
-        )}
-        {editing === 'desc' ? (
-          <input autoFocus value={product.description || ''} onChange={e => onUpdate({ description: e.target.value })}
-                 onBlur={() => setEditing(null)} onKeyDown={e => e.key === 'Enter' && setEditing(null)}
-                 placeholder="Περιγραφή" style={{padding:'4px 8px', fontSize:'0.78rem'}}/>
-        ) : (
-          <span className="me-prod-desc" onClick={() => setEditing('desc')}>
-            {product.description || <em style={{color:'var(--text-muted)'}}>+ προσθέστε περιγραφή</em>}
-          </span>
+        <span className="me-prod-name">{product.name}</span>
+        {product.description && (
+          <span className="me-prod-desc">{product.description}</span>
         )}
       </div>
-      <span className={`me-prod-station ${product.station === 'BAR' ? 'bar' : 'kit'}`}
-            onClick={() => onUpdate({ station: product.station === 'BAR' ? 'KITCHEN' : 'BAR' })}
-            title="Click για εναλλαγή" style={{cursor:'pointer'}}>
-        <Icon name={product.station === 'BAR' ? 'bar' : 'kitchen'} size={10}/>
-        {product.station === 'BAR' ? 'Bar' : 'Kit'}
+      <span className={`me-prod-station ${product.station === 'BAR' ? 'bar' : 'kit'}`}>
+        {stationLabel}
       </span>
-      {editing === 'price' ? (
-        <input autoFocus type="number" step="0.10" value={product.price}
-               onChange={e => onUpdate({ price: parseFloat(e.target.value) || 0 })}
-               onBlur={() => setEditing(null)} onKeyDown={e => e.key === 'Enter' && setEditing(null)}
-               style={{padding:'4px 8px', fontSize:'0.84rem', textAlign:'right', fontFamily:'var(--font-mono)'}}/>
-      ) : (
-        <span className="me-prod-price" onClick={() => setEditing('price')}>
-          {Number(product.price).toFixed(2).replace('.',',')}€
-        </span>
-      )}
+      <span className="me-prod-price">
+        {Number(product.price).toFixed(2).replace('.', ',')}€
+      </span>
       <div className="me-prod-acts">
-        <button className="btn btn-ghost btn-sm" onClick={onDelete}><Icon name="trash" size={11}/></button>
+        <button className="me-prod-edit-btn" onClick={onEdit} title="Επεξεργασία">
+          <Icon name="edit" size={11}/>
+        </button>
+        <button className="me-prod-del-btn" onClick={onDelete} title="Διαγραφή">
+          <Icon name="trash" size={11}/>
+        </button>
       </div>
     </div>
   );
