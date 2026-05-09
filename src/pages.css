@@ -444,11 +444,12 @@
 .me-cat-head {
   display: flex; align-items: center; gap: 8px; padding: 9px 12px;
   background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); cursor: pointer;
+  border-radius: var(--radius); cursor: pointer; user-select: none;
   transition: border-color var(--transition), background var(--transition);
 }
 .me-cat-head:hover { border-color: var(--border-md); }
-.me-cat-name  { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; cursor: text; }
+.me-cat-head * { cursor: pointer; }
+.me-cat-name  { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
 
 /* Arrow — bare, rotates when open */
 .me-cat-arrow {
@@ -544,6 +545,7 @@
 .me-prod {
   display: flex; align-items: center; gap: 12px; padding: 10px 16px;
   border-bottom: 1px solid var(--border); transition: background var(--transition);
+  user-select: none;
 }
 .me-prod:hover { background: var(--bg-card-2); }
 
@@ -551,7 +553,9 @@
 .me-prod-fields {
   flex: 1; min-width: 0;
   display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  cursor: default;
 }
+.me-prod-fields * { cursor: default; }
 .me-prod-field {
   display: flex; align-items: baseline; gap: 5px; min-width: 0;
 }

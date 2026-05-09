@@ -618,10 +618,10 @@ function ProductModal({ initialData, onClose, onSubmit }) {
 /* ─── Product Row (read-only display) ────────────────────────────────────── */
 function ProductRow({ product, onEdit, onDelete }) {
   const stationLabel = {
-    KITCHEN: '🍳 Κουζίνα',
-    BAR:     '🍹 Bar',
-    GRILL:   '🔥 Grill',
-    COLD:    '❄️ Cold',
+    KITCHEN: 'Κουζίνα',
+    BAR:     'Bar',
+    GRILL:   'Grill',
+    COLD:    'Cold',
   }[product.station] || product.station;
 
   return (
