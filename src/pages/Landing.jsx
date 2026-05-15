@@ -76,13 +76,20 @@ const FEATURES = [
   },
 ];
 
+const PRICING_PLANS = [
+  { name: 'Standard',  price: '12€/μήνα',    featured: false, plan: 'STANDARD' },
+  { name: 'Premium',   price: '16.70€/μήνα', featured: true,  plan: 'PREMIUM'  },
+  { name: 'Exclusive', price: '25€/μήνα',    featured: false, plan: 'EXCLUSIVE' },
+];
+
 export default function Landing() {
   const navigate = useNavigate();
-  const [active, setActive] = useState('hero');
-  const [email, setEmail] = useState('');
+  const [active, setActive]       = useState('hero');
+  const [aboutSlide, setAboutSlide] = useState(0); // 0 = panel1, 1 = panel2
+  const [email, setEmail]         = useState('');
 
   useEffect(() => {
-    const sections = ['hero', 'about1', 'about2', 'pricing', 'contact'];
+    const sections = ['hero', 'about', 'pricing', 'contact'];
     const onScroll = () => {
       for (const id of sections) {
         const el = document.getElementById(id);
@@ -98,6 +105,11 @@ export default function Landing() {
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
+  const goToAbout2 = () => {
+    setAboutSlide(1);
+    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className={s.page}>
 
@@ -106,8 +118,8 @@ export default function Landing() {
         <span className={s.logo}>Resto Solutions</span>
         <div className={s.navLinks}>
           <button
-            className={`${s.navLink} ${active === 'about1' || active === 'about2' ? s.navLinkActive : ''}`}
-            onClick={() => scrollTo('about1')}
+            className={`${s.navLink} ${active === 'about' ? s.navLinkActive : ''}`}
+            onClick={() => { setAboutSlide(0); scrollTo('about'); }}
           >Πληροφορίες</button>
           <button
             className={`${s.navLink} ${active === 'pricing' ? s.navLinkActive : ''}`}
@@ -119,7 +131,7 @@ export default function Landing() {
           >Επικοινωνία</button>
         </div>
         <div className={s.navActions}>
-          <button className={s.btnLogin} onClick={() => navigate('/login')}>Σύνδεση</button>
+          <button className={s.btnLogin}    onClick={() => navigate('/login')}>Σύνδεση</button>
           <button className={s.btnRegister} onClick={() => navigate('/register')}>Εγγραφή →</button>
         </div>
       </nav>
@@ -136,117 +148,139 @@ export default function Landing() {
           <p className={s.heroSub}>QR codes · Real-time ενημερώσεις · Analytics · Από 12€/μήνα</p>
           <div className={s.heroCta}>
             <button className={s.btnPrimary} onClick={() => navigate('/register')}>Ξεκινήστε τώρα →</button>
-            <button className={s.btnOutline} onClick={() => scrollTo('about1')}>Δείτε demo</button>
+            <button className={s.btnOutline} onClick={() => scrollTo('about')}>Δείτε demo</button>
           </div>
         </div>
         <div className={s.heroRight} />
-        <button className={s.downBtn} onClick={() => scrollTo('about1')}>
+        <button className={s.downBtn} onClick={() => scrollTo('about')}>
           <span className={s.downLabel}>Down</span>
           <ArrowDown />
         </button>
       </section>
 
-      {/* ── ABOUT 1 (landingAboutUs_1) ──────────────────────── */}
-      <section id="about1" className={s.section}>
-        <div className={s.sectionContainer}>
-          <div className={s.about1Layout}>
-            <div className={s.about1Body}>
-              <span className={s.eyebrowGreen}>ΠΛΗΡΟΦΟΡΙΕΣ</span>
-              <h2 className={s.sectionHeadline}>
-                Βελτιστοποιώντας την<br/>
-                καθημερινότητα της εστίασης
-              </h2>
-              <p className={s.bodyText}>
-                we are driven by the vision of transforming businesses with artificial intelligence. Founded in 2024, we
-                have consistently pushed the boundaries of AI to offer smart, scalable, and intuitive solutions that
-                drive growth and efficiency.
-              </p>
-              <p className={s.bodyText}>
-                Our team of expert data scientists, engineers, and strategists combines cutting-edge technology with
-                deep industry knowledge to deliver custom AI solutions that cater to unique business challenges.
-              </p>
-              <div className={s.statsRow}>
-                <div className={s.stat}>
-                  <span className={s.statNum}>5+</span>
-                  <span className={s.statLabel}>Χρόνια στον χώρο της εστίασης</span>
+      {/* ── ABOUT (landingAboutUs_1 + _2) — horizontal slider ── */}
+      <section id="about" className={s.aboutSection}>
+        {/* Slider track — translates -100vw when aboutSlide = 1 */}
+        <div
+          className={s.aboutTrack}
+          style={{ transform: aboutSlide === 1 ? 'translateX(-100vw)' : 'translateX(0)' }}
+        >
+
+          {/* ── Panel 1 (landingAboutUs_1) ── */}
+          <div className={s.aboutPanel}>
+            <div className={s.aboutPanelInner}>
+              <div className={s.about1Layout}>
+                <div className={s.about1Body}>
+                  <span className={s.eyebrowGreen}>ΠΛΗΡΟΦΟΡΙΕΣ</span>
+                  <h2 className={s.sectionHeadline}>
+                    Βελτιστοποιώντας την<br/>
+                    καθημερινότητα της εστίασης
+                  </h2>
+                  <p className={s.bodyText}>
+                    we are driven by the vision of transforming businesses with artificial intelligence.
+                    Founded in 2024, we have consistently pushed the boundaries of AI to offer smart,
+                    scalable, and intuitive solutions that drive growth and efficiency.
+                  </p>
+                  <p className={s.bodyText}>
+                    Our team of expert data scientists, engineers, and strategists combines cutting-edge
+                    technology with deep industry knowledge to deliver custom AI solutions that cater to
+                    unique business challenges.
+                  </p>
+                  <div className={s.statsRow}>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>5+</span>
+                      <span className={s.statLabel}>Χρόνια στον χώρο της εστίασης</span>
+                    </div>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>20+</span>
+                      <span className={s.statLabel}>Πελάτες εμπιστεύονται τις υπηρεσίες μας</span>
+                    </div>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>100+</span>
+                      <span className={s.statLabel}>Συστήματα έχουν υλοποιηθεί από εμάς</span>
+                    </div>
+                  </div>
                 </div>
-                <div className={s.stat}>
-                  <span className={s.statNum}>20+</span>
-                  <span className={s.statLabel}>Πελάτες εμπιστεύονται τις υπηρεσίες μας</span>
-                </div>
-                <div className={s.stat}>
-                  <span className={s.statNum}>100+</span>
-                  <span className={s.statLabel}>Συστήματα έχουν υλοποιηθεί από εμάς</span>
-                </div>
+                {/* Right arrow → slide to panel 2 */}
+                <button className={s.arrowCircle} onClick={goToAbout2} title="Δείτε περισσότερα">
+                  <ArrowRight />
+                </button>
               </div>
             </div>
-            <button className={s.arrowCircle} onClick={() => scrollTo('about2')}>
-              <ArrowRight />
-            </button>
+            <div className={s.panelFooter}>
+              <button className={s.downBtnInline} onClick={goToAbout2}>
+                <span className={s.downLabel}>Down</span>
+                <ArrowDown />
+              </button>
+            </div>
           </div>
-        </div>
-        <button className={s.downBtn} onClick={() => scrollTo('about2')}>
-          <span className={s.downLabel}>Down</span>
-          <ArrowDown />
-        </button>
-      </section>
 
-      {/* ── ABOUT 2 (landingAboutUs_2) ──────────────────────── */}
-      <section id="about2" className={s.section}>
-        <div className={s.sectionContainer}>
-          <div className={s.about2Head}>
-            <span className={s.eyebrowGreenCenter}>SOLUTIONS</span>
-            <h2 className={s.about2Headline}>
-              Revolutionize Your Business<br/>
-              with Our AI-Powered Features
-            </h2>
-          </div>
-          <div className={s.featuresGrid}>
-            {FEATURES.map((f, i) => (
-              <div key={i} className={s.featureCard}>
-                <div className={s.featureIcon}>{f.icon}</div>
-                <h3 className={s.featureTitle}>{f.title}</h3>
-                <p className={s.featureDesc}>{f.desc}</p>
+          {/* ── Panel 2 (landingAboutUs_2) ── */}
+          <div className={s.aboutPanel}>
+            <div className={s.aboutPanelInner}>
+              <div className={s.sectionContainer}>
+                <div className={s.about2Head}>
+                  <span className={s.eyebrowGreenCenter}>SOLUTIONS</span>
+                  <h2 className={s.about2Headline}>
+                    Revolutionize Your Business<br/>
+                    with Our AI-Powered Features
+                  </h2>
+                </div>
+                <div className={s.featuresGrid}>
+                  {FEATURES.map((f, i) => (
+                    <div key={i} className={s.featureCard}>
+                      <div className={s.featureIcon}>{f.icon}</div>
+                      <h3 className={s.featureTitle}>{f.title}</h3>
+                      <p className={s.featureDesc}>{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+                <button className={s.arrowCircleAbs} onClick={() => scrollTo('pricing')}>
+                  <ArrowRight />
+                </button>
               </div>
-            ))}
+            </div>
+            <div className={s.panelFooter}>
+              <button className={s.downBtnInline} onClick={() => scrollTo('pricing')}>
+                <span className={s.downLabel}>Down</span>
+                <ArrowDown />
+              </button>
+            </div>
           </div>
-          <button className={s.arrowCircleAbs} onClick={() => scrollTo('pricing')}>
-            <ArrowRight />
-          </button>
+
         </div>
-        <button className={s.downBtn} onClick={() => scrollTo('pricing')}>
-          <span className={s.downLabel}>Down</span>
-          <ArrowDown />
-        </button>
       </section>
 
       {/* ── PRICING (landingPricing) ─────────────────────────── */}
       <section id="pricing" className={s.section}>
-        <div className={s.sectionContainer}>
-          <h2 className={s.pricingTitle}>Επιλέξτε το πλάνο σας</h2>
-          <div className={s.pricingGrid}>
-            <div className={s.pricingCard}>
-              <h3 className={s.pricingName}>Standard</h3>
-              <p className={s.pricingPrice}>12€/μήνα</p>
+        <div className={s.sectionInner}>
+          <div className={s.sectionContainer}>
+            <h2 className={s.pricingTitle}>Επιλέξτε το πλάνο σας</h2>
+            <div className={s.pricingGrid}>
+              {PRICING_PLANS.map((p) => (
+                <button
+                  key={p.plan}
+                  className={`${s.pricingCard} ${p.featured ? s.pricingCardFeatured : ''}`}
+                  onClick={() => navigate(`/register?plan=${p.plan}`)}
+                >
+                  <h3 className={s.pricingName}>{p.name}</h3>
+                  <p className={`${s.pricingPrice} ${p.featured ? s.pricingPriceGreen : ''}`}>{p.price}</p>
+                  {p.featured && <span className={s.popularTag}>★ ΔΗΜΟΦΙΛΕΣ</span>}
+                  <span className={s.pricingCta}>Επιλογή →</span>
+                </button>
+              ))}
             </div>
-            <div className={`${s.pricingCard} ${s.pricingCardFeatured}`}>
-              <h3 className={s.pricingName}>Premium</h3>
-              <p className={`${s.pricingPrice} ${s.pricingPriceGreen}`}>16.70€/μήνα</p>
-              <span className={s.popularTag}>★ ΔΗΜΟΦΙΛΕΣ</span>
-            </div>
-            <div className={s.pricingCard}>
-              <h3 className={s.pricingName}>Exclusive</h3>
-              <p className={s.pricingPrice}>25€/μήνα</p>
-            </div>
+            <button className={s.btnGreen} onClick={() => navigate('/register')}>
+              Εγγραφή δωρεάν →
+            </button>
           </div>
-          <button className={s.btnGreen} onClick={() => navigate('/register')}>
-            Εγγραφή δωρεάν →
+        </div>
+        <div className={s.panelFooter}>
+          <button className={s.downBtnInline} onClick={() => scrollTo('contact')}>
+            <span className={s.downLabel}>Down</span>
+            <ArrowDown />
           </button>
         </div>
-        <button className={s.downBtn} onClick={() => scrollTo('contact')}>
-          <span className={s.downLabel}>Down</span>
-          <ArrowDown />
-        </button>
       </section>
 
       {/* ── CONTACT (landingContact) ─────────────────────────── */}
