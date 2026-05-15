@@ -1,160 +1,293 @@
-// src/pages/Landing.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon } from '../components/Primitives';
-import { SERVICES, PLANS } from '../constants';
+import s from './Landing.module.css';
+
+const ArrowDown = () => (
+  <svg width="20" height="21" viewBox="0 0 20 21" fill="none">
+    <path d="M10 3v14M4 13.5l6 6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ArrowRight = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const ArrowUp = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M10 17V3M4 9l6-6 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+const FEATURES = [
+  {
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 55 55" fill="none">
+        <rect x="7" y="30" width="9" height="18" rx="1.5" fill="#3A7326"/>
+        <rect x="23" y="20" width="9" height="28" rx="1.5" fill="#3A7326"/>
+        <rect x="39" y="8" width="9" height="40" rx="1.5" fill="#3A7326"/>
+        <path d="M5 42L18 28L30 34L50 12" stroke="#3A7326" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+    title: 'Advanced Data Analytics',
+    desc: 'Predictive analytics to gain actionable insights and forecast future trends.',
+  },
+  {
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 55 55" fill="none">
+        <circle cx="27.5" cy="27.5" r="9" stroke="#3A7326" strokeWidth="2.5"/>
+        <circle cx="10" cy="10" r="5.5" stroke="#3A7326" strokeWidth="2"/>
+        <circle cx="45" cy="10" r="5.5" stroke="#3A7326" strokeWidth="2"/>
+        <circle cx="10" cy="45" r="5.5" stroke="#3A7326" strokeWidth="2"/>
+        <circle cx="45" cy="45" r="5.5" stroke="#3A7326" strokeWidth="2"/>
+        <line x1="14.9" y1="14.9" x2="20.1" y2="20.1" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="40.1" y1="14.9" x2="34.9" y2="20.1" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="14.9" y1="40.1" x2="20.1" y2="34.9" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="40.1" y1="40.1" x2="34.9" y2="34.9" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+      </svg>
+    ),
+    title: 'Operations with Automation',
+    desc: 'Enhance your operational efficiency with our AI-driven automated workflows.',
+  },
+  {
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 55 55" fill="none">
+        <rect x="8" y="8" width="32" height="38" rx="3" stroke="#3A7326" strokeWidth="2.5"/>
+        <line x1="16" y1="20" x2="32" y2="20" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="16" y1="28" x2="32" y2="28" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <line x1="16" y1="36" x2="24" y2="36" stroke="#3A7326" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M36 34l8 8M36 42l8-8" stroke="#3A7326" strokeWidth="2.5" strokeLinecap="round"/>
+      </svg>
+    ),
+    title: 'Unlock Insights with NLP',
+    desc: 'Language processing to extract meaningful unstructured data.',
+  },
+  {
+    icon: (
+      <svg width="55" height="55" viewBox="0 0 55 55" fill="none">
+        <path d="M27.5 6l4 12 12 4-12 4-4 12-4-12-12-4 12-4 4-12z" stroke="#3A7326" strokeWidth="2.5" strokeLinejoin="round"/>
+        <path d="M43 37l2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5 7-2.5 2.5-7z" fill="#3A7326"/>
+        <circle cx="12" cy="42" r="3.5" fill="#3A7326"/>
+      </svg>
+    ),
+    title: 'Custom AI for Your Needs',
+    desc: 'Collaborate with our team of AI experts to build and deploy bespoke models.',
+  },
+];
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState('hero');
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
+    const sections = ['hero', 'about1', 'about2', 'pricing', 'contact'];
     const onScroll = () => {
-      setScrolled(window.scrollY > 30);
-      for (const id of ['hero', 'services', 'plans']) {
+      for (const id of sections) {
         const el = document.getElementById(id);
         if (el) {
           const r = el.getBoundingClientRect();
-          if (r.top <= 120 && r.bottom > 120) { setActive(id); break; }
+          if (r.top <= 80 && r.bottom > 80) { setActive(id); break; }
         }
       }
     };
-    window.addEventListener('scroll', onScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const scrollTo = (id) => {
-    const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.offsetTop - 70, behavior: 'smooth' });
-  };
+  const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
   return (
-    <div className="lp">
-      <nav className={`lp-nav ${scrolled ? 'solid' : ''}`}>
-        <div className="container lp-nav-inner">
-          <button className="lp-logo" onClick={() => scrollTo('hero')}><span className="dot"/>QRMenu</button>
-          <div className="lp-nav-links">
-            <button className={`lp-nav-link ${active === 'services' ? 'active' : ''}`} onClick={() => scrollTo('services')}>Πλατφόρμα</button>
-            <button className={`lp-nav-link ${active === 'plans' ? 'active' : ''}`} onClick={() => scrollTo('plans')}>Πλάνα</button>
-          </div>
-          <div className="lp-nav-actions">
-            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/login')}>Σύνδεση</button>
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/register')}>Ξεκινήστε <Icon name="arrow" size={12}/></button>
-          </div>
+    <div className={s.page}>
+
+      {/* ── NAV ─────────────────────────────────────────────── */}
+      <nav className={s.nav}>
+        <span className={s.logo}>Resto Solutions</span>
+        <div className={s.navLinks}>
+          <button
+            className={`${s.navLink} ${active === 'about1' || active === 'about2' ? s.navLinkActive : ''}`}
+            onClick={() => scrollTo('about1')}
+          >Πληροφορίες</button>
+          <button
+            className={`${s.navLink} ${active === 'pricing' ? s.navLinkActive : ''}`}
+            onClick={() => scrollTo('pricing')}
+          >Τιμές</button>
+          <button
+            className={`${s.navLink} ${active === 'contact' ? s.navLinkActive : ''}`}
+            onClick={() => scrollTo('contact')}
+          >Επικοινωνία</button>
+        </div>
+        <div className={s.navActions}>
+          <button className={s.btnLogin} onClick={() => navigate('/login')}>Σύνδεση</button>
+          <button className={s.btnRegister} onClick={() => navigate('/register')}>Εγγραφή →</button>
         </div>
       </nav>
 
-      <section id="hero" className="lp-hero">
-        <div className="container">
-          <div className="lp-hero-grid">
-            <div>
-              <div className="lp-eyebrow">QR/01 — Restaurant Operations</div>
-              <h1 className="lp-headline">
-                Παραγγελίες <em>χωρίς τριβή.</em><br/>
-                Από το QR στο τραπέζι, στην κουζίνα.
-              </h1>
-              <p className="lp-sub">
-                Πλατφόρμα ψηφιακού μενού & παραγγελιών για εστιατόρια, καφέ και bars.
-                Φτιάξτε το μενού, βάλτε QR στο τραπέζι, παρακολουθήστε real-time κίνηση.
+      {/* ── HERO (landingStart) ──────────────────────────────── */}
+      <section id="hero" className={s.hero}>
+        <div className={s.heroLeft}>
+          <p className={s.heroEyebrow}>DIGITAL MENUS FOR GREEK HOSPITALITY</p>
+          <h1 className={s.heroHeadline}>
+            Το ψηφιακό μενού<br/>
+            που μεγαλώνει μαζί<br/>
+            με την επιχείρησή σας.
+          </h1>
+          <p className={s.heroSub}>QR codes · Real-time ενημερώσεις · Analytics · Από 12€/μήνα</p>
+          <div className={s.heroCta}>
+            <button className={s.btnPrimary} onClick={() => navigate('/register')}>Ξεκινήστε τώρα →</button>
+            <button className={s.btnOutline} onClick={() => scrollTo('about1')}>Δείτε demo</button>
+          </div>
+        </div>
+        <div className={s.heroRight} />
+        <button className={s.downBtn} onClick={() => scrollTo('about1')}>
+          <span className={s.downLabel}>Down</span>
+          <ArrowDown />
+        </button>
+      </section>
+
+      {/* ── ABOUT 1 (landingAboutUs_1) ──────────────────────── */}
+      <section id="about1" className={s.section}>
+        <div className={s.sectionContainer}>
+          <div className={s.about1Layout}>
+            <div className={s.about1Body}>
+              <span className={s.eyebrowGreen}>ΠΛΗΡΟΦΟΡΙΕΣ</span>
+              <h2 className={s.sectionHeadline}>
+                Βελτιστοποιώντας την<br/>
+                καθημερινότητα της εστίασης
+              </h2>
+              <p className={s.bodyText}>
+                we are driven by the vision of transforming businesses with artificial intelligence. Founded in 2024, we
+                have consistently pushed the boundaries of AI to offer smart, scalable, and intuitive solutions that
+                drive growth and efficiency.
               </p>
-              <div className="lp-cta">
-                <button className="btn btn-primary btn-lg" onClick={() => navigate('/register')}>Δοκιμάστε δωρεάν 30 μέρες</button>
-                <button className="lp-cta-link" onClick={() => scrollTo('services')}>Δείτε τι κάνει →</button>
-              </div>
-            </div>
-
-            <div className="lp-hero-card ticks">
-              <div className="lp-hero-card-bar">
-                <span className="lp-dot live"/><span className="lp-path">/api/orders/live</span>
-                <span className="lp-method">STREAM</span>
-              </div>
-              <div className="lp-feed">
-                {[
-                  { time:'14:32:08', route:'BAR',     item:'Espresso × 2',      price:'4,00€' },
-                  { time:'14:32:14', route:'KITCHEN',  item:'Σουβλάκι χοιρινό',  price:'3,20€' },
-                  { time:'14:32:21', route:'KITCHEN',  item:'Χωριάτικη',          price:'7,50€' },
-                  { time:'14:32:29', route:'BAR',      item:'Μύθος 500ml × 3',   price:'10,50€' },
-                ].map((r, i) => (
-                  <div key={i} className="lp-feed-row">
-                    <span className="lp-time">{r.time}</span>
-                    <span className={`lp-route ${r.route === 'BAR' ? 'bar' : 'kit'}`}>{r.route}</span>
-                    <span className="lp-item">{r.item}</span>
-                    <span className="lp-price">{r.price}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="lp-feed-stats">
-                {[['428','orders / day'],['2.4s','avg latency'],['99.9','% uptime']].map(([n,l]) => (
-                  <div key={l} className="lp-feed-stat">
-                    <div className="lp-feed-stat-num">{n}</div>
-                    <div className="lp-feed-stat-lab">{l}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="services" className="lp-section">
-        <div className="container">
-          <div className="lp-section-head">
-            <div><div className="hr-tick"><span style={{flex:'none'}}>02 / Πλατφόρμα</span></div></div>
-            <div>
-              <h2 className="lp-section-title">Όλα όσα χρειάζεστε για να <em>τρέχει</em> το μαγαζί.</h2>
-              <p className="lp-section-intro">Ένα ολοκληρωμένο σύστημα: ψηφιακό μενού, παραγγελιοληψία, παρακολούθηση σταθμών, κρατήσεις, αναφορές.</p>
-            </div>
-          </div>
-          <div className="lp-info-grid">
-            {SERVICES.map((s, i) => (
-              <div key={i} className="lp-info-card">
-                <div className="lp-info-num">{String(i+1).padStart(2,'0')} / {String(SERVICES.length).padStart(2,'0')}</div>
-                <div className="lp-info-title">{s.title}</div>
-                <div className="lp-info-desc">{s.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="plans" className="lp-section">
-        <div className="container">
-          <div className="lp-section-head">
-            <div><div className="hr-tick"><span style={{flex:'none'}}>03 / Πλάνα</span></div></div>
-            <div>
-              <h2 className="lp-section-title">Διαλέξτε το πλάνο που <em>ταιριάζει</em>.</h2>
-              <p className="lp-section-intro">Όλα τα πλάνα περιλαμβάνουν δωρεάν δοκιμή 30 ημερών. Αλλαγή ή ακύρωση οποτεδήποτε.</p>
-            </div>
-          </div>
-          <div className="lp-plans-grid">
-            {PLANS.map(p => (
-              <div key={p.value} className={`lp-plan ${p.highlight ? 'dark' : ''} ticks`}>
-                {p.highlight && <span className="lp-plan-tag">RECOMMENDED</span>}
-                <div className="lp-plan-name">{p.name}</div>
-                <div className="lp-plan-price">
-                  <span className="lp-plan-amount">{p.price}</span>
-                  <span className="lp-plan-period">{p.period}</span>
+              <p className={s.bodyText}>
+                Our team of expert data scientists, engineers, and strategists combines cutting-edge technology with
+                deep industry knowledge to deliver custom AI solutions that cater to unique business challenges.
+              </p>
+              <div className={s.statsRow}>
+                <div className={s.stat}>
+                  <span className={s.statNum}>5+</span>
+                  <span className={s.statLabel}>Χρόνια στον χώρο της εστίασης</span>
                 </div>
-                <ul className="lp-plan-features">
-                  {p.features.map((f, j) => (
-                    <li key={j} className="lp-plan-feat"><span className="lp-plan-check">→</span><span>{f}</span></li>
-                  ))}
-                </ul>
-                <button className={`btn ${p.highlight ? 'btn-ghost' : 'btn-primary'} btn-full`}
-                        onClick={() => navigate('/register')}>{p.cta}</button>
+                <div className={s.stat}>
+                  <span className={s.statNum}>20+</span>
+                  <span className={s.statLabel}>Πελάτες εμπιστεύονται τις υπηρεσίες μας</span>
+                </div>
+                <div className={s.stat}>
+                  <span className={s.statNum}>100+</span>
+                  <span className={s.statLabel}>Συστήματα έχουν υλοποιηθεί από εμάς</span>
+                </div>
+              </div>
+            </div>
+            <button className={s.arrowCircle} onClick={() => scrollTo('about2')}>
+              <ArrowRight />
+            </button>
+          </div>
+        </div>
+        <button className={s.downBtn} onClick={() => scrollTo('about2')}>
+          <span className={s.downLabel}>Down</span>
+          <ArrowDown />
+        </button>
+      </section>
+
+      {/* ── ABOUT 2 (landingAboutUs_2) ──────────────────────── */}
+      <section id="about2" className={s.section}>
+        <div className={s.sectionContainer}>
+          <div className={s.about2Head}>
+            <span className={s.eyebrowGreenCenter}>SOLUTIONS</span>
+            <h2 className={s.about2Headline}>
+              Revolutionize Your Business<br/>
+              with Our AI-Powered Features
+            </h2>
+          </div>
+          <div className={s.featuresGrid}>
+            {FEATURES.map((f, i) => (
+              <div key={i} className={s.featureCard}>
+                <div className={s.featureIcon}>{f.icon}</div>
+                <h3 className={s.featureTitle}>{f.title}</h3>
+                <p className={s.featureDesc}>{f.desc}</p>
               </div>
             ))}
           </div>
+          <button className={s.arrowCircleAbs} onClick={() => scrollTo('pricing')}>
+            <ArrowRight />
+          </button>
         </div>
+        <button className={s.downBtn} onClick={() => scrollTo('pricing')}>
+          <span className={s.downLabel}>Down</span>
+          <ArrowDown />
+        </button>
       </section>
 
-      <footer className="lp-foot">
-        <div className="container lp-foot-inner">
-          <span className="lp-foot-meta">© 2026 QRMenu — eu-central-1</span>
-          <span className="lp-foot-meta">v1.4.0 · made in Athens</span>
+      {/* ── PRICING (landingPricing) ─────────────────────────── */}
+      <section id="pricing" className={s.section}>
+        <div className={s.sectionContainer}>
+          <h2 className={s.pricingTitle}>Επιλέξτε το πλάνο σας</h2>
+          <div className={s.pricingGrid}>
+            <div className={s.pricingCard}>
+              <h3 className={s.pricingName}>Standard</h3>
+              <p className={s.pricingPrice}>12€/μήνα</p>
+            </div>
+            <div className={`${s.pricingCard} ${s.pricingCardFeatured}`}>
+              <h3 className={s.pricingName}>Premium</h3>
+              <p className={`${s.pricingPrice} ${s.pricingPriceGreen}`}>16.70€/μήνα</p>
+              <span className={s.popularTag}>★ ΔΗΜΟΦΙΛΕΣ</span>
+            </div>
+            <div className={s.pricingCard}>
+              <h3 className={s.pricingName}>Exclusive</h3>
+              <p className={s.pricingPrice}>25€/μήνα</p>
+            </div>
+          </div>
+          <button className={s.btnGreen} onClick={() => navigate('/register')}>
+            Εγγραφή δωρεάν →
+          </button>
         </div>
-      </footer>
+        <button className={s.downBtn} onClick={() => scrollTo('contact')}>
+          <span className={s.downLabel}>Down</span>
+          <ArrowDown />
+        </button>
+      </section>
+
+      {/* ── CONTACT (landingContact) ─────────────────────────── */}
+      <section id="contact" className={s.contact}>
+        <div className={s.contactBody}>
+          <div className={s.contactLeft}>
+            <h2 className={s.contactHeadline}>
+              Επικοινωνήστε για οποιοδήποτε ζήτημά σας άμεσα μαζί μας.
+            </h2>
+            <p className={s.contactSub}>
+              Χρειάζεστε μια ποιο custom λυση;<br/>
+              Επικοινωνήστε μαζί μας →
+            </p>
+          </div>
+          <div className={s.contactRight}>
+            <div className={s.contactForm}>
+              <input
+                className={s.emailInput}
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Πληκτρολογήστε το email σας"
+              />
+              <button className={s.btnSend}>Αποστολή</button>
+            </div>
+          </div>
+        </div>
+        <button className={s.backToTop} onClick={() => scrollTo('hero')}>
+          <span className={s.backToTopLabel}>Back to the top</span>
+          <ArrowUp />
+        </button>
+        <footer className={s.footer}>
+          <span className={s.footerCopy}>©2023 RESTO SOLUTIONS · All rights reserved.</span>
+          <div className={s.footerLinks}>
+            <a className={s.footerLink} href="#">Term of use</a>
+            <a className={s.footerLink} href="#">Privacy policy</a>
+            <a className={s.footerLink} href="#">Security</a>
+          </div>
+        </footer>
+      </section>
+
     </div>
   );
 }
