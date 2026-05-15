@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
 import { getOrdersAnalytics } from '../services/api';
 
-// ── Status labels & colours ───────────────────────────────────────────────────
+// ── Status labels & colours───────────────────────────────────────────────────
 const STATUS_META = {
   NEW:     { label: 'NEW',     color: '#FFB800' },
   CLAIMED: { label: 'CLAIMED', color: '#00C8FF' },
