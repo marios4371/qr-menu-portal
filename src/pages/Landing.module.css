@@ -31,7 +31,16 @@
   letter-spacing: -0.01em;
   flex-shrink: 0;
   white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: -8px;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: opacity 0.15s;
 }
+.logo:hover { opacity: 0.8; }
 
 .navLinks {
   flex: 1;
@@ -244,10 +253,10 @@
   position: relative;
 }
 
-/* Track: 200vw wide, slides left/right — transition controlled via inline style */
+/* Track: 300vw wide (3 panels — panel1, panel2, panel1-clone for infinite carousel) */
 .aboutTrack {
   display: flex;
-  width: 200vw;
+  width: 300vw;
   flex: 1;
   min-height: 0;
 }

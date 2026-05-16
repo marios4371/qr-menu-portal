@@ -14,11 +14,7 @@ const ArrowRight = () => (
   </svg>
 );
 
-const ArrowLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-    <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+// ArrowLeft is unused — panel 2 uses the same ArrowRight as panel 1 (infinite carousel)
 
 const ArrowUp = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -90,10 +86,11 @@ const PRICING_PLANS = [
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [active, setActive]           = useState('hero');
-  const [aboutSlide, setAboutSlide]   = useState(0);    // 0 = panel1, 1 = panel2
-  const [aboutAnimated, setAboutAnimated] = useState(true); // false = instant reset
-  const [email, setEmail]             = useState('');
+  const [active, setActive]               = useState('hero');
+  // Infinite carousel: aboutSlide 0=panel1, 1=panel2, 2=panel1-clone (snaps to 0)
+  const [aboutSlide, setAboutSlide]       = useState(0);
+  const [aboutAnimated, setAboutAnimated] = useState(true);
+  const [email, setEmail]                 = useState('');
 
   useEffect(() => {
     const sections = ['hero', 'about', 'pricing', 'contact'];
@@ -122,10 +119,22 @@ export default function Landing() {
 
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
-  // Toggle between panels (right arrow cycles: 0 → 1 → 0 → …)
-  const toggleAboutPanel = () => {
+  // Infinite carousel — always slides RIGHT (visually consistent)
+  // 0 → 1 (animated) → 2 (animated, shows panel1 clone) → snap to 0 (no animation)
+  const cycleAboutPanel = () => {
     setAboutAnimated(true);
-    setAboutSlide(prev => (prev === 0 ? 1 : 0));
+    setAboutSlide(prev => prev + 1);
+  };
+
+  // When transition lands on the clone (slide 2), snap back to slide 0 instantly
+  const handleAboutTransitionEnd = () => {
+    if (aboutSlide === 2) {
+      setAboutAnimated(false);
+      setAboutSlide(0);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setAboutAnimated(true));
+      });
+    }
   };
 
   return (
@@ -133,7 +142,9 @@ export default function Landing() {
 
       {/* ── NAV ─────────────────────────────────────────────── */}
       <nav className={s.nav}>
-        <span className={s.logo}>Resto Solutions</span>
+        <button className={s.logo} onClick={() => { setAboutSlide(0); scrollTo('hero'); }}>
+          Resto Solutions
+        </button>
         <div className={s.navLinks}>
           <button
             className={`${s.navLink} ${active === 'about' ? s.navLinkActive : ''}`}
@@ -178,13 +189,14 @@ export default function Landing() {
 
       {/* ── ABOUT (landingAboutUs_1 + _2) — horizontal slider ── */}
       <section id="about" className={s.aboutSection}>
-        {/* Slider track — translates -100vw when aboutSlide = 1 */}
+        {/* Slider track — translates by -100vw per slide */}
         <div
           className={s.aboutTrack}
           style={{
-            transform: aboutSlide === 1 ? 'translateX(-100vw)' : 'translateX(0)',
+            transform: `translateX(-${aboutSlide * 100}vw)`,
             transition: aboutAnimated ? 'transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
           }}
+          onTransitionEnd={handleAboutTransitionEnd}
         >
 
           {/* ── Panel 1 (landingAboutUs_1) ── */}
@@ -223,7 +235,7 @@ export default function Landing() {
                   </div>
                 </div>
                 {/* Right arrow → cycle to next/prev panel */}
-                <button className={s.arrowCircle} onClick={toggleAboutPanel} title="Επόμενο">
+                <button className={s.arrowCircle} onClick={cycleAboutPanel} title="Επόμενο">
                   <ArrowRight />
                 </button>
               </div>
@@ -256,14 +268,62 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                {/* Left arrow on panel 2 → go back to panel 1 */}
-                <button className={s.arrowCircleAbs} onClick={toggleAboutPanel} title="Προηγούμενο">
-                  <ArrowLeft />
+                {/* Right arrow on panel 2 → cycles back to panel 1 (with right slide animation) */}
+                <button className={s.arrowCircleAbs} onClick={cycleAboutPanel} title="Επόμενο">
+                  <ArrowRight />
                 </button>
               </div>
             </div>
             <div className={s.panelFooter}>
               <button className={s.downBtnInline} onClick={() => scrollTo('pricing')}>
+                <span className={s.downLabel}>Down</span>
+                <ArrowDown />
+              </button>
+            </div>
+          </div>
+
+          {/* ── Panel 1 CLONE (only visible during 1→0 wrap-around) ── */}
+          <div className={s.aboutPanel} aria-hidden="true">
+            <div className={s.aboutPanelInner}>
+              <div className={s.about1Layout}>
+                <div className={s.about1Body}>
+                  <span className={s.eyebrowGreen}>ΠΛΗΡΟΦΟΡΙΕΣ</span>
+                  <h2 className={s.sectionHeadline}>
+                    Βελτιστοποιώντας την<br/>
+                    καθημερινότητα της εστίασης
+                  </h2>
+                  <p className={s.bodyText}>
+                    we are driven by the vision of transforming businesses with artificial intelligence.
+                    Founded in 2024, we have consistently pushed the boundaries of AI to offer smart,
+                    scalable, and intuitive solutions that drive growth and efficiency.
+                  </p>
+                  <p className={s.bodyText}>
+                    Our team of expert data scientists, engineers, and strategists combines cutting-edge
+                    technology with deep industry knowledge to deliver custom AI solutions that cater to
+                    unique business challenges.
+                  </p>
+                  <div className={s.statsRow}>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>5+</span>
+                      <span className={s.statLabel}>Χρόνια στον χώρο της εστίασης</span>
+                    </div>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>20+</span>
+                      <span className={s.statLabel}>Πελάτες εμπιστεύονται τις υπηρεσίες μας</span>
+                    </div>
+                    <div className={s.stat}>
+                      <span className={s.statNum}>100+</span>
+                      <span className={s.statLabel}>Συστήματα έχουν υλοποιηθεί από εμάς</span>
+                    </div>
+                  </div>
+                </div>
+                <button className={s.arrowCircle} onClick={cycleAboutPanel} tabIndex={-1}>
+                  <ArrowRight />
+                </button>
+              </div>
+            </div>
+            <div className={s.panelFooter}>
+              <button className={s.downBtnInline} onClick={() => scrollTo('pricing')} tabIndex={-1}>
                 <span className={s.downLabel}>Down</span>
                 <ArrowDown />
               </button>

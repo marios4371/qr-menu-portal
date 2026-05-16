@@ -159,8 +159,8 @@ export default function Dashboard() {
   return (
     <main className={s.pageMain}>
       <PageHeader
-        title={`${greeting()}, ${owner?.firstName}.`}
-        sub="Σύνοψη του καταστήματός σας."
+        title={`${greeting()}, ${owner?.firstName} — αυτό είναι η επισκόπηση του καταστήματός σου.`}
+        sub="Dashboard"
         right={right}
       />
 
@@ -197,19 +197,27 @@ export default function Dashboard() {
         <div className={s.statsCol}>
           <div className={s.statCard}>
             <div className={s.statCardTop}>
-              <span className={s.statLabel}>Παραγγελίες σήμερα</span>
+              <span className={s.statLabel}>ORDERS / TODAY</span>
               <span className={s.statIcon}><Icon name="bolt" size={14}/></span>
             </div>
             <div className={`${s.statValue} ${s.statValueMuted}`}>—</div>
-            <div className={s.statMeta}>Σύντομα διαθέσιμο</div>
+            <div className={s.statMeta}>0 αρχικά δεδομένα</div>
           </div>
           <div className={s.statCard}>
             <div className={s.statCardTop}>
-              <span className={s.statLabel}>Σύνολο προϊόντων</span>
+              <span className={s.statLabel}>REVENUE / MTD</span>
+              <span className={s.statIcon}><Icon name="stat" size={14}/></span>
+            </div>
+            <div className={`${s.statValue} ${s.statValueMuted}`}>—</div>
+            <div className={s.statMeta}>0 αρχικά δεδομένα</div>
+          </div>
+          <div className={s.statCard}>
+            <div className={s.statCardTop}>
+              <span className={s.statLabel}>MENU</span>
               <span className={s.statIcon}><Icon name="grid" size={14}/></span>
             </div>
             <div className={s.statValue}>{totalProducts}</div>
-            <div className={s.statMeta}>σε {shop.menu?.length || 0} κατηγορίες</div>
+            <div className={s.statMeta}>{totalProducts} προϊόντα · {shop.menu?.length || 0} κατηγορίες</div>
           </div>
         </div>
       </div>
@@ -218,24 +226,23 @@ export default function Dashboard() {
       <section className={s.section}>
         <div className={s.sectionHead}>
           <div>
-            <h2 className={s.sectionTitle}>Μενού</h2>
+            <h2 className={s.sectionTitle}>Επισκόπηση μενού</h2>
             <p className={s.sectionSub}>
-              {shop.menu?.length || 0} κατηγορίες, {totalProducts} προϊόντα
+              {shop.menu?.length || 0} κατηγορίες · {totalProducts} προϊόντα
             </p>
           </div>
           <div className={s.sectionActions}>
             <button
               className={`${s.btn} ${s.btnSecondary}`}
-              onClick={() => navigate('/menu-appearance')}
-              disabled={owner?.plan === 'STANDARD'}
+              onClick={() => window.open(menuUrl, '_blank')}
             >
-              <Icon name="palette" size={12}/>Εμφάνιση
+              <Icon name="ext" size={12}/>Ανοίξτε Live
             </button>
             <button
               className={`${s.btn} ${s.btnPrimary}`}
               onClick={() => navigate('/menu-editor')}
             >
-              <Icon name="edit" size={12}/>Επεξεργασία
+              <Icon name="edit" size={12}/>Επεξεργασία Μενού
             </button>
           </div>
         </div>

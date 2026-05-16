@@ -94,7 +94,13 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
     <aside className="sb">
       {/* Brand */}
       <div className="sb-head">
-        <span className="brand"><span className="dot"/>QRMenu</span>
+        <button
+          className="brand"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit', padding: 0 }}
+          onClick={() => navigate('/dashboard')}
+        >
+          <span className="dot"/>Resto Solutions
+        </button>
       </div>
 
 {/* Nav */}
@@ -128,10 +134,19 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
       <div className="sb-section sb-foot">
         <button className="sb-plan" onClick={onPlanClick}>
           <div className="sb-plan-row">
-            <span style={{ fontSize: '10px', color: 'var(--sb-text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Πλάνο</span>
-            <span style={{ fontSize: '10px', color: 'var(--sb-active-text)' }}>↑ Αναβάθμιση</span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--sb-active-text)' }}>
+              {owner?.plan === 'PREMIUM' ? 'Premium' : owner?.plan === 'EXCLUSIVE' ? 'Exclusive' : 'Standard'}
+            </span>
+            <span style={{ fontSize: '9px', fontWeight: 700, color: '#F5E6C8', letterSpacing: '0.08em' }}>✦ PRO</span>
           </div>
-          <div className="sb-plan-name">{owner?.plan || 'STANDARD'}</div>
+          <div className="sb-plan-name" style={{ fontSize: '11px', fontWeight: 400, color: 'var(--sb-text-muted)', marginTop: 4 }}>
+            {owner?.plan === 'PREMIUM' ? '16.70€' : owner?.plan === 'EXCLUSIVE' ? '25€' : '12€'} / μήνα
+          </div>
+          {!isExclusive && (
+            <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: 8, textDecoration: 'underline' }}>
+              Αναβάθμιση σε {owner?.plan === 'PREMIUM' ? 'Exclusive' : 'Premium'}
+            </div>
+          )}
         </button>
 
         <div className="sb-owner">
