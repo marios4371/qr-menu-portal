@@ -14,6 +14,12 @@ const ArrowRight = () => (
   </svg>
 );
 
+const ArrowLeft = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+    <path d="M16 10H4M10 16l-6-6 6-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 const ArrowUp = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
     <path d="M10 17V3M4 9l6-6 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -84,9 +90,10 @@ const PRICING_PLANS = [
 
 export default function Landing() {
   const navigate = useNavigate();
-  const [active, setActive]       = useState('hero');
-  const [aboutSlide, setAboutSlide] = useState(0); // 0 = panel1, 1 = panel2
-  const [email, setEmail]         = useState('');
+  const [active, setActive]           = useState('hero');
+  const [aboutSlide, setAboutSlide]   = useState(0);    // 0 = panel1, 1 = panel2
+  const [aboutAnimated, setAboutAnimated] = useState(true); // false = instant reset
+  const [email, setEmail]             = useState('');
 
   useEffect(() => {
     const sections = ['hero', 'about', 'pricing', 'contact'];
@@ -103,11 +110,22 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Reset to panel 1 instantly (no animation) when leaving the about section
+  useEffect(() => {
+    if (active !== 'about') {
+      setAboutAnimated(false);
+      setAboutSlide(0);
+      const t = setTimeout(() => setAboutAnimated(true), 80);
+      return () => clearTimeout(t);
+    }
+  }, [active]);
+
   const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
-  const goToAbout2 = () => {
-    setAboutSlide(1);
-    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+  // Toggle between panels (right arrow cycles: 0 → 1 → 0 → …)
+  const toggleAboutPanel = () => {
+    setAboutAnimated(true);
+    setAboutSlide(prev => (prev === 0 ? 1 : 0));
   };
 
   return (
@@ -163,7 +181,10 @@ export default function Landing() {
         {/* Slider track — translates -100vw when aboutSlide = 1 */}
         <div
           className={s.aboutTrack}
-          style={{ transform: aboutSlide === 1 ? 'translateX(-100vw)' : 'translateX(0)' }}
+          style={{
+            transform: aboutSlide === 1 ? 'translateX(-100vw)' : 'translateX(0)',
+            transition: aboutAnimated ? 'transform 0.55s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+          }}
         >
 
           {/* ── Panel 1 (landingAboutUs_1) ── */}
@@ -201,14 +222,14 @@ export default function Landing() {
                     </div>
                   </div>
                 </div>
-                {/* Right arrow → slide to panel 2 */}
-                <button className={s.arrowCircle} onClick={goToAbout2} title="Δείτε περισσότερα">
+                {/* Right arrow → cycle to next/prev panel */}
+                <button className={s.arrowCircle} onClick={toggleAboutPanel} title="Επόμενο">
                   <ArrowRight />
                 </button>
               </div>
             </div>
             <div className={s.panelFooter}>
-              <button className={s.downBtnInline} onClick={goToAbout2}>
+              <button className={s.downBtnInline} onClick={() => scrollTo('pricing')}>
                 <span className={s.downLabel}>Down</span>
                 <ArrowDown />
               </button>
@@ -235,8 +256,9 @@ export default function Landing() {
                     </div>
                   ))}
                 </div>
-                <button className={s.arrowCircleAbs} onClick={() => scrollTo('pricing')}>
-                  <ArrowRight />
+                {/* Left arrow on panel 2 → go back to panel 1 */}
+                <button className={s.arrowCircleAbs} onClick={toggleAboutPanel} title="Προηγούμενο">
+                  <ArrowLeft />
                 </button>
               </div>
             </div>
