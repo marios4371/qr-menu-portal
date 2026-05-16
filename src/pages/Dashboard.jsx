@@ -159,8 +159,8 @@ export default function Dashboard() {
   return (
     <main className={s.pageMain}>
       <PageHeader
+        topbarLabel="Dashboard"
         title={`${greeting()}, ${owner?.firstName} — αυτό είναι η επισκόπηση του καταστήματός σου.`}
-        sub="Dashboard"
         right={right}
       />
 
@@ -250,21 +250,8 @@ export default function Dashboard() {
         <div className={s.catGrid}>
           {(shop.menu || []).map(cat => (
             <div key={cat.id} className={s.catCard}>
-              <div className={s.catHead}>
-                <span className={s.catName}>{cat.name}</span>
-                <span className={s.catCount}>{cat.items?.length || 0}</span>
-              </div>
-              <ul className={s.prodList}>
-                {(cat.items || []).slice(0,4).map(p => (
-                  <li key={p.id} className={s.prodItem}>
-                    <span className={s.prodName}>{p.name}</span>
-                    <span className={s.prodPrice}>{Number(p.price).toFixed(2).replace('.',',')}€</span>
-                  </li>
-                ))}
-                {(cat.items?.length || 0) > 4 && (
-                  <li className={s.prodMore}>+ {cat.items.length - 4} ακόμα</li>
-                )}
-              </ul>
+              <span className={s.catName}>{cat.name}</span>
+              <span className={s.catCount}>{cat.items?.length || 0} προϊόντα</span>
             </div>
           ))}
         </div>

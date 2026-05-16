@@ -208,7 +208,7 @@ export default function MenuAppearance() {
   if (owner?.plan === 'STANDARD') {
     return (
       <main className="page-main">
-        <PageHeader kicker="Εμφάνιση" title="Εμφάνιση μενού" sub="Διαθέσιμο σε Premium και Exclusive πλάνα."/>
+        <PageHeader topbarLabel="Εμφάνιση" title="Εμφάνιση μενού" sub="Διαθέσιμο σε Premium και Exclusive πλάνα."/>
         <div className="me-gate" style={{ marginTop: 40 }}>
           <div className="me-gate-icon"><Icon name="lock" size={22}/></div>
           <h3>Απαιτείται Premium ή Exclusive</h3>
@@ -221,7 +221,7 @@ export default function MenuAppearance() {
   return (
     <main className="page-main" style={{ overflow: 'hidden' }}>
       <PageHeader
-        kicker="Εμφάνιση Μενού"
+        topbarLabel="Εμφάνιση"
         title="Σχεδίαση μενού"
         sub="Προσαρμόστε χρώματα, γραμματοσειρές, διάταξη και στυλ του ψηφιακού μενού."
         right={right}

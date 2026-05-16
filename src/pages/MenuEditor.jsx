@@ -311,6 +311,7 @@ export default function MenuEditor() {
   return (
     <main className="page-main">
       <PageHeader
+        topbarLabel="Menu Editor"
         title="Επεξεργασία μενού"
         sub="Προσθέστε κατηγορίες και προϊόντα. Οι αλλαγές αποθηκεύονται αυτόματα."
         right={right}

@@ -143,7 +143,7 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
             {owner?.plan === 'PREMIUM' ? '16.70€' : owner?.plan === 'EXCLUSIVE' ? '25€' : '12€'} / μήνα
           </div>
           {!isExclusive && (
-            <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: 8, textDecoration: 'underline' }}>
+            <div style={{ fontSize: '10px', color: '#F5E6C8', marginTop: 8, textDecoration: 'underline', fontWeight: 500 }}>
               Αναβάθμιση σε {owner?.plan === 'PREMIUM' ? 'Exclusive' : 'Premium'}
             </div>
           )}
@@ -165,16 +165,24 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   );
 }
 
-// ── PageHeader ───────────────────────────────────────────────────────────────────────────
-export function PageHeader({ kicker, title, sub, right }) {
+// ── PageHeader (topbar + subheader, Figma frame 05) ──────────────────────
+export function PageHeader({ kicker, title, sub, right, topbarLabel }) {
+  // Topbar label resolution: explicit topbarLabel > kicker > title
+  // (sub is intentionally NOT used because it's typically a longer description)
+  const label = topbarLabel || kicker || title;
   return (
-    <header className="ph">
-      <div className="ph-left">
-        {kicker && <span className="ph-kicker">{kicker}</span>}
-        <h1 className="ph-title">{title}</h1>
-        {sub && <p className="ph-sub">{sub}</p>}
+    <>
+      <div className="topbar">
+        <span className="topbar-label">{label}</span>
       </div>
-      {right && <div className="ph-right">{right}</div>}
-    </header>
+      <header className="ph">
+        <div className="ph-left">
+          {kicker && <span className="ph-kicker">{kicker}</span>}
+          <h1 className="ph-title">{title}</h1>
+          {sub && <p className="ph-sub">{sub}</p>}
+        </div>
+        {right && <div className="ph-right">{right}</div>}
+      </header>
+    </>
   );
 }
