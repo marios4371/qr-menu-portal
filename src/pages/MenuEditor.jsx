@@ -1,265 +1,162 @@
-// src/pages/MenuEditor.jsx
+// src/pages/MenuEditor.jsx — Figma frame 06 (two-pane editor)
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { saveMenu, saveAppearance } from '../services/api';
+import { saveMenu } from '../services/api';
+import s from './MenuEditor.module.css';
 
-// ── Layout modes (display-mode picker) ────────────────────────────────────────
-const LAYOUT_MODES = [
-  { key: 'accordion', name: 'Vertical Accordion', desc: 'Όλες οι κατηγορίες stacked, ξεδιπλώνουν με click. Compact.', tier: 'STANDARD' },
-  { key: 'sticky-tabs', name: 'Sticky Tab Bar',     desc: 'efood-style: tabs sticky στο header, click → scroll στη section.', tier: 'PREMIUM' },
-  { key: 'side-tabs',   name: 'Side Tabs',          desc: 'Desktop: vertical λίστα κατηγοριών αριστερά, προϊόντα δεξιά.',   tier: 'PREMIUM' },
-  { key: 'grid-mosaic', name: 'Grid Mosaic',        desc: 'Pinterest/masonry. Image-heavy. Bars, signature dishes.',         tier: 'PREMIUM' },
-  { key: 'magazine',    name: 'Magazine Pages',     desc: 'One category per scroll page. Hero + items. Cinematic.',          tier: 'PREMIUM' },
-  { key: 'compact',     name: 'Compact List',       desc: 'Text-only. Πολύ γρήγορο για παραδοσιακά μεγάλα μενού.',           tier: 'PREMIUM' },
-  { key: 'hero',        name: 'Hero Featured',      desc: '2-4 highlighted items πάνω, υπόλοιπα σε compact list.',           tier: 'PREMIUM' },
-];
-
-const TIER_ORDER = { STANDARD: 0, PREMIUM: 1, EXCLUSIVE: 2 };
-
-function LayoutThumb({ mode }) {
-  switch (mode) {
-    case 'accordion':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-bar short"/>
-          <div className="lay-thumb-row dark"/>
-          <div className="lay-thumb-row"/>
-          <div className="lay-thumb-row"/>
-          <div className="lay-thumb-row dark"/>
-          <div className="lay-thumb-row dark"/>
-        </div>
-      );
-    case 'sticky-tabs':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-bar short"/>
-          <div className="lay-thumb-tabs">
-            <span className="lay-thumb-tab on"/>
-            <span className="lay-thumb-tab"/>
-            <span className="lay-thumb-tab"/>
-            <span className="lay-thumb-tab"/>
-          </div>
-          <div className="lay-thumb-row"/>
-          <div className="lay-thumb-row"/>
-          <div className="lay-thumb-row"/>
-        </div>
-      );
-    case 'side-tabs':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-bar short"/>
-          <div className="lay-thumb-side">
-            <div/>
-            <div><span/><span/><span/></div>
-          </div>
-        </div>
-      );
-    case 'grid-mosaic':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-bar short"/>
-          <div className="lay-thumb-grid" style={{ flex: 1 }}>
-            <div className="lay-thumb-cell tall"/>
-            <div className="lay-thumb-cell"/>
-            <div className="lay-thumb-cell"/>
-            <div className="lay-thumb-cell"/>
-            <div className="lay-thumb-cell tall"/>
-          </div>
-        </div>
-      );
-    case 'magazine':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-hero"/>
-          <div className="lay-thumb-row"/>
-          <div className="lay-thumb-row"/>
-        </div>
-      );
-    case 'compact':
-      return (
-        <div className="lay-thumb">
-          <div className="lay-thumb-bar short"/>
-          <div className="lay-thumb-line"><span/><span/></div>
-          <div className="lay-thumb-line"><span/><span/></div>
-          <div className="lay-thumb-line"><span/><span/></div>
-          <div className="lay-thumb-line"><span/><span/></div>
-          <div className="lay-thumb-line"><span/><span/></div>
-        </div>
-      );
-    case 'hero':
-      return (
-        <div className="lay-thumb">
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 3 }}>
-            <div className="lay-thumb-cell lime" style={{ height: 28 }}/>
-            <div className="lay-thumb-cell" style={{ height: 28 }}/>
-            <div className="lay-thumb-cell" style={{ height: 28 }}/>
-            <div className="lay-thumb-cell" style={{ height: 28 }}/>
-          </div>
-          <div className="lay-thumb-line"><span/><span/></div>
-          <div className="lay-thumb-line"><span/><span/></div>
-        </div>
-      );
-    default: return <div className="lay-thumb"/>;
-  }
-}
-
-// ── Layout tab body ───────────────────────────────────────────────────────────
-function LayoutPicker({ shop, owner, onSaved }) {
-  const initial = shop?.theme?.layout || 'accordion';
-  const [selected, setSelected] = useState(initial);
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState('');
-  const [savedToast, setSavedToast] = useState(false);
-
-  const userTier = TIER_ORDER[owner?.plan] ?? 0;
-  const dirty = selected !== initial;
-
-  const isLocked = (mode) => TIER_ORDER[mode.tier] > userTier;
-  const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
-
-  const save = async () => {
-    if (!dirty) return;
-    setBusy(true); setErr('');
-    try {
-      const newTheme = { ...(shop.theme || {}), layout: selected };
-      await saveAppearance({ shopId: shop.shop_id, theme: newTheme });
-      onSaved?.(newTheme);
-      setSavedToast(true);
-      setTimeout(() => setSavedToast(false), 2000);
-    } catch (e) {
-      setErr(e.message || 'Σφάλμα αποθήκευσης διάταξης');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  if (isLegacy) {
-    return (
-      <div className="lay-wrap">
-        <div className="lay-head">
-          <h2>Custom template</h2>
-          <p>
-            Το κατάστημά σας χρησιμοποιεί δικό του custom HTML/CSS template (legacy shop). Η αλλαγή layout δεν είναι διαθέσιμη — οι αλλαγές περιεχομένου εμφανίζονται όμως κανονικά.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
+// ── Modals ──────────────────────────────────────────────────────────────────
+function CategoryModal({ initialName, onClose, onSave }) {
+  const [name, setName] = useState(initialName || '');
+  const submit = () => { if (name.trim()) onSave(name.trim()); };
   return (
-    <div className="lay-wrap">
-      <div className="lay-head">
-        <span className="ph-kicker">ΔΙΑΤΑΞΗ</span>
-        <h2>Πώς θα βλέπουν οι πελάτες σας το μενού;</h2>
-        <p>Επιλέξτε μία από τις {LAYOUT_MODES.length} διατάξεις. Η αλλαγή εφαρμόζεται άμεσα στο live μενού — δεν χάνονται δεδομένα.</p>
+    <div className={s.modalOverlay} onClick={onClose}>
+      <div className={s.modal} onClick={e => e.stopPropagation()}>
+        <div className={s.modalHead}>
+          <span className={s.modalTitle}>{initialName ? 'Επεξεργασία κατηγορίας' : 'Νέα κατηγορία'}</span>
+          <button className={s.modalClose} onClick={onClose} aria-label="Κλείσιμο">
+            <Icon name="x" size={14}/>
+          </button>
+        </div>
+        <div className={s.modalBody}>
+          <div className={s.formField}>
+            <label className={s.formLabel}>Όνομα κατηγορίας</label>
+            <input
+              className={s.formInput}
+              placeholder="π.χ. Καφέδες"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+              autoFocus
+            />
+          </div>
+        </div>
+        <div className={s.modalFoot}>
+          <button className={`${s.btn} ${s.btnGhost}`} onClick={onClose}>Ακύρωση</button>
+          <button className={`${s.btn} ${s.btnPrimary}`} onClick={submit} disabled={!name.trim()}>
+            {initialName ? 'Αποθήκευση' : 'Προσθήκη'}
+          </button>
+        </div>
       </div>
-
-      <div className="lay-grid">
-        {LAYOUT_MODES.map((m, i) => {
-          const locked = isLocked(m);
-          const isOn = selected === m.key;
-          return (
-            <button
-              key={m.key}
-              className={`lay-card ${isOn ? 'on' : ''}`}
-              onClick={() => !locked && setSelected(m.key)}
-              disabled={locked}
-            >
-              {isOn && <span className="lay-card-active">ACTIVE</span>}
-              {locked && !isOn && <span className="lay-card-lock"><Icon name="lock" size={12}/></span>}
-              <span className="lay-card-num">{String(i+1).padStart(2,'0')}</span>
-              <LayoutThumb mode={m.key}/>
-              <div>
-                <div className="lay-card-name">{m.name}</div>
-                <div className="lay-card-desc">{m.desc}</div>
-                {locked && (
-                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-muted)', marginTop: 6, letterSpacing: '0.04em' }}>
-                    // διαθέσιμο σε {m.tier}
-                  </div>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {err && <div className="msg-error" style={{ marginTop: 16 }}>{err}</div>}
-
-      <div className="lay-foot">
-        <span className="lay-foot-info">
-          Επιλεγμένη: <strong>{LAYOUT_MODES.find(m => m.key === selected)?.name}</strong>
-        </span>
-        <span className="lay-foot-warn">// αλλαγή εφαρμόζεται άμεσα στο live μενού</span>
-        <span className="grow"/>
-        <button className="btn btn-ghost btn-sm" onClick={() => setSelected(initial)} disabled={!dirty || busy}>
-          Επαναφορά
-        </button>
-        <button className="btn btn-primary btn-sm" onClick={save} disabled={!dirty || busy}>
-          {busy ? <><span className="spinner"/>Αποθήκευση…</> : <><Icon name="save" size={12}/>Αποθήκευση</>}
-        </button>
-      </div>
-
-      {savedToast && <div className="toast">✓ Διάταξη αποθηκεύτηκε</div>}
     </div>
   );
 }
 
-export default function MenuEditor() {
-  const navigate = useNavigate();
-  const { owner, shops, setShops, currentShopId, setCurrentShopId } = useAuth();
-  const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
+function ProductModal({ initialData, onClose, onSubmit }) {
+  const isEdit = !!initialData;
+  const [name, setName]               = useState(initialData?.name        || '');
+  const [price, setPrice]             = useState(initialData?.price != null ? String(initialData.price) : '');
+  const [description, setDescription] = useState(initialData?.description || '');
+  const [station, setStation]         = useState(initialData?.station      || 'KITCHEN');
 
-  const [tab, setTab] = useState('content');
+  const submit = () => {
+    if (!name.trim()) return;
+    onSubmit({
+      id: initialData?.id || ('p' + Date.now()),
+      name: name.trim(),
+      price: parseFloat(price) || 0,
+      description: description.trim(),
+      station,
+    });
+  };
+
+  return (
+    <div className={s.modalOverlay} onClick={onClose}>
+      <div className={s.modal} onClick={e => e.stopPropagation()}>
+        <div className={s.modalHead}>
+          <span className={s.modalTitle}>{isEdit ? 'Επεξεργασία προϊόντος' : 'Νέο προϊόν'}</span>
+          <button className={s.modalClose} onClick={onClose} aria-label="Κλείσιμο">
+            <Icon name="x" size={14}/>
+          </button>
+        </div>
+        <div className={s.modalBody}>
+          <div className={s.formField}>
+            <label className={s.formLabel}>Όνομα *</label>
+            <input className={s.formInput} placeholder="π.χ. Μπριζόλα Χοιρινή"
+              value={name} onChange={e => setName(e.target.value)} autoFocus/>
+          </div>
+          <div className={s.formGrid}>
+            <div className={s.formField}>
+              <label className={s.formLabel}>Τιμή (€)</label>
+              <input className={s.formInput} type="number" min="0" step="0.10" placeholder="0.00"
+                value={price} onChange={e => setPrice(e.target.value)}/>
+            </div>
+            <div className={s.formField}>
+              <label className={s.formLabel}>Πόστο</label>
+              <select className={s.formInput} value={station} onChange={e => setStation(e.target.value)}>
+                <option value="KITCHEN">KITCHEN</option>
+                <option value="BAR">BAR</option>
+                <option value="GRILL">GRILL</option>
+                <option value="COLD">COLD</option>
+              </select>
+            </div>
+          </div>
+          <div className={s.formField}>
+            <label className={s.formLabel}>Περιγραφή</label>
+            <textarea className={s.formTextarea} rows={3} placeholder="Προαιρετική περιγραφή…"
+              value={description} onChange={e => setDescription(e.target.value)}/>
+          </div>
+        </div>
+        <div className={s.modalFoot}>
+          <button className={`${s.btn} ${s.btnGhost}`} onClick={onClose}>Ακύρωση</button>
+          <button className={`${s.btn} ${s.btnPrimary}`} onClick={submit} disabled={!name.trim()}>
+            {isEdit ? 'Αποθήκευση' : 'Προσθήκη'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main ─────────────────────────────────────────────────────────────────────
+export default function MenuEditor() {
+  const { shops, setShops, currentShopId, setCurrentShopId } = useAuth();
+  const shop = shops.find(sh => sh.shop_id === currentShopId) || shops[0];
+
   const [menu, setMenu] = useState(shop?.menu || []);
-  const [open, setOpen] = useState({ [shop?.menu?.[0]?.id]: true });
-  const [editingCat, setEditingCat] = useState(null);
-  const [search, setSearch] = useState('');
+  const [selectedCatId, setSelectedCatId] = useState(shop?.menu?.[0]?.id || null);
   const [dirty, setDirty] = useState(false);
   const [savedToast, setSavedToast] = useState(false);
   const [saveErr, setSaveErr] = useState('');
-  const [productModalCat, setProductModalCat] = useState(null);
-  const [emptyHintCat,    setEmptyHintCat]    = useState(null);
-  // Category rename modal
-  const [editCatModalId, setEditCatModalId] = useState(null);
-  // Product edit modal: { catId, product }
-  const [editProductModal, setEditProductModal] = useState(null);
 
+  const [catModalOpen, setCatModalOpen] = useState(false);          // new category
+  const [editCatId, setEditCatId] = useState(null);                  // edit existing
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [editProduct, setEditProduct] = useState(null);
+
+  // Sync local state when shop changes
   useEffect(() => {
     if (shop) {
       setMenu(shop.menu || []);
-      setOpen({ [shop.menu?.[0]?.id]: true });
+      setSelectedCatId(shop.menu?.[0]?.id || null);
       setDirty(false);
     }
   }, [shop?.shop_id]);
 
-  const update = (newMenu) => { setMenu(newMenu); setDirty(true); };
-  const toggleCat = (id) => {
-    const isOpening = !open[id];
-    const cat = menu.find(c => c.id === id);
-    setOpen(o => ({ ...o, [id]: !o[id] }));
-    if (isOpening && cat && cat.items.length === 0) {
-      setEmptyHintCat(id);
-      setTimeout(() => setEmptyHintCat(null), 3000);
-    } else {
-      setEmptyHintCat(null);
-    }
+  if (!shop) return null;
+
+  const selectedCat = menu.find(c => c.id === selectedCatId) || menu[0];
+  const editingCat  = editCatId ? menu.find(c => c.id === editCatId) : null;
+
+  const update = (nm) => { setMenu(nm); setDirty(true); };
+
+  // category ops
+  const addCat = (name) => {
+    const id = 'c' + Date.now();
+    update([...menu, { id, name, items: [] }]);
+    setSelectedCatId(id);
   };
   const renameCat = (id, name) => update(menu.map(c => c.id === id ? { ...c, name } : c));
   const deleteCat = (id) => {
-    if (window.confirm('Διαγραφή κατηγορίας;')) update(menu.filter(c => c.id !== id));
+    if (!window.confirm('Διαγραφή κατηγορίας; Θα διαγραφούν και όλα τα προϊόντα της.')) return;
+    const nm = menu.filter(c => c.id !== id);
+    update(nm);
+    if (selectedCatId === id) setSelectedCatId(nm[0]?.id || null);
   };
-  const addCat = () => {
-    const id = 'c' + Date.now();
-    update([...menu, { id, name: 'Νέα κατηγορία', items: [] }]);
-    setOpen(o => ({ ...o, [id]: true }));
-    setEditingCat(id);
-  };
+
+  // product ops
   const addProduct = (catId, productData) => {
-    update(menu.map(c => c.id === catId
-      ? { ...c, items: [...c.items, productData] }
-      : c));
+    update(menu.map(c => c.id === catId ? { ...c, items: [...(c.items||[]), productData] } : c));
   };
   const updateProduct = (catId, pid, patch) => {
     update(menu.map(c => c.id === catId
@@ -275,7 +172,7 @@ export default function MenuEditor() {
     setSaveErr('');
     try {
       await saveMenu({ shopId: shop.shop_id, data: { menu } });
-      setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, menu } : s));
+      setShops(prev => prev.map(sh => sh.shop_id === shop.shop_id ? { ...sh, menu } : sh));
       setDirty(false);
       setSavedToast(true);
       setTimeout(() => setSavedToast(false), 2000);
@@ -284,379 +181,170 @@ export default function MenuEditor() {
     }
   };
 
-  const totalProducts = menu.reduce((acc, c) => acc + c.items.length, 0);
-  const filtered = search
-    ? menu.map(c => ({ ...c, items: c.items.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        (p.description||'').toLowerCase().includes(search.toLowerCase()))
-      })).filter(c => c.items.length > 0 || c.name.toLowerCase().includes(search.toLowerCase()))
-    : menu;
-
+  // Top-right header actions: shop selector (rounded pill) + Save
   const right = (
-    <div className="dash-shop-select-wrap">
-      <span className="dash-shop-select-lab">SHOP</span>
-      <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
-        {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
+    <div className={s.headerActions}>
+      <span className={s.shopLabel}>Κατάστημα :</span>
+      <select
+        className={s.shopSelect}
+        value={currentShopId}
+        onChange={e => setCurrentShopId(e.target.value)}
+      >
+        {shops.map(sh => (
+          <option key={sh.shop_id} value={sh.shop_id}>{sh.shopName}</option>
+        ))}
       </select>
+      <button className={`${s.btn} ${s.btnPrimary}`} onClick={save} disabled={!dirty}>
+        <Icon name="save" size={12}/>Αποθήκευση
+      </button>
     </div>
   );
 
-  if (!shop) return null;
-
-  const isPremiumPlus = owner?.plan === 'PREMIUM' || owner?.plan === 'EXCLUSIVE';
-
-  // Find cat being edited for CategoryModal
-  const editCat = editCatModalId ? menu.find(c => c.id === editCatModalId) : null;
-
   return (
-    <main className="page-main">
+    <main className={s.pageMain}>
       <PageHeader
-        topbarLabel="Menu Editor"
+        topbarLabel="Επεξεργασία Μενού"
         title="Επεξεργασία μενού"
-        sub="Προσθέστε κατηγορίες και προϊόντα. Οι αλλαγές αποθηκεύονται αυτόματα."
+        sub="Προσθέστε κατηγορίες και προϊόντα. Αποθηκεύστε για να εφαρμοστούν."
         right={right}
       />
 
-      <div className="me-tabs">
-        <button className={`me-tab ${tab === 'content' ? 'on' : ''}`} onClick={() => setTab('content')}>
-          <Icon name="list" size={12}/>Περιεχόμενο
-        </button>
-        <button className={`me-tab ${tab === 'layout' ? 'on' : ''}`} onClick={() => setTab('layout')}>
-          <Icon name="grid" size={12}/>Διάταξη
-        </button>
-        <button
-          className="me-tab"
-          onClick={() => isPremiumPlus && navigate('/menu-appearance')}
-          disabled={!isPremiumPlus}
-          title={isPremiumPlus ? 'Ανοιχτό σε /menu-appearance' : 'Διαθέσιμο σε Premium+'}
-        >
-          <Icon name="palette" size={12}/>Εμφάνιση
-          {!isPremiumPlus && <Icon name="lock" size={11} stroke={1.4}/>}
-        </button>
-      </div>
+      {saveErr && <div className={s.msgError}>{saveErr}</div>}
 
-      {tab === 'layout' && (
-        <LayoutPicker
-          shop={shop}
-          owner={owner}
-          onSaved={(newTheme) => setShops(prev => prev.map(s => s.shop_id === shop.shop_id ? { ...s, theme: newTheme } : s))}
-        />
-      )}
+      {/* Two-pane layout: categories | products */}
+      <div className={s.editorLayout}>
+        {/* ── Categories panel ── */}
+        <aside className={s.catPanel}>
+          <div className={s.panelHead}>
+            <span className={s.panelTitle}>Κατηγορίες</span>
+            <button className={`${s.btn} ${s.btnPrimary} ${s.btnSm}`} onClick={() => setCatModalOpen(true)}>
+              <Icon name="plus" size={11}/>Νέα
+            </button>
+          </div>
 
-      {tab === 'content' && <>
-
-      <div className="me-toolbar">
-        <div className="me-search-wrap">
-          <Icon name="search" size={16}/>
-          <input className="me-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Αναζήτηση προϊόντων…"/>
-        </div>
-        <div className="me-counter">
-          <span className={dirty ? 'me-dirty' : ''}>
-            <strong>{menu.length}</strong> κατηγορίες · <strong>{totalProducts}</strong> προϊόντα
-            {dirty && ' · μη αποθηκευμένο'}
-          </span>
-        </div>
-        <div className="grow"/>
-        <button className="btn btn-ghost btn-sm" onClick={() => { setMenu(shop.menu); setDirty(false); }} disabled={!dirty}>Επαναφορά</button>
-        <button className="btn btn-primary btn-sm" onClick={save} disabled={!dirty}>
-          <Icon name="save" size={12}/>Αποθήκευση
-        </button>
-      </div>
-
-      {saveErr && <div className="msg-error" style={{marginBottom:14}}>{saveErr}</div>}
-
-      {filtered.length === 0 && (
-        <div className="me-empty">
-          <span className="icon">∅</span>
-          <span>Δεν βρέθηκαν αποτελέσματα για «{search}»</span>
-          <button className="btn btn-ghost btn-sm" onClick={() => setSearch('')}>Καθαρισμός</button>
-        </div>
-      )}
-
-      <div className="me-cat-list">
-        {filtered.map((cat, i) => (
-          <div key={cat.id} className={`me-cat ${open[cat.id] ? 'open' : ''} ticks`}>
-            <div className="me-cat-head" onClick={() => toggleCat(cat.id)}>
-              <span className={`me-cat-arrow ${open[cat.id] ? 'open' : ''}`}><Icon name="chev-r" size={14}/></span>
-              <div className="me-cat-name">
-                {cat.name}
-              </div>
-
-              <div className="me-cat-acts" onClick={e => e.stopPropagation()}>
-                {/* Edit category button */}
-                <button
-                  className="me-cat-edit-btn"
-                  title="Επεξεργασία κατηγορίας"
-                  onClick={() => setEditCatModalId(cat.id)}
-                ><Icon name="edit" size={11}/>Κατηγορία</button>
-
-                {/* Add product button */}
-                <div className="me-cat-add-wrap">
-                  {emptyHintCat === cat.id && (
-                    <div className="me-cat-hint">Παρακαλώ εισάγετε προϊόν</div>
-                  )}
-                  <button
-                    className={`me-cat-add-btn${emptyHintCat === cat.id ? ' hint' : ''}`}
-                    onClick={() => { setProductModalCat(cat.id); setEmptyHintCat(null); }}
-                  ><Icon name="plus" size={11}/>Προϊόν</button>
+          <div className={s.catList}>
+            {menu.length === 0 && (
+              <div className={s.emptyHint}>Δεν υπάρχουν κατηγορίες ακόμα.</div>
+            )}
+            {menu.map(cat => (
+              <div
+                key={cat.id}
+                className={`${s.catItem} ${selectedCatId === cat.id ? s.catItemOn : ''}`}
+                onClick={() => setSelectedCatId(cat.id)}
+              >
+                <span className={s.catName}>{cat.name}</span>
+                <span className={s.catCount}>{cat.items?.length || 0}</span>
+                <div className={s.catActions} onClick={e => e.stopPropagation()}>
+                  <button className={s.iconBtn} onClick={() => setEditCatId(cat.id)} title="Επεξεργασία">
+                    <Icon name="edit" size={11}/>
+                  </button>
+                  <button className={s.iconBtn} onClick={() => deleteCat(cat.id)} title="Διαγραφή">
+                    <Icon name="trash" size={11}/>
+                  </button>
                 </div>
-
-                {/* Delete category button */}
-                <button className="me-cat-del-btn" onClick={() => deleteCat(cat.id)}><Icon name="trash" size={11}/></button>
               </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* ── Products panel ── */}
+        <section className={s.prodPanel}>
+          {!selectedCat && (
+            <div className={s.emptyState}>
+              <span className={s.emptyIcon}><Icon name="grid" size={24}/></span>
+              <span>Επιλέξτε ή δημιουργήστε κατηγορία για να ξεκινήσετε.</span>
             </div>
-            {open[cat.id] && (
-              <div className="me-prod-list">
-                {cat.items.length === 0 && <div className="me-prod-empty">// Καμία προσθήκη ακόμα — πατήστε «+ Προϊόν»</div>}
-                {cat.items.map(p => (
-                  <ProductRow
-                    key={p.id}
-                    product={p}
-                    onEdit={() => setEditProductModal({ catId: cat.id, product: p })}
-                    onDelete={() => deleteProduct(cat.id, p.id)}
-                  />
+          )}
+
+          {selectedCat && (
+            <>
+              <div className={s.panelHead}>
+                <span className={s.prodPanelTitle}>{selectedCat.name}</span>
+                <button
+                  className={`${s.btn} ${s.btnPrimary} ${s.btnSm}`}
+                  onClick={() => { setEditProduct(null); setProductModalOpen(true); }}
+                >
+                  <Icon name="plus" size={11}/>Νέο Προϊόν
+                </button>
+              </div>
+
+              <div className={s.prodTableHead}>
+                <span>Προϊόν</span>
+                <span>Τιμή</span>
+                <span>Πόστο</span>
+                <span aria-hidden="true"/>
+              </div>
+
+              <div className={s.prodList}>
+                {(selectedCat.items || []).length === 0 && (
+                  <div className={s.emptyHint}>// Καμία προσθήκη ακόμα — πατήστε «+ Νέο Προϊόν»</div>
+                )}
+                {(selectedCat.items || []).map(p => (
+                  <div key={p.id} className={s.prodRow}>
+                    <div className={s.prodCellMain}>
+                      <span className={s.prodName}>{p.name}</span>
+                      {p.description && <span className={s.prodDesc}>{p.description}</span>}
+                    </div>
+                    <span className={s.prodPrice}>
+                      {Number(p.price).toFixed(2).replace('.', ',')}€
+                    </span>
+                    <span className={s.prodStation}>{p.station || 'KITCHEN'}</span>
+                    <div className={s.prodActs}>
+                      <button
+                        className={`${s.btnPill}`}
+                        onClick={() => { setEditProduct({ catId: selectedCat.id, product: p }); setProductModalOpen(true); }}
+                      >
+                        <span>Επεξεργασία</span>
+                        <Icon name="edit" size={11}/>
+                      </button>
+                      <button
+                        className={`${s.btnPill}`}
+                        onClick={() => deleteProduct(selectedCat.id, p.id)}
+                      >
+                        <span>Διαγραφή</span>
+                        <Icon name="trash" size={11}/>
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
-            )}
-          </div>
-        ))}
+            </>
+          )}
+        </section>
       </div>
 
-      <button className="me-add-cat" onClick={addCat}><Icon name="plus" size={12}/>Προσθήκη κατηγορίας</button>
+      {savedToast && <div className={s.toast}>✓ Οι αλλαγές αποθηκεύτηκαν</div>}
 
-      {savedToast && <div className="toast">✓ Οι αλλαγές αποθηκεύτηκαν</div>}
-
-      {/* Add product modal */}
-      {productModalCat && (
-        <ProductModal
-          onClose={() => setProductModalCat(null)}
-          onSubmit={(productData) => {
-            addProduct(productModalCat, productData);
-            setProductModalCat(null);
-          }}
-        />
-      )}
-
-      {/* Edit product modal */}
-      {editProductModal && (
-        <ProductModal
-          initialData={editProductModal.product}
-          onClose={() => setEditProductModal(null)}
-          onSubmit={(productData) => {
-            updateProduct(editProductModal.catId, editProductModal.product.id, productData);
-            setEditProductModal(null);
-          }}
-        />
-      )}
-
-      {/* Edit category modal */}
-      {editCat && (
+      {catModalOpen && (
         <CategoryModal
-          initialName={editCat.name}
-          onClose={() => setEditCatModalId(null)}
-          onSave={(newName) => {
-            renameCat(editCatModalId, newName);
-            setEditCatModalId(null);
+          onClose={() => setCatModalOpen(false)}
+          onSave={(name) => { addCat(name); setCatModalOpen(false); }}
+        />
+      )}
+
+      {editingCat && (
+        <CategoryModal
+          initialName={editingCat.name}
+          onClose={() => setEditCatId(null)}
+          onSave={(name) => { renameCat(editCatId, name); setEditCatId(null); }}
+        />
+      )}
+
+      {productModalOpen && (
+        <ProductModal
+          initialData={editProduct?.product}
+          onClose={() => { setProductModalOpen(false); setEditProduct(null); }}
+          onSubmit={(productData) => {
+            if (editProduct) {
+              updateProduct(editProduct.catId, editProduct.product.id, productData);
+            } else {
+              addProduct(selectedCat.id, productData);
+            }
+            setProductModalOpen(false);
+            setEditProduct(null);
           }}
         />
       )}
-      </>}
     </main>
-  );
-}
-
-/* ─── Category Modal ──────────────────────────────────────────────────────── */
-function CategoryModal({ initialName, onClose, onSave }) {
-  const [name, setName] = useState(initialName || '');
-
-  const handleSubmit = () => {
-    if (!name.trim()) return;
-    onSave(name.trim());
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal-sm" onClick={e => e.stopPropagation()}>
-        <div className="modal-head">
-          <h3>Επεξεργασία κατηγορίας</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
-        </div>
-        <div className="modal-body">
-          <div className="modal-field">
-            <label className="modal-label">Όνομα κατηγορίας *</label>
-            <input
-              className="modal-input"
-              placeholder="π.χ. Καφέδες"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              autoFocus
-            />
-          </div>
-        </div>
-        <div className="modal-foot">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>Ακύρωση</button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleSubmit}
-            disabled={!name.trim()}
-          >
-            ΟΚ
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ─── Product Modal ───────────────────────────────────────────────────────── */
-function ProductModal({ initialData, onClose, onSubmit }) {
-  const isEdit = !!initialData;
-  const [name, setName]               = useState(initialData?.name        || '');
-  const [price, setPrice]             = useState(initialData?.price != null ? String(initialData.price) : '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [station, setStation]         = useState(initialData?.station      || 'KITCHEN');
-
-  const handleSubmit = () => {
-    if (!name.trim()) return;
-    onSubmit({
-      id:          initialData?.id || ('p' + Date.now()),
-      name:        name.trim(),
-      price:       parseFloat(price) || 0,
-      description: description.trim(),
-      station,
-    });
-  };
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-
-        {/* Head */}
-        <div className="modal-head">
-          <h3>{isEdit ? 'Επεξεργασία Προϊόντος' : 'Νέο Προϊόν'}</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
-        </div>
-
-        {/* Body */}
-        <div className="modal-body">
-
-          {/* Name */}
-          <div className="modal-field">
-            <label className="modal-label">Όνομα *</label>
-            <input
-              className="modal-input"
-              placeholder="π.χ. Espresso"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              autoFocus
-            />
-          </div>
-
-          {/* Price */}
-          <div className="modal-field">
-            <label className="modal-label">Τιμή (€)</label>
-            <input
-              className="modal-input"
-              type="number"
-              min="0"
-              step="0.10"
-              placeholder="0.00"
-              value={price}
-              onChange={e => setPrice(e.target.value)}
-            />
-          </div>
-
-          {/* Description */}
-          <div className="modal-field">
-            <label className="modal-label">Περιγραφή</label>
-            <textarea
-              className="modal-textarea"
-              placeholder="Προαιρετική περιγραφή…"
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-            />
-          </div>
-
-          {/* Station */}
-          <div className="modal-field">
-            <label className="modal-label">Σταθμός</label>
-            <div className="modal-chips">
-              {['KITCHEN', 'BAR'].map(s => (
-                <button
-                  key={s}
-                  className={'modal-chip' + (station === s ? ' modal-chip-active' : '')}
-                  onClick={() => setStation(s)}
-                >
-                  {s === 'KITCHEN' ? 'Κουζίνα'
-                    : s === 'BAR'  ? 'Bar'
-                    : s === 'GRILL'? 'Grill'
-                    :                'Cold'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Foot */}
-        <div className="modal-foot">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>Ακύρωση</button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={handleSubmit}
-            disabled={!name.trim()}
-          >
-            {isEdit ? 'Αποθήκευση' : 'Προσθήκη'}
-          </button>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-/* ─── Product Row (read-only display) ────────────────────────────────────── */
-function ProductRow({ product, onEdit, onDelete }) {
-  const stationLabel = {
-    KITCHEN: 'Κουζίνα',
-    BAR:     'Bar',
-    GRILL:   'Grill',
-    COLD:    'Cold',
-  }[product.station] || product.station;
-
-  return (
-    <div className="me-prod">
-      <div className="me-prod-fields">
-        <div className="me-prod-field">
-          <span className="me-prod-field-lbl">Ποτό</span>
-          <span className="me-prod-field-val">{product.name}</span>
-        </div>
-        <div className="me-prod-field">
-          <span className="me-prod-field-lbl">Περιγραφή</span>
-          <span className="me-prod-field-val me-prod-field-muted">
-            {product.description || <em>—</em>}
-          </span>
-        </div>
-        <div className="me-prod-field">
-          <span className="me-prod-field-lbl">Τιμή</span>
-          <span className="me-prod-field-val me-prod-field-price">
-            {Number(product.price).toFixed(2).replace('.', ',')}€
-          </span>
-        </div>
-        <div className="me-prod-field">
-          <span className="me-prod-field-lbl">Ποστο</span>
-          <span className="me-prod-field-val">{stationLabel}</span>
-        </div>
-      </div>
-      <div className="me-prod-acts">
-        <button className="me-prod-edit-btn" onClick={onEdit} title="Επεξεργασία">
-          <Icon name="edit" size={11}/>
-        </button>
-        <button className="me-prod-del-btn" onClick={onDelete} title="Διαγραφή">
-          <Icon name="trash" size={11}/>
-        </button>
-      </div>
-    </div>
   );
 }

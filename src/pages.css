@@ -688,31 +688,111 @@
   padding: 0 22px 20px;
 }
 
-/* ── Menu Appearance ────────────────────────────────────────────────────── */
-.ma-layout { display: flex; flex: 1; overflow: hidden; }
-
-.ma-acc {
-  width: 320px; min-width: 300px; overflow-y: auto;
-  border-right: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0;
+/* ── Menu Appearance (Figma frame 07) ───────────────────────────────────── */
+.ma-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  flex: 1;
+  overflow: hidden;
+  padding: 4px 28px 28px;
 }
+
+/* Accordion card (left) */
+.ma-acc {
+  background: var(--bg-card);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+  max-height: 100%;
+}
+.ma-acc-items {
+  flex: 1;
+  overflow-y: auto;
+  padding: 22px 22px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Save bar at the bottom of the accordion card */
+.ma-save-bar {
+  padding: 14px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.ma-save-btn {
+  width: 100%;
+  height: 48px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.14s, opacity 0.14s;
+}
+.ma-save-btn:hover:not(:disabled) { background: var(--accent-hover); }
+.ma-save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.ma-save-reset {
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  align-self: center;
+}
+.ma-save-reset:hover { color: var(--text-sub); }
+
+/* Preview panel (right) — keeps the existing phone preview */
 .ma-preview {
-  flex: 1; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-subtle);
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 100%;
 }
 .ma-preview-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 20px; border-bottom: 1px solid var(--border);
+  padding: 14px 22px; border-bottom: 1px solid var(--border);
   background: var(--bg-card); flex-shrink: 0;
 }
-.ma-preview-lab  { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--text-muted); text-transform: uppercase; }
-.ma-preview-frame { flex: 1; overflow-y: auto; padding: 24px; display: flex; align-items: flex-start; justify-content: center; }
+.ma-preview-lab {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--text-muted); text-transform: uppercase;
+}
+.ma-preview-frame {
+  flex: 1; overflow-y: auto; padding: 28px 24px;
+  display: flex; align-items: flex-start; justify-content: center;
+  background: var(--bg-card-2);
+}
 .ma-preview-inner {
   width: 320px; flex-shrink: 0;
   height: 660px;
-  border-radius: 36px; overflow: hidden; box-shadow: 0 0 0 8px #1a1a1e, 0 0 0 9px var(--border-md), var(--shadow-lg);
+  border-radius: 36px; overflow: hidden;
+  box-shadow: 0 0 0 8px #1a1a1e, 0 0 0 9px var(--border-md), 0 16px 40px rgba(0,0,0,0.12);
   border: none; display: flex; flex-direction: column;
   position: relative;
+  background: #fff;
 }
-/* Phone notch bar */
 .ma-preview-inner::before {
   content: '';
   display: block; flex-shrink: 0;
@@ -722,25 +802,51 @@
   position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   z-index: 2;
 }
-/* Scrollable content area */
+.ma-preview-inner > iframe,
 .ma-preview-inner > div {
   flex: 1; overflow-y: auto; padding-top: 12px;
 }
 
-.ma-acc-item { border-bottom: 1px solid var(--border); }
-.ma-acc-head {
-  display: flex; align-items: center; gap: 10px; padding: 13px 16px;
-  width: 100%; background: none; border: none; cursor: pointer;
-  text-align: left; transition: background var(--transition); font-family: var(--font);
+/* Accordion items — cream pills (Figma) */
+.ma-acc-item {
+  background: var(--bg-card-2);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: background 0.14s;
 }
-.ma-acc-head:hover { background: var(--bg-card-2); }
-.ma-acc-item.open .ma-acc-head { background: var(--accent-soft); }
-.ma-acc-icon  { color: var(--accent); flex-shrink: 0; }
-.ma-acc-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.ma-acc-item:hover { background: #ECE9E2; }
+.ma-acc-item.open { background: var(--bg-card-2); }
+
+.ma-acc-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  width: 100%; background: none; border: none; cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+}
+.ma-acc-icon  { color: var(--text); flex-shrink: 0; }
+.ma-acc-title {
+  font-size: 14px; font-weight: 500; color: var(--text);
+  flex: 1; letter-spacing: -0.01em;
+}
 .ma-acc-meta  { font-size: 11px; color: var(--text-muted); }
-.ma-acc-chev  { color: var(--text-muted); transition: transform var(--transition); }
+.ma-acc-chev {
+  color: var(--text-sub);
+  transition: transform 0.2s ease;
+  display: inline-flex;
+}
 .ma-acc-chev.on { transform: rotate(90deg); }
-.ma-acc-body  { padding: 16px; background: var(--bg); display: flex; flex-direction: column; gap: 12px; animation: fadeInUp 150ms ease; }
+.ma-acc-body {
+  padding: 4px 20px 20px;
+  background: var(--bg-card-2);
+  display: flex; flex-direction: column; gap: 12px;
+  animation: fadeInUp 150ms ease;
+}
+
+@media (max-width: 1100px) {
+  .ma-layout { grid-template-columns: 1fr; }
+  .ma-preview-inner { width: 280px; height: 580px; }
+}
 
 .ma-color-row { display: flex; align-items: center; justify-content: space-between; }
 .ma-color-lab { font-size: 12px; color: var(--text-sub); }

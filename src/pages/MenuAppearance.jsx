@@ -187,20 +187,12 @@ export default function MenuAppearance() {
   ];
 
   const right = (
-    <>
-      <div className="dash-shop-select-wrap">
-        <span className="dash-shop-select-lab">SHOP</span>
-        <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
-          {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
-        </select>
-      </div>
-      <button className="btn btn-ghost btn-sm" onClick={() => setTheme(DEFAULT_THEME)} disabled={busy}>
-        Επαναφορά
-      </button>
-      <button className="btn btn-primary btn-sm" onClick={save} disabled={busy}>
-        {busy ? <><span className="spinner"/>Αποθήκευση…</> : <><Icon name="save" size={12}/>Αποθήκευση</>}
-      </button>
-    </>
+    <div className="dash-shop-select-wrap">
+      <span className="dash-shop-select-lab">SHOP</span>
+      <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
+        {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
+      </select>
+    </div>
   );
 
   if (!shop) return null;
@@ -232,6 +224,7 @@ export default function MenuAppearance() {
       <div className="ma-layout">
         {/* ── Accordion panel ─────────────────────────────────── */}
         <div className="ma-acc">
+          <div className="ma-acc-items">
           {sections.map(sec => {
             const isOpen = openSection === sec.id;
             return (
@@ -460,6 +453,17 @@ export default function MenuAppearance() {
               </div>
             );
           })}
+          </div>
+
+          {/* Save bar at the bottom of the accordion card (Figma frame 07) */}
+          <div className="ma-save-bar">
+            <button className="ma-save-btn" onClick={save} disabled={busy}>
+              {busy ? <><span className="spinner"/>Αποθήκευση…</> : <><Icon name="save" size={14}/>Αποθήκευση Θέματος</>}
+            </button>
+            <button className="ma-save-reset" onClick={() => setTheme(DEFAULT_THEME)} disabled={busy}>
+              Επαναφορά στις προεπιλογές
+            </button>
+          </div>
         </div>
 
         {/* ── Preview panel ───────────────────────────────────── */}
