@@ -106,33 +106,62 @@ body[data-layout="app"] { overflow: hidden; height: 100vh; }
   background: var(--bg); display: flex; flex-direction: column;
 }
 
-/* ── Topbar (Figma frame 05) ────────────────────────────────────────────── */
+/* ── Topbar — single gray bar with greeting on left + actions + page label on right ── */
 .topbar {
-  height: 56px;
+  min-height: 56px;
   background: var(--topbar-bg);
-  display: flex; align-items: center; justify-content: flex-end;
-  padding: 0 28px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 24px;
   flex-shrink: 0;
+}
+.topbar-left {
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1; min-width: 0;
+}
+.topbar-title {
+  font-family: var(--font);
+  font-size: 13px; font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar-sub {
+  font-family: var(--font);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar-right {
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.topbar-actions {
+  display: flex; align-items: center; gap: 8px;
 }
 .topbar-label {
   font-family: var(--font);
-  font-size: 14px; font-weight: 600;
+  font-size: 13px; font-weight: 600;
   color: var(--topbar-text);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
-/* ── Page subheader (greeting + actions) ────────────────────────────────── */
+/* Backward compatibility — old pages may still render .ph */
 .ph {
   display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 22px 28px 18px; flex-shrink: 0;
+  padding: 16px 28px 8px; flex-shrink: 0;
   gap: 16px;
 }
 .ph-left  { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
 .ph-kicker { font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 0.05em; text-transform: uppercase; }
-.ph-title  {
-  font-size: 15px; font-weight: 500; color: var(--text-muted);
-  letter-spacing: -0.01em; line-height: 1.4;
-}
+.ph-title  { font-size: 15px; font-weight: 500; color: var(--text-muted); letter-spacing: -0.01em; line-height: 1.4; }
 .ph-sub    { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 .ph-right  { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-top: 2px; }
 

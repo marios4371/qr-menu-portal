@@ -165,24 +165,19 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   );
 }
 
-// ── PageHeader (topbar + subheader, Figma frame 05) ──────────────────────
+// ── PageHeader — single gray topbar with greeting/sub on left + actions + page label on right
 export function PageHeader({ kicker, title, sub, right, topbarLabel }) {
-  // Topbar label resolution: explicit topbarLabel > kicker > title
-  // (sub is intentionally NOT used because it's typically a longer description)
-  const label = topbarLabel || kicker || title;
+  const label = topbarLabel || kicker;
   return (
-    <>
-      <div className="topbar">
-        <span className="topbar-label">{label}</span>
+    <header className="topbar">
+      <div className="topbar-left">
+        {title && <span className="topbar-title">{title}</span>}
+        {sub && <span className="topbar-sub">{sub}</span>}
       </div>
-      <header className="ph">
-        <div className="ph-left">
-          {kicker && <span className="ph-kicker">{kicker}</span>}
-          <h1 className="ph-title">{title}</h1>
-          {sub && <p className="ph-sub">{sub}</p>}
-        </div>
-        {right && <div className="ph-right">{right}</div>}
-      </header>
-    </>
+      <div className="topbar-right">
+        {right && <div className="topbar-actions">{right}</div>}
+        {label && <span className="topbar-label">{label}</span>}
+      </div>
+    </header>
   );
 }

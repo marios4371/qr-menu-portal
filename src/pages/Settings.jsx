@@ -1,12 +1,11 @@
 // src/pages/Settings.jsx
 // Ρυθμίσεις: Λογαριασμός, Πλάνο & Χρέωση, Καταστήματα, Ασφάλεια.
-// Read-mostly view για τώρα — οι ενεργές αλλαγές γίνονται μέσω modals/εντολών στις άλλες σελίδες.
 
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { PLANS } from '../constants';
+import { PLANS, PLAN_FEATURES } from '../constants';
 import { MENU_BASE_URL } from '../services/api';
 
 const TABS = [
@@ -136,15 +135,27 @@ function PlanTab({ owner, onPlanClick }) {
             <span className="dash-panel-kicker">ΛΕΙΤΟΥΡΓΙΕΣ ΠΛΑΝΟΥ</span>
             <span className="dash-panel-title">Τι περιλαμβάνεται στο {currentPlan.name}</span>
           </div>
+          {!isExclusive && (
+            <button className="btn btn-primary btn-sm" onClick={onPlanClick}>
+              <Icon name="bolt" size={12}/>Αναβάθμιση πλάνου
+            </button>
+          )}
         </div>
-        <ul className="set-feature-list">
-          {currentPlan.features.map((f, i) => (
-            <li key={i} className="set-feature">
-              <span className="set-feature-check">→</span>
-              <span>{f}</span>
-            </li>
+        <div className="set-feat-grid">
+          {(PLAN_FEATURES[owner?.plan] || []).map((f) => (
+            <div key={f.key} className="set-feat-card">
+              <div className="set-feat-head">
+                <span className="set-feat-name">{f.label}</span>
+                <span className="set-feat-check">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </span>
+              </div>
+              <span className="set-feat-desc">{f.desc}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       <div className="dash-panel ticks">

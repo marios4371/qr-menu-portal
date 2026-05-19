@@ -198,9 +198,30 @@ export default function Analytics() {
       {/* ── Empty state (08_before) ── */}
       {!hasSearched && !loading && !err && (
         <div className={s.emptyState}>
-          <svg className={s.emptyIcon} viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 100 L60 70 L100 90 L140 50 L180 20 M180 20 L160 30 M180 20 L170 40"
-                  stroke="#9B948C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg className={s.emptyIcon} viewBox="0 0 240 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Soft background blob */}
+            <ellipse cx="120" cy="180" rx="100" ry="12" fill="#1A1714" opacity="0.04"/>
+            {/* Grid floor lines */}
+            <line x1="20" y1="160" x2="220" y2="160" stroke="#9B948C" strokeWidth="1" opacity="0.4" strokeDasharray="3 4"/>
+            <line x1="20" y1="130" x2="220" y2="130" stroke="#9B948C" strokeWidth="1" opacity="0.25" strokeDasharray="3 4"/>
+            <line x1="20" y1="100" x2="220" y2="100" stroke="#9B948C" strokeWidth="1" opacity="0.2"  strokeDasharray="3 4"/>
+            <line x1="20" y1="70"  x2="220" y2="70"  stroke="#9B948C" strokeWidth="1" opacity="0.15" strokeDasharray="3 4"/>
+            {/* Bars */}
+            <rect x="40"  y="110" width="22" height="50" rx="3" fill="#1C62CC" opacity="0.85"/>
+            <rect x="76"  y="85"  width="22" height="75" rx="3" fill="#1C62CC" opacity="0.85"/>
+            <rect x="112" y="100" width="22" height="60" rx="3" fill="#1C62CC" opacity="0.85"/>
+            <rect x="148" y="60"  width="22" height="100" rx="3" fill="#2E5C1E" opacity="0.85"/>
+            <rect x="184" y="40"  width="22" height="120" rx="3" fill="#1C62CC"/>
+            {/* Trend line */}
+            <path d="M51 100 L87 78 L123 92 L159 55 L195 32" stroke="#1A1714" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            {/* Trend nodes */}
+            <circle cx="51"  cy="100" r="4" fill="#FFFFFF" stroke="#1A1714" strokeWidth="2"/>
+            <circle cx="87"  cy="78"  r="4" fill="#FFFFFF" stroke="#1A1714" strokeWidth="2"/>
+            <circle cx="123" cy="92"  r="4" fill="#FFFFFF" stroke="#1A1714" strokeWidth="2"/>
+            <circle cx="159" cy="55"  r="4" fill="#FFFFFF" stroke="#1A1714" strokeWidth="2"/>
+            <circle cx="195" cy="32"  r="5" fill="#2E5C1E" stroke="#FFFFFF" strokeWidth="2"/>
+            {/* Sparkle */}
+            <path d="M205 18 L207 22 L211 24 L207 26 L205 30 L203 26 L199 24 L203 22 Z" fill="#1C62CC"/>
           </svg>
           <p className={s.emptyText}>Επιλέξτε φίλτρα για εμφάνιση αποτελεσμάτων</p>
         </div>

@@ -204,9 +204,9 @@
   gap: 22px;
 }
 .emptyIcon {
-  width: 220px;
-  height: 140px;
-  opacity: 0.55;
+  width: 280px;
+  height: 230px;
+  opacity: 0.95;
 }
 .emptyText {
   font-size: 26px;

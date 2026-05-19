@@ -1,9 +1,8 @@
 // src/pages/Dashboard.jsx
 import { useState } from 'react';
-import { useNavigate, useOutletContext } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { PLAN_FEATURES } from '../constants';
 import { MENU_BASE_URL, claimShop } from '../services/api';
 import s from './Dashboard.module.css';
 
@@ -115,17 +114,13 @@ function ClaimShopModal({ onClose }) {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { onPlanClick } = useOutletContext();
   const { owner, shops, currentShopId, setCurrentShopId } = useAuth();
   const [claimOpen, setClaimOpen] = useState(false);
 
   const shop = shops.find(sh => sh.shop_id === currentShopId) || shops[0];
   if (!shop) return null;
 
-  const totalProducts   = shop.menu?.reduce((acc, c) => acc + (c.items?.length || 0), 0) || 0;
-  const planFeatures    = PLAN_FEATURES[owner?.plan] || [];
-  const enabledFeatures = planFeatures.length;
-  const isExclusive     = owner?.plan === 'EXCLUSIVE';
+  const totalProducts = shop.menu?.reduce((acc, c) => acc + (c.items?.length || 0), 0) || 0;
 
   const LEGACY_MENU_BASE = 'https://1f6nesbrjk.execute-api.eu-central-1.amazonaws.com/default/';
   const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
@@ -252,41 +247,6 @@ export default function Dashboard() {
             <div key={cat.id} className={s.catCard}>
               <span className={s.catName}>{cat.name}</span>
               <span className={s.catCount}>{cat.items?.length || 0} προϊόντα</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Features ── */}
-      <section className={s.section}>
-        <div className={s.sectionHead}>
-          <div>
-            <h2 className={s.sectionTitle}>Λειτουργίες</h2>
-            <p className={s.sectionSub}>
-              {enabledFeatures} ενεργές · πλάνο {owner?.plan}
-            </p>
-          </div>
-          {!isExclusive ? (
-            <button className={`${s.btn} ${s.btnSecondary}`} onClick={onPlanClick}>
-              <Icon name="bolt" size={12}/>Αναβάθμιση πλάνου
-            </button>
-          ) : (
-            <span className={s.planMaxNote}>Μέγιστο πλάνο</span>
-          )}
-        </div>
-
-        <div className={s.featGrid}>
-          {planFeatures.map((f) => (
-            <div key={f.key} className={s.featCard}>
-              <div className={s.featHead}>
-                <span className={s.featName}>{f.label}</span>
-                <span className={s.featCheck}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </span>
-              </div>
-              <span className={s.featDesc}>{f.desc}</span>
             </div>
           ))}
         </div>
