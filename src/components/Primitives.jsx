@@ -82,13 +82,23 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   const page = PATH_MAP[location.pathname] || 'dashboard';
   const isExclusive = owner?.plan === 'EXCLUSIVE';
   const items = [
-    { key: 'dashboard',  label: 'Dashboard',         icon: 'home' },
-    { key: 'editor',     label: 'Menu Editor',       icon: 'edit' },
-    { key: 'appearance', label: 'Εμφάνιση',          icon: 'palette', premium: true },
-    { key: 'analytics',  label: 'Analytics',         icon: 'stat',    premium: true },
-    { key: 'inventory',  label: 'Απόθεμα',           icon: 'package', exclusive: true },
-    { key: 'settings',   label: 'Ρυθμίσεις',         icon: 'settings' },
+    { key: 'dashboard',  label: 'Αρχική',             icon: 'menu' },
+    { key: 'editor',     label: 'Επεξεργασία Μενού',  icon: 'edit' },
+    { key: 'appearance', label: 'Εμφάνιση',           icon: 'grid',     premium: true },
+    { key: 'analytics',  label: 'Analytics',          icon: 'stat',     premium: true },
+    { key: 'settings',   label: 'Ρυθμίσεις',          icon: 'settings' },
   ];
+
+  // Plan info for the bottom card
+  const planName = owner?.plan === 'PREMIUM' ? 'Premium' : owner?.plan === 'EXCLUSIVE' ? 'Exclusive' : 'Standard';
+  const planPrice = owner?.plan === 'PREMIUM' ? '16.70€' : owner?.plan === 'EXCLUSIVE' ? '25€' : '12€';
+  // Renewal date — next 1st of next month
+  const renewalLabel = (() => {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const months = ['Ιαν', 'Φεβ', 'Μαρ', 'Απρ', 'Μάι', 'Ιουν', 'Ιουλ', 'Αυγ', 'Σεπ', 'Οκτ', 'Νοε', 'Δεκ'];
+    return `1 ${months[next.getMonth()]}`;
+  })();
 
   return (
     <aside className="sb">
@@ -99,13 +109,12 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', font: 'inherit', padding: 0 }}
           onClick={() => navigate('/dashboard')}
         >
-          <span className="dot"/>Resto Solutions
+          Resto Solutions
         </button>
       </div>
 
-{/* Nav */}
+      {/* Nav */}
       <div className="sb-section">
-        <div className="sb-section-label">Navigation</div>
         <nav className="sb-nav">
           {items.map(it => {
             const lockedByPremium   = it.premium   && owner?.plan === 'STANDARD';
@@ -118,10 +127,9 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
                 className={`sb-item ${page === it.key ? 'on' : ''} ${locked ? 'locked' : ''}`}
                 disabled={locked}
               >
-                <Icon name={it.icon} size={13}/>
-                <span>{it.label}</span>
+                <span className="sb-item-label">{it.label}</span>
                 {locked && <Icon name="lock" size={11}/>}
-                {page === it.key && <span className="sb-tick"/>}
+                <Icon name={it.icon} size={14}/>
               </button>
             );
           })}
@@ -132,22 +140,20 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
 
       {/* Footer */}
       <div className="sb-section sb-foot">
-        <button className="sb-plan" onClick={onPlanClick}>
+        <div className="sb-plan-card">
           <div className="sb-plan-row">
-            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--sb-active-text)' }}>
-              {owner?.plan === 'PREMIUM' ? 'Premium' : owner?.plan === 'EXCLUSIVE' ? 'Exclusive' : 'Standard'}
-            </span>
-            <span style={{ fontSize: '9px', fontWeight: 700, color: '#F5E6C8', letterSpacing: '0.08em' }}>✦ PRO</span>
+            <span className="sb-plan-name-main">{planName}</span>
+            <span className="sb-plan-badge">✦ PRO</span>
           </div>
-          <div className="sb-plan-name" style={{ fontSize: '11px', fontWeight: 400, color: 'var(--sb-text-muted)', marginTop: 4 }}>
-            {owner?.plan === 'PREMIUM' ? '16.70€' : owner?.plan === 'EXCLUSIVE' ? '25€' : '12€'} / μήνα
+          <div className="sb-plan-sub">
+            {planPrice} / μήνα{!isExclusive && ` · ανανέωση ${renewalLabel}`}
           </div>
           {!isExclusive && (
-            <div style={{ fontSize: '10px', color: '#F5E6C8', marginTop: 8, textDecoration: 'underline', fontWeight: 500 }}>
+            <button className="sb-upgrade-btn" onClick={onPlanClick}>
               Αναβάθμιση σε {owner?.plan === 'PREMIUM' ? 'Exclusive' : 'Premium'}
-            </div>
+            </button>
           )}
-        </button>
+        </div>
 
         <div className="sb-owner">
           <div className="sb-avatar">{owner?.firstName?.[0]}{owner?.lastName?.[0]}</div>
@@ -165,8 +171,8 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   );
 }
 
-// ── PageHeader — single gray topbar with greeting/sub on left + actions + page label on right
-export function PageHeader({ kicker, title, sub, right, topbarLabel }) {
+// ── PageHeader — single gray topbar: left (title/sub) + center (shop) + right (actions + label)
+export function PageHeader({ kicker, title, sub, right, center, topbarLabel }) {
   const label = topbarLabel || kicker;
   return (
     <header className="topbar">
@@ -174,10 +180,25 @@ export function PageHeader({ kicker, title, sub, right, topbarLabel }) {
         {title && <span className="topbar-title">{title}</span>}
         {sub && <span className="topbar-sub">{sub}</span>}
       </div>
+      {center && <div className="topbar-center">{center}</div>}
       <div className="topbar-right">
         {right && <div className="topbar-actions">{right}</div>}
         {label && <span className="topbar-label">{label}</span>}
       </div>
     </header>
+  );
+}
+
+// ── ShopSelectPill — centered pill used in topbar (Κατάστημα : POSADA) ───────
+export function ShopSelectPill({ value, onChange, shops }) {
+  return (
+    <div className="shop-pill">
+      <span className="shop-pill-label">Κατάστημα :</span>
+      <select className="shop-pill-select" value={value} onChange={onChange}>
+        {shops.map(sh => (
+          <option key={sh.shop_id} value={sh.shop_id}>{sh.shopName || sh.shop_id}</option>
+        ))}
+      </select>
+    </div>
   );
 }

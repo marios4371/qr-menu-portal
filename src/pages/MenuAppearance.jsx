@@ -1,7 +1,7 @@
 // src/pages/MenuAppearance.jsx — Figma frame 07 simplified: categories editor + phone preview
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Icon, PageHeader } from '../components/Primitives';
+import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 import { saveMenu, MENU_BASE_URL } from '../services/api';
 
 // ── Category Modal ──────────────────────────────────────────────────────────
@@ -116,23 +116,20 @@ export default function MenuAppearance() {
     }
   };
 
-  // Topbar right: shop selector pill
-  const right = (
-    <div className="dash-shop-select-wrap">
-      <span className="dash-shop-select-lab">SHOP</span>
-      <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
-        {shops.map(sh => <option key={sh.shop_id} value={sh.shop_id}>{sh.shopName}</option>)}
-      </select>
-    </div>
+  // Topbar: centered shop pill
+  const centerPill = (
+    <ShopSelectPill
+      value={currentShopId}
+      onChange={e => setCurrentShopId(e.target.value)}
+      shops={shops}
+    />
   );
 
   return (
     <main className="page-main" style={{ overflow: 'hidden' }}>
       <PageHeader
         topbarLabel="Εμφάνιση Μενού"
-        title="Σχεδίαση μενού"
-        sub="Διαχειριστείτε τις κατηγορίες του μενού σας."
-        right={right}
+        center={centerPill}
       />
 
       {saveErr && <div className="msg-error" style={{ margin: '12px 28px 0', flexShrink: 0 }}>{saveErr}</div>}

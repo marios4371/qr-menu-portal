@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Icon, PageHeader } from '../components/Primitives';
+import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 import { getOrdersAnalytics } from '../services/api';
 import s from './Analytics.module.css';
 
@@ -109,20 +109,13 @@ export default function Analytics() {
     );
   }
 
-  // Header right (shop selector pill)
-  const right = (
-    <div className={s.headerActions}>
-      <span className={s.shopLabel}>Κατάστημα :</span>
-      <select
-        className={s.shopSelect}
-        value={currentShopId}
-        onChange={e => setCurrentShopId(e.target.value)}
-      >
-        {shops.map(sh => (
-          <option key={sh.shop_id} value={sh.shop_id}>{sh.shopName}</option>
-        ))}
-      </select>
-    </div>
+  // Topbar: centered shop pill
+  const centerPill = (
+    <ShopSelectPill
+      value={currentShopId}
+      onChange={e => setCurrentShopId(e.target.value)}
+      shops={shops}
+    />
   );
 
   const sum = result?.summary;
@@ -132,9 +125,7 @@ export default function Analytics() {
     <main className={s.pageMain}>
       <PageHeader
         topbarLabel="Analytics Μενού"
-        title="Order Analytics"
-        sub="Διαμορφώστε τα φίλτρα και πατήστε «Αναζήτηση» για ανάκτηση δεδομένων."
-        right={right}
+        center={centerPill}
       />
 
       {/* ── Search bar (rounded white pill container) ── */}

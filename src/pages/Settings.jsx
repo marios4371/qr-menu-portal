@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Icon, PageHeader } from '../components/Primitives';
+import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 import { PLANS, PLAN_FEATURES } from '../constants';
 import { MENU_BASE_URL } from '../services/api';
 
@@ -313,15 +313,22 @@ function SecurityTab({ owner }) {
 // ── Settings ──────────────────────────────────────────────────────────────────
 export default function Settings() {
   const { onPlanClick } = useOutletContext();
-  const { owner, shops } = useAuth();
+  const { owner, shops, currentShopId, setCurrentShopId } = useAuth();
   const [tab, setTab] = useState('account');
+
+  const centerPill = (
+    <ShopSelectPill
+      value={currentShopId}
+      onChange={e => setCurrentShopId(e.target.value)}
+      shops={shops}
+    />
+  );
 
   return (
     <main className="page-main">
       <PageHeader
-        kicker="Ρυθμίσεις"
-        title="Λογαριασμός & Διαχείριση"
-        sub="Στοιχεία λογαριασμού, πλάνο, καταστήματα και ασφάλεια."
+        topbarLabel="Ρυθμίσεις"
+        center={centerPill}
       />
 
       <div className="set-tabs">

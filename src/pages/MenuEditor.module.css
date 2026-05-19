@@ -170,7 +170,6 @@
 .catItemOn {
   background: var(--bg-card-2);
 }
-.catItemOn .catName { color: var(--text); font-weight: 700; }
 
 .catName {
   flex: 1;

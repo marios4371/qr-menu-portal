@@ -18,60 +18,88 @@ body[data-layout="app"] { overflow: hidden; height: 100vh; }
 }
 
 /* Brand */
-.sb-head { padding: 20px 18px 10px; display: flex; align-items: center; gap: 8px; }
+.sb-head {
+  padding: 20px 18px 16px;
+  display: flex; align-items: center;
+  border-bottom: 1px solid var(--sb-border);
+}
 .brand {
   font-size: 14px; font-weight: 700; color: var(--sb-text);
-  letter-spacing: -0.01em; display: flex; align-items: center; gap: 7px;
+  letter-spacing: -0.01em;
 }
 .dot { display: none; }
 
 /* Nav section */
-.sb-section { padding: 10px 10px 4px; }
-.sb-section-label {
-  font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-  color: var(--sb-text-muted); padding: 0 8px; margin-bottom: 6px;
-}
+.sb-section { padding: 12px 10px 4px; }
+.sb-section-label { display: none; }
 
-.sb-nav { display: flex; flex-direction: column; gap: 1px; }
+.sb-nav { display: flex; flex-direction: column; gap: 2px; }
 .sb-item {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%; padding: 8px 10px; border-radius: var(--radius);
+  display: flex; align-items: center;
+  width: 100%; padding: 10px 14px; border-radius: var(--radius);
   background: none; border: none; cursor: pointer;
   color: var(--sb-text); font-size: 13px; font-weight: 400;
-  text-align: left; transition: background var(--transition), color var(--transition);
+  text-align: left; transition: background var(--transition);
   font-family: var(--font);
-  opacity: 0.78;
+  opacity: 0.82;
 }
 .sb-item:hover:not(:disabled) { background: var(--sb-hover); opacity: 1; }
-.sb-item.on  { background: var(--sb-active-bg); opacity: 1; font-weight: 500; }
+.sb-item.on  { background: var(--sb-active-bg); opacity: 1; }
 .sb-item.locked { opacity: 0.35; cursor: not-allowed; }
 .sb-item:disabled { opacity: 0.35; cursor: not-allowed; }
-.sb-item > svg { flex-shrink: 0; }
-.sb-item > span:first-of-type { flex: 1; }
-.sb-tick {
-  width: 4px; height: 18px; border-radius: 2px;
-  background: #F5E6C8; flex-shrink: 0;
-}
+.sb-item-label { flex: 1; }
+.sb-item > svg { flex-shrink: 0; margin-left: 8px; opacity: 0.85; }
+.sb-tick { display: none; }
 
 .sb-grow { flex: 1; }
 
 /* Footer */
 .sb-foot {
-  padding: 12px 10px 16px;
+  padding: 14px 12px 16px;
   border-top: 1px solid var(--sb-border);
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex; flex-direction: column; gap: 8px;
 }
 
-/* Plan pill */
-.sb-plan {
-  padding: 12px 12px; border-radius: 6px;
-  background: rgba(0, 0, 0, 0.18);
-  border: none;
-  cursor: pointer; text-align: left; width: 100%;
-  transition: background var(--transition); font-family: var(--font);
+/* Plan card */
+.sb-plan-card {
+  padding: 14px 14px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.22);
+  text-align: left;
+  font-family: var(--font);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.sb-plan:hover { background: rgba(0, 0, 0, 0.28); }
-.sb-plan-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.sb-plan-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sb-plan-name-main { font-size: 13px; font-weight: 700; color: #FFFFFF; letter-spacing: -0.01em; }
+.sb-plan-badge {
+  font-size: 9px; font-weight: 700; color: #F5E6C8;
+  letter-spacing: 0.08em;
+}
+.sb-plan-sub {
+  font-size: 11px; font-weight: 400; color: var(--sb-text-muted);
+  letter-spacing: 0;
+}
+.sb-upgrade-btn {
+  margin-top: 10px;
+  width: 100%;
+  height: 32px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 5px;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.14s, border-color 0.14s;
+}
+.sb-upgrade-btn:hover { background: rgba(255, 255, 255, 0.18); border-color: rgba(255, 255, 255, 0.28); }
+
+/* Backward compatibility */
+.sb-plan { padding: 12px; border-radius: 6px; background: rgba(0, 0, 0, 0.18); border: none; cursor: pointer; text-align: left; width: 100%; font-family: var(--font); }
 .sb-plan-name { font-size: 12px; font-weight: 600; color: var(--sb-active-text); }
 
 /* Owner info */
@@ -106,19 +134,20 @@ body[data-layout="app"] { overflow: hidden; height: 100vh; }
   background: var(--bg); display: flex; flex-direction: column;
 }
 
-/* ── Topbar — single gray bar with greeting on left + actions + page label on right ── */
+/* ── Topbar — left (greeting/sub) + center (shop pill) + right (actions + label) ── */
 .topbar {
   min-height: 56px;
   background: var(--topbar-bg);
-  display: flex; align-items: center;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
   gap: 16px;
   padding: 8px 24px;
   flex-shrink: 0;
 }
 .topbar-left {
   display: flex; flex-direction: column; gap: 2px;
-  flex: 1; min-width: 0;
+  min-width: 0;
 }
 .topbar-title {
   font-family: var(--font);
@@ -138,9 +167,14 @@ body[data-layout="app"] { overflow: hidden; height: 100vh; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.topbar-center {
+  display: flex; justify-content: center;
+}
 .topbar-right {
   display: flex; align-items: center; gap: 14px;
+  justify-content: flex-end;
   flex-shrink: 0;
+  min-width: 0;
 }
 .topbar-actions {
   display: flex; align-items: center; gap: 8px;
@@ -151,6 +185,43 @@ body[data-layout="app"] { overflow: hidden; height: 100vh; }
   color: var(--topbar-text);
   letter-spacing: -0.01em;
   white-space: nowrap;
+}
+
+/* ── Centered shop pill (Κατάστημα : POSADA) ─────────────────────────────── */
+.shop-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 32px;
+  padding: 0 6px 0 16px;
+  background: rgba(217, 217, 217, 0.55);
+  border-radius: 20px;
+}
+.shop-pill-label {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: #FFFFFF;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.shop-pill-select {
+  height: 22px;
+  padding: 0 26px 0 14px;
+  background: #FFFFFF;
+  border: none;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%231A1714' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
 }
 
 /* Backward compatibility — old pages may still render .ph */

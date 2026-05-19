@@ -6,7 +6,7 @@
 import { useState, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Icon, PageHeader } from '../components/Primitives';
+import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 function computeStatus(item) {
@@ -171,26 +171,19 @@ export default function Inventory() {
     );
   }
 
-  const right = (
-    <div className="dash-shop-select-wrap">
-      <span className="dash-shop-select-lab">SHOP</span>
-      <select className="dash-shop-select" value={currentShopId} onChange={e => setCurrentShopId(e.target.value)}>
-        {shops.map(s => <option key={s.shop_id} value={s.shop_id}>{s.shopName}</option>)}
-      </select>
-    </div>
+  const centerPill = (
+    <ShopSelectPill
+      value={currentShopId}
+      onChange={e => setCurrentShopId(e.target.value)}
+      shops={shops}
+    />
   );
 
   return (
     <main className="page-main">
       <PageHeader
-        kicker="Απόθεμα"
-        title="Διαχείριση κάβας"
-        sub={
-          items.length === 0
-            ? 'Καταγράψτε τα είδη σας: ποσότητα, μονάδα, κόστος, λήξη.'
-            : `${counts.total} είδη · ${counts.low} χαμηλά · ${counts.out} εκτός · ${counts.expiring} λήγουν`
-        }
-        right={right}
+        topbarLabel="Απόθεμα"
+        center={centerPill}
       />
 
       {/* Toolbar */}

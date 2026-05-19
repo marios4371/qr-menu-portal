@@ -1,7 +1,7 @@
 // src/pages/MenuEditor.jsx — Figma frame 06 (two-pane editor)
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Icon, PageHeader } from '../components/Primitives';
+import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 import { saveMenu } from '../services/api';
 import s from './MenuEditor.module.css';
 
@@ -181,31 +181,25 @@ export default function MenuEditor() {
     }
   };
 
-  // Top-right header actions: shop selector (rounded pill) + Save
+  // Topbar: centered shop pill + Save button on the right
+  const centerPill = (
+    <ShopSelectPill
+      value={currentShopId}
+      onChange={e => setCurrentShopId(e.target.value)}
+      shops={shops}
+    />
+  );
   const right = (
-    <div className={s.headerActions}>
-      <span className={s.shopLabel}>Κατάστημα :</span>
-      <select
-        className={s.shopSelect}
-        value={currentShopId}
-        onChange={e => setCurrentShopId(e.target.value)}
-      >
-        {shops.map(sh => (
-          <option key={sh.shop_id} value={sh.shop_id}>{sh.shopName}</option>
-        ))}
-      </select>
-      <button className={`${s.btn} ${s.btnPrimary}`} onClick={save} disabled={!dirty}>
-        <Icon name="save" size={12}/>Αποθήκευση
-      </button>
-    </div>
+    <button className={`${s.btn} ${s.btnPrimary}`} onClick={save} disabled={!dirty}>
+      <Icon name="save" size={12}/>Αποθήκευση
+    </button>
   );
 
   return (
     <main className={s.pageMain}>
       <PageHeader
         topbarLabel="Επεξεργασία Μενού"
-        title="Επεξεργασία μενού"
-        sub="Προσθέστε κατηγορίες και προϊόντα. Αποθηκεύστε για να εφαρμοστούν."
+        center={centerPill}
         right={right}
       />
 
