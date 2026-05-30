@@ -1,6 +1,5 @@
 // src/pages/Dashboard.jsx
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
 import { MENU_BASE_URL, claimShop } from '../services/api';
@@ -111,19 +110,107 @@ function ClaimShopModal({ onClose }) {
   );
 }
 
+// ── TodoList — owner's "what to do" list (replaces the Figma table) ────────────
+function TodoList({ shopId }) {
+  const storageKey = `qrmenu_todos_${shopId}`;
+  const [todos, setTodos] = useState([]);
+  const [text,  setText]  = useState('');
+
+  // Load this shop's todos whenever the active shop changes
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      setTodos(Array.isArray(saved) ? saved : []);
+    } catch {
+      setTodos([]);
+    }
+  }, [storageKey]);
+
+  // Persist on every change
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify(todos)); } catch {}
+  }, [todos, storageKey]);
+
+  const addTodo = (e) => {
+    e?.preventDefault();
+    const t = text.trim();
+    if (!t) return;
+    setTodos(prev => [...prev, { id: Date.now(), text: t, done: false }]);
+    setText('');
+  };
+  const toggleTodo = (id) => setTodos(prev => prev.map(td => td.id === id ? { ...td, done: !td.done } : td));
+  const removeTodo = (id) => setTodos(prev => prev.filter(td => td.id !== id));
+
+  const doneCount = todos.filter(td => td.done).length;
+
+  return (
+    <section className={s.todoCard}>
+      <div className={s.todoHead}>
+        <div>
+          <h2 className={s.todoTitle}>Λίστα Εκκρεμοτήτων</h2>
+          <p className={s.todoSub}>Τι έχεις να κάνεις για το κατάστημά σου</p>
+        </div>
+        {todos.length > 0 && (
+          <span className={s.todoCount}>{doneCount}/{todos.length} ολοκληρώθηκαν</span>
+        )}
+      </div>
+
+      <form className={s.todoAdd} onSubmit={addTodo}>
+        <input
+          className={s.todoInput}
+          type="text"
+          placeholder="Προσθήκη νέας εργασίας…"
+          value={text}
+          onChange={e => setText(e.target.value)}
+        />
+        <button type="submit" className={s.todoAddBtn} disabled={!text.trim()}>
+          <Icon name="plus" size={14}/>Προσθήκη
+        </button>
+      </form>
+
+      <div className={s.todoList}>
+        {todos.length === 0 ? (
+          <div className={s.todoEmpty}>
+            Δεν υπάρχουν εκκρεμότητες. Πρόσθεσε την πρώτη σου εργασία παραπάνω!
+          </div>
+        ) : (
+          todos.map(td => (
+            <div key={td.id} className={`${s.todoRow} ${td.done ? s.todoRowDone : ''}`}>
+              <button
+                type="button"
+                className={`${s.todoCheck} ${td.done ? s.todoCheckOn : ''}`}
+                onClick={() => toggleTodo(td.id)}
+                aria-label={td.done ? 'Αναίρεση' : 'Ολοκλήρωση'}
+              >
+                {td.done && <Icon name="check" size={12}/>}
+              </button>
+              <span className={s.todoText}>{td.text}</span>
+              <button
+                type="button"
+                className={s.todoDel}
+                onClick={() => removeTodo(td.id)}
+                aria-label="Διαγραφή"
+              >
+                <Icon name="trash" size={14}/>
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 export default function Dashboard() {
-  const navigate = useNavigate();
   const { owner, shops, currentShopId, setCurrentShopId } = useAuth();
   const [claimOpen, setClaimOpen] = useState(false);
 
   const shop = shops.find(sh => sh.shop_id === currentShopId) || shops[0];
   if (!shop) return null;
 
-  const totalProducts = shop.menu?.reduce((acc, c) => acc + (c.items?.length || 0), 0) || 0;
-
-  const LEGACY_MENU_BASE = 'https://1f6nesbrjk.execute-api.eu-central-1.amazonaws.com/default/';
   const isLegacy = !shop?.shop_id?.startsWith('SHOP#');
+  const LEGACY_MENU_BASE = 'https://1f6nesbrjk.execute-api.eu-central-1.amazonaws.com/default/';
   const menuUrl  = isLegacy
     ? `${LEGACY_MENU_BASE}?shop=${shop.shop_id}`
     : `${MENU_BASE_URL}/menu/${shop.shopSlug}`;
@@ -132,125 +219,95 @@ export default function Dashboard() {
     : `${MENU_BASE_URL.replace('https://','').split('.')[0]}…/menu/${shop.shopSlug}`;
   const copyUrl = () => navigator.clipboard?.writeText(menuUrl);
 
-  const right = (
-    <div className={s.headerActions}>
-      <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => setClaimOpen(true)}>
-        <Icon name="shop" size={12}/>Σύνδεση καταστήματος
-      </button>
-      <select
-        className={s.shopSelect}
-        value={currentShopId}
-        onChange={e => setCurrentShopId(e.target.value)}
-      >
-        {shops.map(sh => (
-          <option key={sh.shop_id} value={sh.shop_id}>
-            {sh.shopName}{!sh.shop_id?.startsWith('SHOP#') ? ' (Legacy)' : ''}
-          </option>
-        ))}
-      </select>
-    </div>
-  );
-
   return (
     <main className={s.pageMain}>
       <PageHeader
         topbarLabel="Dashboard"
-        title={`${greeting()}, ${owner?.firstName} — αυτό είναι η επισκόπηση του καταστήματός σου.`}
-        right={right}
+        title={`${greeting()}, ${owner?.firstName || ''}`}
       />
 
-      {/* ── Top row: shop card + stats ── */}
-      <div className={s.topRow}>
-        <div className={s.shopCard}>
-          <div className={s.shopCardTop}>
-            <div>
-              <div className={s.shopMetaLabel}>Ενεργό κατάστημα</div>
-              <div className={s.shopName}>
-                {shop.shopName}
-                {isLegacy && <span className={s.shopTag}>LEGACY</span>}
+      <div className={s.dashBody}>
+        {/* ── Info cards row ── */}
+        <div className={s.cardsRow}>
+          {/* Πληροφορίες */}
+          <section className={s.infoCard}>
+            <div className={s.infoCardLabel}>Πληροφορίες</div>
+            <div className={s.infoFields}>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Τρέχον Κατάστημα :</span>
+                {shops.length > 1 ? (
+                  <select
+                    className={s.infoSelect}
+                    value={currentShopId}
+                    onChange={e => setCurrentShopId(e.target.value)}
+                  >
+                    {shops.map(sh => (
+                      <option key={sh.shop_id} value={sh.shop_id}>
+                        {sh.shopName}{!sh.shop_id?.startsWith('SHOP#') ? ' (Legacy)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className={s.infoVal}>{shop.shopName}{isLegacy && ' (Legacy)'}</span>
+                )}
               </div>
-              <div className={s.shopType}>{shop.businessType}</div>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Μενού URL :</span>
+                <button className={s.urlLink} onClick={() => window.open(menuUrl, '_blank')} title={menuUrl}>
+                  {menuUrlShort}
+                </button>
+                <button className={s.urlIcon} onClick={copyUrl} title="Αντιγραφή" aria-label="Αντιγραφή">
+                  <Icon name="copy" size={13}/>
+                </button>
+              </div>
             </div>
-            <span className={s.livePill}>
-              <span className={s.liveDot}/>Ενεργό
-            </span>
-          </div>
-          <div className={s.urlRow}>
-            <div className={s.urlCode}>
-              <Icon name="qr" size={14}/>
-              <span className={s.urlCodeText}>{menuUrlShort}</span>
+            <button className={s.pillBtn} onClick={() => setClaimOpen(true)}>
+              Σύνδεση Καταστήματος
+            </button>
+          </section>
+
+          {/* Παραγγελίες */}
+          <section className={s.infoCard}>
+            <div className={s.infoCardLabel}>Παραγγελίες</div>
+            <div className={s.infoFields}>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Συνολικές Παραγγελίες :</span>
+                <span className={s.infoVal}>—</span>
+              </div>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Παραγγελίες Σήμερα :</span>
+                <span className={s.infoVal}>—</span>
+              </div>
             </div>
-            <button className={`${s.btn} ${s.btnSecondary}`} onClick={copyUrl}>
-              <Icon name="copy" size={12}/>Αντιγραφή
-            </button>
-            <button className={`${s.btn} ${s.btnSecondary}`} onClick={() => window.open(menuUrl, '_blank')}>
-              <Icon name="ext" size={12}/>Άνοιγμα
-            </button>
-          </div>
+          </section>
+
+          {/* Οικονομικά */}
+          <section className={s.infoCard}>
+            <div className={s.infoCardLabel}>Οικονομικά</div>
+            <div className={s.infoFields}>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Έσοδα (Σύνολο Μήνας):</span>
+                <span className={s.infoVal}>—</span>
+              </div>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Έξοδα (Σύνολο Μήνας):</span>
+                <span className={s.infoVal}>—</span>
+              </div>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Έσοδα (Σύνολο Μέρα):</span>
+                <span className={s.infoVal}>—</span>
+              </div>
+              <div className={s.infoRow}>
+                <span className={s.infoKey}>Έξοδα (Σύνολο Μέρα):</span>
+                <span className={s.infoVal}>—</span>
+              </div>
+            </div>
+          </section>
         </div>
 
-        <div className={s.statsCol}>
-          <div className={s.statCard}>
-            <div className={s.statCardTop}>
-              <span className={s.statLabel}>ORDERS / TODAY</span>
-              <span className={s.statIcon}><Icon name="bolt" size={14}/></span>
-            </div>
-            <div className={`${s.statValue} ${s.statValueMuted}`}>—</div>
-            <div className={s.statMeta}>0 αρχικά δεδομένα</div>
-          </div>
-          <div className={s.statCard}>
-            <div className={s.statCardTop}>
-              <span className={s.statLabel}>REVENUE / MTD</span>
-              <span className={s.statIcon}><Icon name="stat" size={14}/></span>
-            </div>
-            <div className={`${s.statValue} ${s.statValueMuted}`}>—</div>
-            <div className={s.statMeta}>0 αρχικά δεδομένα</div>
-          </div>
-          <div className={s.statCard}>
-            <div className={s.statCardTop}>
-              <span className={s.statLabel}>MENU</span>
-              <span className={s.statIcon}><Icon name="grid" size={14}/></span>
-            </div>
-            <div className={s.statValue}>{totalProducts}</div>
-            <div className={s.statMeta}>{totalProducts} προϊόντα · {shop.menu?.length || 0} κατηγορίες</div>
-          </div>
-        </div>
+        {/* ── To-do list (replaces the Figma table) ── */}
+        <TodoList shopId={shop.shop_id}/>
       </div>
-
-      {/* ── Menu overview ── */}
-      <section className={s.section}>
-        <div className={s.sectionHead}>
-          <div>
-            <h2 className={s.sectionTitle}>Επισκόπηση μενού</h2>
-            <p className={s.sectionSub}>
-              {shop.menu?.length || 0} κατηγορίες · {totalProducts} προϊόντα
-            </p>
-          </div>
-          <div className={s.sectionActions}>
-            <button
-              className={`${s.btn} ${s.btnSecondary}`}
-              onClick={() => window.open(menuUrl, '_blank')}
-            >
-              <Icon name="ext" size={12}/>Ανοίξτε Live
-            </button>
-            <button
-              className={`${s.btn} ${s.btnPrimary}`}
-              onClick={() => navigate('/menu-editor')}
-            >
-              <Icon name="edit" size={12}/>Επεξεργασία Μενού
-            </button>
-          </div>
-        </div>
-
-        <div className={s.catGrid}>
-          {(shop.menu || []).map(cat => (
-            <div key={cat.id} className={s.catCard}>
-              <span className={s.catName}>{cat.name}</span>
-              <span className={s.catCount}>{cat.items?.length || 0} προϊόντα</span>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {claimOpen && <ClaimShopModal onClose={() => setClaimOpen(false)}/>}
     </main>

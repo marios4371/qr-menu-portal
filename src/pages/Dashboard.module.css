@@ -15,33 +15,6 @@
   flex-direction: column;
 }
 
-/* ── HEADER ACTIONS (passed to PageHeader `right`) ──────────────────────── */
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.shopSelect {
-  height: 34px;
-  padding: 0 36px 0 14px;
-  border-radius: 17px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text);
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23575249' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  transition: border-color 0.12s, box-shadow 0.12s;
-}
-.shopSelect:focus { outline: none; box-shadow: 0 0 0 2px var(--accent-soft); border-color: var(--accent); }
-
 /* ── BUTTONS (Figma pill style) ─────────────────────────────────────────── */
 .btn {
   display: inline-flex;
@@ -79,280 +52,283 @@
 .btnGhost:hover:not(:disabled) { background: var(--bg-subtle); color: var(--text); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── TOP ROW — shop card + stats ────────────────────────────────────────── */
-.topRow {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
-  gap: 16px;
-  padding: 0 28px;
-  margin-top: 4px;
-  margin-bottom: 20px;
-}
-
-/* Shop card (with blue left accent bar) */
-.shopCard {
-  background: var(--bg-card);
-  border-radius: 10px;
-  padding: 18px 22px;
+/* ── DASHBOARD BODY ─────────────────────────────────────────────────────── */
+.dashBody {
+  padding: 24px 28px 60px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  position: relative;
-  overflow: hidden;
-  min-height: 110px;
+  gap: 22px;
 }
-.shopCard::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 4px;
-  background: var(--accent);
+
+/* ── INFO CARDS ROW (Πληροφορίες · Παραγγελίες · Οικονομικά) ─────────────── */
+.cardsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  align-items: stretch;
 }
-.shopCardTop {
+
+.infoCard {
+  background: var(--bg-card);
+  border-radius: 15px;
+  padding: 14px 20px 18px;
+  box-shadow: var(--shadow-sm);
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+  flex-direction: column;
+  min-height: 172px;
 }
-.shopMetaLabel {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
+.infoCardLabel {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #838383;
+  letter-spacing: 0.01em;
+  margin-bottom: 16px;
 }
-.shopName {
-  font-size: 18px;
+.infoFields {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.infoRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 15px;
+  line-height: 1.3;
+}
+.infoKey {
   font-weight: 700;
   color: var(--text);
-  letter-spacing: -0.02em;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
-.shopType {
-  font-size: 11px;
+.infoVal {
+  font-weight: 500;
   color: var(--text-sub);
 }
-.shopTag {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--bg-card-2);
-  color: var(--text-sub);
-  border: 1px solid var(--border);
-  flex-shrink: 0;
-}
 
-.livePill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
+/* Inline shop switcher inside "Τρέχον Κατάστημα" */
+.infoSelect {
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--success);
-  background: var(--success-bg);
-  border: 1px solid rgba(46, 92, 30, 0.2);
-  padding: 4px 9px;
-  border-radius: 999px;
-  flex-shrink: 0;
-}
-.liveDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 0 0 rgba(46, 92, 30, 0.5);
-  animation: dashLivePulse 2s infinite;
-}
-@keyframes dashLivePulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(46, 92, 30, 0.5); }
-  50%      { box-shadow: 0 0 0 4px rgba(46, 92, 30, 0); }
-}
-
-/* URL row */
-.urlRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.urlCode {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
+  color: var(--text);
   background: var(--bg-card-2);
-  border-radius: 4px;
+  border: 1px solid var(--border-md);
+  border-radius: 8px;
+  padding: 4px 28px 4px 10px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23575249' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.infoSelect:focus { border-color: #000; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06); }
+
+/* Menu URL value + copy */
+.urlLink {
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-sub);
-  overflow: hidden;
-  height: 28px;
-}
-.urlCode > svg { color: var(--text-muted); flex-shrink: 0; }
-.urlCodeText {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  flex: 1;
-  min-width: 0;
 }
+.urlLink:hover { text-decoration: underline; }
+.urlIcon {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 5px;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.urlIcon:hover { background: var(--bg-card-2); color: var(--text); }
 
-/* Stats column (now flat in topRow grid) */
-.statsCol {
-  display: contents;
+/* Black pill button — "Σύνδεση Καταστήματος" */
+.pillBtn {
+  margin-top: auto;
+  align-self: center;
+  height: 38px;
+  min-width: 208px;
+  padding: 0 24px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.14s, transform 0.14s;
 }
-.statCard {
+.pillBtn:hover { background: #1a1a1a; transform: translateY(-1px); }
+.pillBtn:active { transform: translateY(0); }
+
+/* ── TO-DO LIST (replaces the Figma table) ──────────────────────────────── */
+.todoCard {
   background: var(--bg-card);
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 15px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 110px;
 }
-.statCardTop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.statLabel {
-  font-size: 10px;
-  color: var(--text-muted);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.statIcon { color: var(--text-muted); display: inline-flex; }
-.statValue {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.statValueMuted { color: var(--text-muted); font-size: 24px; }
-.statMeta {
-  font-size: 10px;
-  color: var(--text-muted);
-}
-
-/* ── SECTION (menu + features) ──────────────────────────────────────────── */
-.section {
-  background: var(--bg-card);
-  border-radius: 10px;
-  padding: 22px 24px 24px;
-  margin: 0 28px 16px;
-}
-.sectionHead {
+.todoHead {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  padding: 20px 24px 16px;
 }
-.sectionTitle {
-  font-size: 15px;
+.todoTitle {
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text);
   margin: 0 0 3px;
 }
-.sectionSub {
+.todoSub {
   font-size: 12px;
   color: var(--text-muted);
   margin: 0;
 }
-.sectionActions { display: flex; gap: 10px; }
-
-.planMaxNote {
+.todoCount {
   font-size: 12px;
-  color: var(--text-muted);
-}
-
-/* ── MENU — category cards (cream inner, Figma) ─────────────────────────── */
-.catGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px;
-}
-.catCard {
-  background: var(--bg-card-2);
-  border-radius: 8px;
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 92px;
-  justify-content: center;
-  transition: background 0.12s, transform 0.12s;
-  cursor: pointer;
-}
-.catCard:hover {
-  background: #ECE9E2;
-  transform: translateY(-1px);
-}
-.catName {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-.catCount {
-  font-size: 11px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-/* ── FEATURES ───────────────────────────────────────────────────────────── */
-.featGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-}
-.featCard {
-  background: var(--bg-card-2);
-  border-radius: 8px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.featHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.featName {
-  font-size: 13px;
   font-weight: 600;
-  color: var(--text);
-}
-.featDesc {
-  font-size: 11px;
   color: var(--text-sub);
-  line-height: 1.45;
-}
-.featCheck {
-  width: 16px;
-  height: 16px;
-  background: var(--accent);
-  color: var(--accent-fg);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* Add-task row */
+.todoAdd {
+  display: flex;
+  gap: 10px;
+  padding: 0 24px 16px;
+}
+.todoInput {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-md);
+  border-radius: 10px;
+  background: var(--bg-card);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.todoInput::placeholder { color: var(--text-muted); }
+.todoInput:focus { outline: none; border-color: #000; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06); }
+.todoAddBtn {
+  height: 40px;
+  padding: 0 20px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: background 0.14s, opacity 0.14s;
+}
+.todoAddBtn:hover:not(:disabled) { background: #1a1a1a; }
+.todoAddBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* Striped task rows — echoes the Figma table */
+.todoList {
+  border-top: 1px solid var(--border);
+}
+.todoEmpty {
+  padding: 44px 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.todoRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 24px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+.todoRow:nth-of-type(odd) { background: #F4F3F1; }
+.todoRow:last-child { border-bottom: none; }
+.todoRow:hover { background: var(--bg-hover); }
+
+.todoCheck {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border-hi);
+  border-radius: 6px;
+  background: var(--bg-card);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s;
+}
+.todoCheck:hover { border-color: #000; }
+.todoCheckOn { background: #000; border-color: #000; }
+
+.todoText {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.4;
+  word-break: break-word;
+}
+.todoRowDone .todoText {
+  text-decoration: line-through;
+  color: var(--text-muted);
+}
+
+.todoDel {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.12s, background 0.12s, color 0.12s;
+}
+.todoRow:hover .todoDel { opacity: 1; }
+.todoDel:hover { background: var(--error-soft); color: var(--danger); }
 
 /* ── MODAL ──────────────────────────────────────────────────────────────── */
 .modalOverlay {
@@ -495,14 +471,12 @@
 @keyframes dashSpin { to { transform: rotate(360deg); } }
 
 /* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
-@media (max-width: 1180px) {
-  .topRow { grid-template-columns: 1fr 1fr; }
-  .shopCard { grid-column: 1 / -1; }
+@media (max-width: 1080px) {
+  .cardsRow { grid-template-columns: 1fr; }
 }
-@media (max-width: 700px) {
-  .topRow { grid-template-columns: 1fr; padding: 0 16px; }
-  .shopCard { grid-column: auto; }
-  .section { margin: 0 16px 12px; }
-  .urlRow { flex-wrap: wrap; }
-  .sectionHead { flex-direction: column; align-items: flex-start; }
+@media (max-width: 600px) {
+  .dashBody { padding: 16px 16px 48px; gap: 16px; }
+  .todoHead { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .todoAdd { flex-direction: column; }
+  .todoAddBtn { width: 100%; justify-content: center; }
 }
