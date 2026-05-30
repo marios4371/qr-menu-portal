@@ -126,24 +126,24 @@ const fmtTime = (iso) => {
 // ── TodoList — Εκκρεμείς + Ολοκληρωμένες tables, με προαιρετικό email reminder ──
 function TodoList({ shopId }) {
   const storageKey = `qrmenu_todos_${shopId}`;
-  const [todos,    setTodos]    = useState([]);
+  // Load synchronously so the first render already has the saved todos — avoids a
+  // mount-time race where the persist effect could overwrite them with an empty array.
+  const [todos, setTodos] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      return Array.isArray(saved) ? saved : [];
+    } catch {
+      return [];
+    }
+  });
   const [text,     setText]     = useState('');
   const [remindOn, setRemindOn] = useState(false);
   const [rDate,    setRDate]    = useState('');
   const [rTime,    setRTime]    = useState('');
   const [hint,     setHint]     = useState('');
 
-  // Load this shop's todos whenever the active shop changes
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      setTodos(Array.isArray(saved) ? saved : []);
-    } catch {
-      setTodos([]);
-    }
-  }, [storageKey]);
-
-  // Persist on every change
+  // Persist on every change. (TodoList is keyed by shopId in the parent, so switching
+  // shops remounts this component and re-runs the initializer above for the new key.)
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify(todos)); } catch {}
   }, [todos, storageKey]);
@@ -190,11 +190,23 @@ function TodoList({ shopId }) {
     resetForm();
   };
 
-  const toggleTodo = (id) => setTodos(prev => prev.map(td =>
-    td.id === id
-      ? { ...td, done: !td.done, completedAt: !td.done ? new Date().toISOString() : null }
-      : td
-  ));
+  const toggleTodo = (id) => {
+    // Όταν μια εργασία ολοκληρώνεται, ακύρωσε το email reminder της (αν υπάρχει)
+    const target = todos.find(td => td.id === id);
+    if (target && !target.done && target.reminderId) {
+      cancelReminder(target.reminderId).catch(() => {});
+    }
+    setTodos(prev => prev.map(td =>
+      td.id === id
+        ? {
+            ...td,
+            done:        !td.done,
+            completedAt: !td.done ? new Date().toISOString() : null,
+            reminderId:  !td.done ? null : td.reminderId,
+          }
+        : td
+    ));
+  };
 
   const removeTodo = (td) => {
     if (td.reminderId) cancelReminder(td.reminderId).catch(() => {});
@@ -423,7 +435,7 @@ export default function Dashboard() {
         </div>
 
         {/* ── To-do list (replaces the Figma table) ── */}
-        <TodoList shopId={shop.shop_id}/>
+        <TodoList key={shop.shop_id} shopId={shop.shop_id}/>
       </div>
 
       {claimOpen && <ClaimShopModal onClose={() => setClaimOpen(false)}/>}

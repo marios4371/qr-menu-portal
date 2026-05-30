@@ -58,15 +58,6 @@ export function AuthProvider({ children }) {
 
   // Rehydration
   useEffect(() => {
-    // DEV-only demo seed (guarded by explicit localStorage flag) — local visual checks only
-    if (import.meta.env.DEV && localStorage.getItem("qrmenu_demo") === "1") {
-      setOwner({ firstName: "Marios", lastName: "P.", email: "info@posada.gr", plan: "PREMIUM" });
-      setShops([{ shop_id: "SHOP#posada", shopName: "POSADA", shopSlug: "posada", businessType: "Εστιατόριο",
-        menu: [{ id: 1, name: "Καφέδες", items: [{}, {}] }, { id: 2, name: "Φαγητά", items: [{}, {}, {}] }] }]);
-      setCurrentShopId("SHOP#posada");
-      setLoading(false);
-      return;
-    }
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) { setLoading(false); return; }
     if (isSessionExpired()) { clearSession(); setLoading(false); return; }

@@ -612,7 +612,16 @@
   .remToggle, .todoAddBtn { width: 100%; justify-content: center; }
   .tBlockHead { padding: 14px 16px 8px; }
   .todoEmpty { padding: 16px; }
-  .tHeadRow, .tRow { grid-template-columns: 22px 1fr 92px 30px; gap: 10px; padding: 0 16px; }
-  .tRow { padding-top: 9px; padding-bottom: 9px; }
-  .todoDel { opacity: 1; }
+  .tHeadRow { display: none; }                 /* drop column labels on narrow screens */
+  .tRow {
+    grid-template-columns: 22px 1fr auto;
+    grid-template-areas: "check note del" "check meta del";
+    column-gap: 10px;
+    row-gap: 3px;
+    padding: 10px 16px;
+  }
+  .todoCheck { grid-area: check; }
+  .tNote     { grid-area: note; }
+  .tMeta     { grid-area: meta; flex-direction: row; align-items: center; gap: 6px; }
+  .todoDel   { grid-area: del; opacity: 1; }
 }
