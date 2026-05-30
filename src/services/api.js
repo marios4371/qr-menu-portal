@@ -79,6 +79,21 @@ export const claimShop = ({ shopId, password }) =>
     body: JSON.stringify({ shopId, password }),
   });
 
+// ─── Reminders (To-Do email reminders) ─────────────────────────────────────────
+// Καταχωρεί ένα reminder στο backend ώστε να σταλεί email υπενθύμισης
+// στην ορισμένη ημερομηνία/ώρα, στο email του ιδιοκτήτη (από το JWT).
+// remindAt: ISO datetime string · note: το κείμενο της εκκρεμότητας
+export const scheduleReminder = ({ remindAt, note, shopId }) =>
+  request("/reminders", {
+    method: "POST",
+    body: JSON.stringify({ remindAt, note, shopId }),
+  });
+
+export const cancelReminder = (reminderId) =>
+  request(`/reminders/${encodeURIComponent(reminderId)}`, {
+    method: "DELETE",
+  });
+
 // ─── Orders Analytics ─────────────────────────────────────────────────────────
 // Builds a query-string from the filter object and calls GET /orders/analytics.
 // Filters: { shopId, from, to, status, paymentStatus, tableNumber, source, minAmount }

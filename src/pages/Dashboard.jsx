@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader } from '../components/Primitives';
-import { MENU_BASE_URL, claimShop } from '../services/api';
+import { MENU_BASE_URL, claimShop, scheduleReminder, cancelReminder } from '../services/api';
 import s from './Dashboard.module.css';
 
 function greeting() {
@@ -110,11 +110,28 @@ function ClaimShopModal({ onClose }) {
   );
 }
 
-// ── TodoList — owner's "what to do" list (replaces the Figma table) ────────────
+// ── Date helpers ──────────────────────────────────────────────────────────────
+const pad2 = (n) => String(n).padStart(2, '0');
+const fmtDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return isNaN(d) ? '' : `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`;
+};
+const fmtTime = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return isNaN(d) ? '' : `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+};
+
+// ── TodoList — Εκκρεμείς + Ολοκληρωμένες tables, με προαιρετικό email reminder ──
 function TodoList({ shopId }) {
   const storageKey = `qrmenu_todos_${shopId}`;
-  const [todos, setTodos] = useState([]);
-  const [text,  setText]  = useState('');
+  const [todos,    setTodos]    = useState([]);
+  const [text,     setText]     = useState('');
+  const [remindOn, setRemindOn] = useState(false);
+  const [rDate,    setRDate]    = useState('');
+  const [rTime,    setRTime]    = useState('');
+  const [hint,     setHint]     = useState('');
 
   // Load this shop's todos whenever the active shop changes
   useEffect(() => {
@@ -131,17 +148,112 @@ function TodoList({ shopId }) {
     try { localStorage.setItem(storageKey, JSON.stringify(todos)); } catch {}
   }, [todos, storageKey]);
 
-  const addTodo = (e) => {
+  const resetForm = () => { setText(''); setRemindOn(false); setRDate(''); setRTime(''); };
+
+  const addTodo = async (e) => {
     e?.preventDefault();
     const t = text.trim();
     if (!t) return;
-    setTodos(prev => [...prev, { id: Date.now(), text: t, done: false }]);
-    setText('');
-  };
-  const toggleTodo = (id) => setTodos(prev => prev.map(td => td.id === id ? { ...td, done: !td.done } : td));
-  const removeTodo = (id) => setTodos(prev => prev.filter(td => td.id !== id));
 
-  const doneCount = todos.filter(td => td.done).length;
+    let remindAt = null;
+    if (remindOn) {
+      if (!rDate || !rTime) { setHint('Όρισε ημερομηνία και ώρα για την υπενθύμιση.'); return; }
+      const dt = new Date(`${rDate}T${rTime}`);
+      if (isNaN(dt))        { setHint('Μη έγκυρη ημερομηνία/ώρα.'); return; }
+      if (dt.getTime() <= Date.now()) { setHint('Η ώρα υπενθύμισης πρέπει να είναι στο μέλλον.'); return; }
+      remindAt = dt.toISOString();
+    }
+
+    const todo = {
+      id: Date.now(),
+      text: t,
+      done: false,
+      createdAt: new Date().toISOString(),
+      remindAt,
+      reminderId: null,
+    };
+
+    // Best-effort: καταχώρηση του email reminder στο backend
+    if (remindAt) {
+      try {
+        const res = await scheduleReminder({ remindAt, note: t, shopId });
+        todo.reminderId = res?.reminderId || res?.id || null;
+        setHint('Η υπενθύμιση ορίστηκε — θα σταλεί email στην ώρα που επέλεξες.');
+      } catch {
+        setHint('Η εργασία αποθηκεύτηκε. (Η αποστολή email θα ενεργοποιηθεί μόλις συνδεθεί ο server reminders.)');
+      }
+    } else {
+      setHint('');
+    }
+
+    setTodos(prev => [todo, ...prev]);
+    resetForm();
+  };
+
+  const toggleTodo = (id) => setTodos(prev => prev.map(td =>
+    td.id === id
+      ? { ...td, done: !td.done, completedAt: !td.done ? new Date().toISOString() : null }
+      : td
+  ));
+
+  const removeTodo = (td) => {
+    if (td.reminderId) cancelReminder(td.reminderId).catch(() => {});
+    setTodos(prev => prev.filter(x => x.id !== td.id));
+  };
+
+  const pending   = todos.filter(td => !td.done);
+  const completed = todos.filter(td => td.done);
+
+  const minDate = new Date().toISOString().slice(0, 10);
+
+  const renderRow = (td, done) => (
+    <div key={td.id} className={`${s.tRow} ${done ? s.tRowDone : ''}`}>
+      <button
+        type="button"
+        className={`${s.todoCheck} ${done ? s.todoCheckOn : ''}`}
+        onClick={() => toggleTodo(td.id)}
+        aria-label={done ? 'Αναίρεση' : 'Ολοκλήρωση'}
+      >
+        {done && <Icon name="check" size={12}/>}
+      </button>
+      <div className={s.tNote}>
+        <span className={s.tNoteText}>{td.text}</span>
+        {!done && td.remindAt && (
+          <span className={s.tReminder} title="Έχει οριστεί email υπενθύμισης">
+            <Icon name="bell" size={11}/>{fmtDate(td.remindAt)} · {fmtTime(td.remindAt)}
+          </span>
+        )}
+      </div>
+      <span className={s.tMeta}>
+        {fmtDate(done ? (td.completedAt || td.createdAt) : td.createdAt)}
+        <span className={s.tMetaTime}>{fmtTime(done ? (td.completedAt || td.createdAt) : td.createdAt)}</span>
+      </span>
+      <button
+        type="button"
+        className={s.todoDel}
+        onClick={() => removeTodo(td)}
+        aria-label="Διαγραφή"
+      >
+        <Icon name="trash" size={14}/>
+      </button>
+    </div>
+  );
+
+  const renderTable = (rows, done, emptyText, metaLabel) => (
+    rows.length === 0 ? (
+      <div className={s.todoEmpty}>{emptyText}</div>
+    ) : (
+      <div className={s.tTable}>
+        <div className={s.tHeadRow}>
+          <span/>
+          <span>Σημείωση</span>
+          <span>{metaLabel}</span>
+          <span/>
+        </div>
+        {rows.map(td => renderRow(td, done))}
+      </div>
+    )
+  );
 
   return (
     <section className={s.todoCard}>
@@ -150,52 +262,57 @@ function TodoList({ shopId }) {
           <h2 className={s.todoTitle}>Λίστα Εκκρεμοτήτων</h2>
           <p className={s.todoSub}>Τι έχεις να κάνεις για το κατάστημά σου</p>
         </div>
-        {todos.length > 0 && (
-          <span className={s.todoCount}>{doneCount}/{todos.length} ολοκληρώθηκαν</span>
-        )}
       </div>
 
-      <form className={s.todoAdd} onSubmit={addTodo}>
-        <input
-          className={s.todoInput}
-          type="text"
-          placeholder="Προσθήκη νέας εργασίας…"
-          value={text}
-          onChange={e => setText(e.target.value)}
-        />
-        <button type="submit" className={s.todoAddBtn} disabled={!text.trim()}>
-          <Icon name="plus" size={14}/>Προσθήκη
-        </button>
+      {/* Add form (+ optional reminder) */}
+      <form className={s.todoForm} onSubmit={addTodo}>
+        <div className={s.todoAdd}>
+          <input
+            className={s.todoInput}
+            type="text"
+            placeholder="Προσθήκη νέας εργασίας…"
+            value={text}
+            onChange={e => { setText(e.target.value); setHint(''); }}
+          />
+          <button
+            type="button"
+            className={`${s.remToggle} ${remindOn ? s.remToggleOn : ''}`}
+            onClick={() => { setRemindOn(v => !v); setHint(''); }}
+            aria-pressed={remindOn}
+          >
+            <Icon name="bell" size={13}/>Υπενθύμιση
+          </button>
+          <button type="submit" className={s.todoAddBtn} disabled={!text.trim()}>
+            <Icon name="plus" size={14}/>Προσθήκη
+          </button>
+        </div>
+
+        {remindOn && (
+          <div className={s.remFields}>
+            <span className={s.remLabel}>Αποστολή email υπενθύμισης στις:</span>
+            <input className={s.remInput} type="date" value={rDate} min={minDate} onChange={e => setRDate(e.target.value)}/>
+            <input className={s.remInput} type="time" value={rTime} onChange={e => setRTime(e.target.value)}/>
+          </div>
+        )}
+        {hint && <div className={s.todoHint}>{hint}</div>}
       </form>
 
-      <div className={s.todoList}>
-        {todos.length === 0 ? (
-          <div className={s.todoEmpty}>
-            Δεν υπάρχουν εκκρεμότητες. Πρόσθεσε την πρώτη σου εργασία παραπάνω!
-          </div>
-        ) : (
-          todos.map(td => (
-            <div key={td.id} className={`${s.todoRow} ${td.done ? s.todoRowDone : ''}`}>
-              <button
-                type="button"
-                className={`${s.todoCheck} ${td.done ? s.todoCheckOn : ''}`}
-                onClick={() => toggleTodo(td.id)}
-                aria-label={td.done ? 'Αναίρεση' : 'Ολοκλήρωση'}
-              >
-                {td.done && <Icon name="check" size={12}/>}
-              </button>
-              <span className={s.todoText}>{td.text}</span>
-              <button
-                type="button"
-                className={s.todoDel}
-                onClick={() => removeTodo(td.id)}
-                aria-label="Διαγραφή"
-              >
-                <Icon name="trash" size={14}/>
-              </button>
-            </div>
-          ))
-        )}
+      {/* Εκκρεμείς */}
+      <div className={s.tBlock}>
+        <div className={s.tBlockHead}>
+          <span className={s.tBlockTitle}>Εκκρεμείς</span>
+          <span className={s.tBlockCount}>{pending.length}</span>
+        </div>
+        {renderTable(pending, false, 'Δεν υπάρχουν εκκρεμότητες. Πρόσθεσε την πρώτη σου εργασία παραπάνω!', 'Καταχωρήθηκε')}
+      </div>
+
+      {/* Ολοκληρωμένες */}
+      <div className={s.tBlock}>
+        <div className={s.tBlockHead}>
+          <span className={s.tBlockTitle}>Ολοκληρωμένες</span>
+          <span className={s.tBlockCount}>{completed.length}</span>
+        </div>
+        {renderTable(completed, true, 'Καμία ολοκληρωμένη εργασία ακόμη.', 'Ολοκληρώθηκε')}
       </div>
     </section>
   );

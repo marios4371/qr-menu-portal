@@ -211,23 +211,14 @@
   color: var(--text-muted);
   margin: 0;
 }
-.todoCount {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-sub);
-  background: var(--bg-card-2);
-  border: 1px solid var(--border);
-  padding: 4px 12px;
-  border-radius: 999px;
-  white-space: nowrap;
-  flex-shrink: 0;
+/* ── Add form (+ optional reminder) ─────────────────────────────────────── */
+.todoForm {
+  padding: 0 24px 18px;
+  border-bottom: 1px solid var(--border);
 }
-
-/* Add-task row */
 .todoAdd {
   display: flex;
   gap: 10px;
-  padding: 0 24px 16px;
 }
 .todoInput {
   flex: 1;
@@ -244,6 +235,32 @@
 }
 .todoInput::placeholder { color: var(--text-muted); }
 .todoInput:focus { outline: none; border-color: #000; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06); }
+
+/* Reminder toggle pill */
+.remToggle {
+  height: 40px;
+  padding: 0 16px;
+  background: var(--bg-card);
+  color: var(--text-sub);
+  border: 1px solid var(--border-md);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.remToggle:hover { border-color: var(--border-strong); color: var(--text); }
+.remToggleOn {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .todoAddBtn {
   height: 40px;
   padding: 0 20px;
@@ -264,28 +281,108 @@
 .todoAddBtn:hover:not(:disabled) { background: #1a1a1a; }
 .todoAddBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* Striped task rows — echoes the Figma table */
-.todoList {
-  border-top: 1px solid var(--border);
+/* Reminder date/time fields */
+.remFields {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
 }
+.remLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+.remInput {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-md);
+  border-radius: 8px;
+  background: var(--bg-card);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+}
+.remInput:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.todoHint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* ── Table blocks (Εκκρεμείς / Ολοκληρωμένες) ───────────────────────────── */
+.tBlock { display: flex; flex-direction: column; }
+.tBlockHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 24px 10px;
+}
+.tBlockTitle {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.tBlockCount {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-sub);
+  background: var(--bg-card-2);
+  border: 1px solid var(--border);
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .todoEmpty {
-  padding: 44px 24px;
-  text-align: center;
+  padding: 22px 24px 26px;
   font-size: 13px;
   color: var(--text-muted);
 }
-.todoRow {
+
+.tTable { border-top: 1px solid var(--border); }
+.tHeadRow,
+.tRow {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 24px 1fr 116px 34px;
   align-items: center;
   gap: 14px;
-  padding: 13px 24px;
+  padding: 0 24px;
+}
+.tHeadRow {
+  height: 34px;
+  background: var(--bg-card-2);
+}
+.tHeadRow > span {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.tRow {
+  min-height: 50px;
+  padding-top: 9px;
+  padding-bottom: 9px;
   border-bottom: 1px solid var(--border);
   transition: background 0.12s;
 }
-.todoRow:nth-of-type(odd) { background: #F4F3F1; }
-.todoRow:last-child { border-bottom: none; }
-.todoRow:hover { background: var(--bg-hover); }
+.tRow:nth-of-type(even) { background: #F4F3F1; }   /* striping echoes the Figma table */
+.tRow:last-child { border-bottom: none; }
+.tRow:hover { background: var(--bg-hover); }
 
 .todoCheck {
   width: 22px;
@@ -303,14 +400,47 @@
 .todoCheck:hover { border-color: #000; }
 .todoCheckOn { background: #000; border-color: #000; }
 
-.todoText {
+.tNote {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.tNoteText {
   font-size: 14px;
   color: var(--text);
-  line-height: 1.4;
+  line-height: 1.35;
   word-break: break-word;
 }
-.todoRowDone .todoText {
+.tRowDone .tNoteText {
   text-decoration: line-through;
+  color: var(--text-muted);
+}
+.tReminder {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.tReminder > svg { flex-shrink: 0; }
+
+.tMeta {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+}
+.tMetaTime {
+  font-size: 11px;
+  font-weight: 500;
   color: var(--text-muted);
 }
 
@@ -327,7 +457,7 @@
   opacity: 0;
   transition: opacity 0.12s, background 0.12s, color 0.12s;
 }
-.todoRow:hover .todoDel { opacity: 1; }
+.tRow:hover .todoDel { opacity: 1; }
 .todoDel:hover { background: var(--error-soft); color: var(--danger); }
 
 /* ── MODAL ──────────────────────────────────────────────────────────────── */
@@ -477,6 +607,12 @@
 @media (max-width: 600px) {
   .dashBody { padding: 16px 16px 48px; gap: 16px; }
   .todoHead { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .todoForm { padding: 0 16px 16px; }
   .todoAdd { flex-direction: column; }
-  .todoAddBtn { width: 100%; justify-content: center; }
+  .remToggle, .todoAddBtn { width: 100%; justify-content: center; }
+  .tBlockHead { padding: 14px 16px 8px; }
+  .todoEmpty { padding: 16px; }
+  .tHeadRow, .tRow { grid-template-columns: 22px 1fr 92px 30px; gap: 10px; padding: 0 16px; }
+  .tRow { padding-top: 9px; padding-bottom: 9px; }
+  .todoDel { opacity: 1; }
 }
