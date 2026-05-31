@@ -351,7 +351,6 @@ export default function Dashboard() {
   return (
     <main className={s.pageMain}>
       <PageHeader
-        topbarLabel="Dashboard"
         title={`${greeting()}, ${owner?.firstName || ''}`}
       />
 

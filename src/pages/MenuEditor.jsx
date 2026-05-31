@@ -124,6 +124,10 @@ export default function MenuEditor() {
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editProduct, setEditProduct] = useState(null);
 
+  // Drag-and-drop reordering of categories
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
   // Sync local state when shop changes
   useEffect(() => {
     if (shop) {
@@ -152,6 +156,14 @@ export default function MenuEditor() {
     const nm = menu.filter(c => c.id !== id);
     update(nm);
     if (selectedCatId === id) setSelectedCatId(nm[0]?.id || null);
+  };
+  // Reorder via drag-and-drop — persists on Save and so reflects in the public menu order.
+  const reorderCats = (from, to) => {
+    if (from == null || to == null || from === to) return;
+    const nm = [...menu];
+    const [moved] = nm.splice(from, 1);
+    nm.splice(to, 0, moved);
+    update(nm);
   };
 
   // product ops
@@ -220,20 +232,29 @@ export default function MenuEditor() {
             {menu.length === 0 && (
               <div className={s.emptyHint}>Δεν υπάρχουν κατηγορίες ακόμα.</div>
             )}
-            {menu.map(cat => (
+            {menu.map((cat, i) => (
               <div
                 key={cat.id}
-                className={`${s.catItem} ${selectedCatId === cat.id ? s.catItemOn : ''}`}
+                className={[
+                  s.catItem,
+                  selectedCatId === cat.id ? s.catItemOn : '',
+                  dragIndex === i ? s.catItemDragging : '',
+                  dragOverIndex === i && dragIndex !== i ? s.catItemDragOver : '',
+                ].join(' ')}
                 onClick={() => setSelectedCatId(cat.id)}
+                draggable={menu.length > 1}
+                onDragStart={(e) => { setDragIndex(i); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)); }}
+                onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (dragOverIndex !== i) setDragOverIndex(i); }}
+                onDrop={(e) => { e.preventDefault(); const from = Number(e.dataTransfer.getData('text/plain')); reorderCats(from, i); setDragIndex(null); setDragOverIndex(null); }}
+                onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
               >
                 <span className={s.catName}>{cat.name}</span>
-                <span className={s.catCount}>{cat.items?.length || 0}</span>
                 <div className={s.catActions} onClick={e => e.stopPropagation()}>
                   <button className={s.iconBtn} onClick={() => setEditCatId(cat.id)} title="Επεξεργασία">
-                    <Icon name="edit" size={11}/>
+                    <Icon name="edit-solid" size={14}/>
                   </button>
-                  <button className={s.iconBtn} onClick={() => deleteCat(cat.id)} title="Διαγραφή">
-                    <Icon name="trash" size={11}/>
+                  <button className={`${s.iconBtn} ${s.iconBtnDel}`} onClick={() => deleteCat(cat.id)} title="Διαγραφή">
+                    <Icon name="trash-solid" size={14}/>
                   </button>
                 </div>
               </div>

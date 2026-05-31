@@ -27,6 +27,9 @@ export function Icon({ name, size = 14, stroke = 1.6 }) {
     case "chev-r":  return <svg {...p}><path d="M9 18l6-6-6-6"/></svg>;
     case "chev-d":  return <svg {...p}><path d="M6 9l6 6 6-6"/></svg>;
     case "trash":   return <svg {...p}><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>;
+    // Solid (filled) default edit / delete icons — used for the category row actions
+    case "edit-solid":  return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>;
+    case "trash-solid": return <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>;
     case "save":    return <svg {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>;
     case "kitchen": return <svg {...p}><path d="M6 2v6a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V2M8 10v12M14 2c-2 0-3 2-3 4s1 4 3 4v12"/></svg>;
     case "bar":     return <svg {...p}><path d="M8 22h8M12 15v7M3 3h18l-7 9H10L3 3z"/></svg>;
@@ -45,6 +48,7 @@ export function Icon({ name, size = 14, stroke = 1.6 }) {
     case "package": return <svg {...p}><path d="M16.5 9.4l-9-5.19M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>;
     case "bell":    return <svg {...p}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>;
     case "clock":   return <svg {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>;
+    case "download":return <svg {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>;
     default:        return <svg {...p}><circle cx="12" cy="12" r="9"/></svg>;
   }
 }
@@ -88,6 +92,7 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
     { key: 'editor',     label: 'Επεξεργασία Μενού',  icon: 'edit' },
     { key: 'appearance', label: 'Εμφάνιση',           icon: 'grid',     premium: true },
     { key: 'analytics',  label: 'Analytics',          icon: 'stat',     premium: true },
+    { key: 'inventory',  label: 'Απόθεμα',            icon: 'package',  exclusive: true },
     { key: 'settings',   label: 'Ρυθμίσεις',          icon: 'settings' },
   ];
 
@@ -173,19 +178,20 @@ export function Sidebar({ onPlanClick, onLogout, onCmdOpen }) {
   );
 }
 
-// ── PageHeader — single gray topbar: left (title/sub) + center (shop) + right (actions + label)
+// ── PageHeader — single gray topbar: left (section label + title/sub) + center (shop) + right (actions)
+// The section label sits top-left on every page except Αρχική (Dashboard passes no topbarLabel).
 export function PageHeader({ kicker, title, sub, right, center, topbarLabel }) {
   const label = topbarLabel || kicker;
   return (
     <header className="topbar">
       <div className="topbar-left">
+        {label && <span className="topbar-label">{label}</span>}
         {title && <span className="topbar-title">{title}</span>}
         {sub && <span className="topbar-sub">{sub}</span>}
       </div>
       {center && <div className="topbar-center">{center}</div>}
       <div className="topbar-right">
         {right && <div className="topbar-actions">{right}</div>}
-        {label && <span className="topbar-label">{label}</span>}
       </div>
     </header>
   );

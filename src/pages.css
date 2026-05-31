@@ -864,6 +864,50 @@
 .ma-cat-iconbtn:hover:not(:disabled) { background: var(--bg-hover); color: var(--text); }
 .ma-cat-iconbtn:disabled { opacity: 0.35; cursor: not-allowed; }
 .ma-cat-iconbtn-del:hover { background: rgba(220, 38, 38, 0.1); color: var(--danger); }
+.ma-cat-hint-reorder {
+  font-family: var(--font-mono); font-size: 10px; color: var(--text-muted);
+  letter-spacing: 0.03em; padding: 6px 4px 2px; opacity: 0.7; line-height: 1.5;
+}
+
+/* ── Appearance controls — scroll area + sections ───────────────────────── */
+.ma-acc-scroll {
+  flex: 1; overflow-y: auto;
+  padding: 16px 20px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ma-sec { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.ma-sec:first-child { padding-top: 4px; }
+.ma-sec:last-child { border-bottom: none; }
+.ma-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.ma-sec-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+.ma-sec-list { display: flex; flex-direction: column; gap: 8px; }
+
+/* Live preview header link */
+.ma-preview-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: none; border: 1px solid var(--border-md); border-radius: 99px;
+  padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--text-sub);
+  cursor: pointer; font-family: var(--font); transition: all var(--transition);
+}
+.ma-preview-link:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Live preview render (themed menu) */
+.ma-prev { padding: 20px 16px 28px; min-height: 100%; }
+.ma-preview-inner > .ma-prev { padding-top: 34px; } /* clear the notch */
+.ma-prev-brand { text-align: center; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; margin-bottom: 20px; }
+.ma-prev-empty { text-align: center; font-size: 13px; padding: 20px; }
+.ma-prev-cat { margin-bottom: 20px; }
+.ma-prev-cat-name { font-weight: 700; letter-spacing: 0.01em; margin-bottom: 6px; }
+.ma-prev-div { height: 1px; margin-bottom: 12px; }
+.ma-prev-items { display: flex; flex-direction: column; gap: 12px; }
+.ma-prev-compact { gap: 6px; }
+.ma-prev-item-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ma-prev-item-name { font-weight: 600; font-size: 14px; }
+.ma-prev-compact .ma-prev-item-name { font-size: 13px; font-weight: 500; }
+.ma-prev-item-price { font-weight: 700; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ma-prev-item-desc { font-size: 12px; margin-top: 3px; line-height: 1.45; }
+.ma-prev-cards .ma-prev-item { padding: 11px 13px; }
+.ma-prev-item-empty { font-size: 12px; padding: 2px 0 6px; }
 
 /* Backward compatibility — accordion classes still referenced by Layout/Theme code; mostly unused now */
 .ma-acc-item    { background: var(--bg-card-2); border-radius: 8px; }
@@ -966,6 +1010,19 @@
   color: var(--text); font-size: 13px; font-family: var(--font);
 }
 .inv-search input::placeholder { color: var(--text-muted); }
+
+.inv-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; padding: 18px 28px 0;
+}
+.inv-stat {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 14px 16px;
+}
+.inv-stat-lab { font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+.inv-stat-val { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -0.02em; }
+.inv-stat-val.accent { color: var(--accent); }
+.inv-stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 
 .inv-empty {
   margin: 40px 28px; padding: 56px 32px;

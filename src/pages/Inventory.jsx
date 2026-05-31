@@ -1,9 +1,8 @@
 // src/pages/Inventory.jsx
-// Απόθεμα — EXCLUSIVE only. Placeholder UI: table + empty state + add-drawer mock.
-// Το backend για inventory δεν υπάρχει ακόμα — αυτή η σελίδα δείχνει το UI και
-// διαχειρίζεται in-memory state ώστε να είναι λειτουργική για demo.
+// Απόθεμα — EXCLUSIVE only. Stock archive: organize items, compute cost/value,
+// export a supplier-order CSV. Persisted per-shop in localStorage (backend TBD).
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
@@ -11,7 +10,7 @@ import { Icon, PageHeader, ShopSelectPill } from '../components/Primitives';
 // ── Status helpers ────────────────────────────────────────────────────────────
 function computeStatus(item) {
   if (item.quantity <= 0) return 'OUT';
-  if (item.minStock != null && item.quantity <= item.minStock) return 'LOW';
+  if (item.minStock != null && item.minStock !== '' && item.quantity <= Number(item.minStock)) return 'LOW';
   if (item.expiry) {
     const days = Math.floor((new Date(item.expiry).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     if (days < 0) return 'EXPIRED';
@@ -21,11 +20,11 @@ function computeStatus(item) {
 }
 
 const STATUS_META = {
-  OK:       { label: 'OK',           color: 'var(--success)',  cls: 'badge-green' },
-  LOW:      { label: 'LOW STOCK',    color: 'var(--warning)',  cls: 'badge-amber' },
-  EXPIRING: { label: 'EXPIRING',     color: 'var(--warning)',  cls: 'badge-amber' },
-  EXPIRED:  { label: 'EXPIRED',      color: 'var(--error)',    cls: 'badge-red'   },
-  OUT:      { label: 'OUT OF STOCK', color: 'var(--error)',    cls: 'badge-red'   },
+  OK:       { label: 'OK',           cls: 'badge-green' },
+  LOW:      { label: 'LOW STOCK',    cls: 'badge-amber' },
+  EXPIRING: { label: 'EXPIRING',     cls: 'badge-amber' },
+  EXPIRED:  { label: 'EXPIRED',      cls: 'badge-red'   },
+  OUT:      { label: 'OUT OF STOCK', cls: 'badge-red'   },
 };
 
 const fmtNum = (n) => Number(n || 0).toLocaleString('el-GR');
@@ -109,17 +108,52 @@ function ItemDrawer({ item, onClose, onSave }) {
   );
 }
 
-// ── Inventory main component ──────────────────────────────────────────────────
-export default function Inventory() {
-  const { onPlanClick } = useOutletContext();
-  const { owner, shops, currentShopId, setCurrentShopId } = useAuth();
-  const isExclusive = owner?.plan === 'EXCLUSIVE';
+// ── CSV export (supplier order) ─────────────────────────────────────────────────
+// Uses ';' delimiter + UTF-8 BOM so Greek Excel opens it cleanly.
+function exportCSV(rows, shop) {
+  const headers = ['Είδος', 'SKU', 'Κατηγορία', 'Ποσότητα', 'Μονάδα', 'Κόστος/μον. (€)', 'Αξία (€)', 'Status'];
+  const esc = (v) => {
+    const sv = String(v ?? '');
+    return /[";\n]/.test(sv) ? '"' + sv.replace(/"/g, '""') + '"' : sv;
+  };
+  const lines = [headers.join(';')];
+  rows.forEach(it => {
+    const value = (Number(it.quantity) || 0) * (Number(it.cost) || 0);
+    lines.push([
+      it.name, it.sku || '', it.category || '', fmtNum(it.quantity), it.unit,
+      fmtPrice(it.cost), fmtPrice(value), STATUS_META[computeStatus(it)].label,
+    ].map(esc).join(';'));
+  });
+  const csv = '﻿' + lines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `apothema_${shop.shopSlug || shop.shop_id}_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
-  // In-memory state (backend integration TBD)
-  const [items, setItems] = useState([]);
+// ── Inventory board (per-shop; keyed so switching shops remounts cleanly) ───────
+function InventoryBoard({ shop }) {
+  const storageKey = `qrmenu_inventory_${shop.shop_id}`;
+  // Load synchronously so the first render already has saved items (avoids the
+  // mount-time persist race). Keyed by shop in the parent, so a shop switch remounts.
+  const [items, setItems] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      return Array.isArray(saved) ? saved : [];
+    } catch { return []; }
+  });
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [drawerItem, setDrawerItem] = useState(undefined); // undefined=closed, null=new, object=edit
+
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify(items)); } catch {}
+  }, [items, storageKey]);
 
   const filtered = useMemo(() => {
     let r = items;
@@ -128,16 +162,15 @@ export default function Inventory() {
     return r;
   }, [items, search, filterStatus]);
 
-  const counts = useMemo(() => {
-    const c = { total: items.length, ok: 0, low: 0, out: 0, expiring: 0 };
+  const stats = useMemo(() => {
+    let value = 0, low = 0, out = 0;
     items.forEach(it => {
+      value += (Number(it.quantity) || 0) * (Number(it.cost) || 0);
       const s = computeStatus(it);
-      if (s === 'OK') c.ok++;
-      else if (s === 'LOW') c.low++;
-      else if (s === 'OUT') c.out++;
-      else if (s === 'EXPIRING' || s === 'EXPIRED') c.expiring++;
+      if (s === 'LOW') low++;
+      else if (s === 'OUT') out++;
     });
-    return c;
+    return { count: items.length, value, low, out };
   }, [items]);
 
   const upsert = (item) => {
@@ -154,37 +187,30 @@ export default function Inventory() {
     setItems(prev => prev.filter(i => i.id !== id));
   };
 
-  // Plan gate
-  if (!isExclusive) {
-    return (
-      <main className="page-main">
-        <PageHeader kicker="Απόθεμα" title="Διαχείριση κάβας" sub="Διαθέσιμο μόνο στο Exclusive πλάνο."/>
-        <div className="an-gate ticks">
-          <div className="an-gate-icon"><Icon name="package" size={32}/></div>
-          <div className="an-gate-title">Exclusive Feature</div>
-          <div className="an-gate-sub">Καταγραφή ειδών, ποσοτήτων, ημερομηνιών λήξης και low-stock alerts. Διαθέσιμο μόνο στο Exclusive πλάνο.</div>
-          <button className="btn btn-primary" onClick={onPlanClick}>
-            <Icon name="bolt" size={13}/>Αναβάθμιση πλάνου
-          </button>
-        </div>
-      </main>
-    );
-  }
-
-  const centerPill = (
-    <ShopSelectPill
-      value={currentShopId}
-      onChange={e => setCurrentShopId(e.target.value)}
-      shops={shops}
-    />
-  );
-
   return (
-    <main className="page-main">
-      <PageHeader
-        topbarLabel="Απόθεμα"
-        center={centerPill}
-      />
+    <>
+      {/* Summary */}
+      {items.length > 0 && (
+        <div className="inv-stats">
+          <div className="inv-stat">
+            <div className="inv-stat-lab">Είδη</div>
+            <div className="inv-stat-val">{fmtNum(stats.count)}</div>
+          </div>
+          <div className="inv-stat">
+            <div className="inv-stat-lab">Συνολική αξία</div>
+            <div className="inv-stat-val accent">{fmtPrice(stats.value)} €</div>
+            <div className="inv-stat-sub">Σύνολο ποσότητα × κόστος</div>
+          </div>
+          <div className="inv-stat">
+            <div className="inv-stat-lab">Χαμηλό απόθεμα</div>
+            <div className="inv-stat-val" style={{ color: stats.low ? 'var(--warning)' : 'var(--text)' }}>{fmtNum(stats.low)}</div>
+          </div>
+          <div className="inv-stat">
+            <div className="inv-stat-lab">Εξαντλημένα</div>
+            <div className="inv-stat-val" style={{ color: stats.out ? 'var(--error)' : 'var(--text)' }}>{fmtNum(stats.out)}</div>
+          </div>
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="inv-toolbar">
@@ -201,6 +227,14 @@ export default function Inventory() {
           <option value="EXPIRED">Expired</option>
         </select>
         <div className="grow"/>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={() => exportCSV(filtered, shop)}
+          disabled={filtered.length === 0}
+          title="Εξαγωγή τρέχουσας λίστας σε CSV (για παραγγελία προμηθευτή)"
+        >
+          <Icon name="download" size={13}/>Εξαγωγή CSV
+        </button>
         <button className="btn btn-primary btn-sm" onClick={() => setDrawerItem(null)}>
           <Icon name="plus" size={12}/>Νέο είδος
         </button>
@@ -208,31 +242,32 @@ export default function Inventory() {
 
       {/* Empty state */}
       {items.length === 0 && (
-        <div className="inv-empty ticks">
+        <div className="inv-empty">
           <div className="inv-empty-icon"><Icon name="package" size={28}/></div>
           <div className="inv-empty-title">Δεν έχετε καταγράψει είδη ακόμα</div>
           <div className="inv-empty-sub">
-            Ξεκινήστε προσθέτοντας το πρώτο είδος αποθέματος. Status, alerts και reports υπολογίζονται αυτόματα.
+            Ξεκινήστε προσθέτοντας το πρώτο είδος της κάβας σας. Status, αξία και CSV εξαγωγή υπολογίζονται αυτόματα.
           </div>
           <button className="btn btn-primary" onClick={() => setDrawerItem(null)}>
             <Icon name="plus" size={13}/>Προσθήκη πρώτου είδους
           </button>
           <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.05em', marginTop: 18, opacity: 0.6 }}>
-            // backend persistence: επερχόμενο sprint
+            // αποθηκεύεται τοπικά σε αυτή τη συσκευή
           </p>
         </div>
       )}
 
       {/* Table */}
       {items.length > 0 && filtered.length > 0 && (
-        <div className="inv-table-wrap ticks">
+        <div className="inv-table-wrap">
           <table className="inv-table">
             <thead>
               <tr>
                 <th>Είδος</th>
                 <th>Κατηγορία</th>
                 <th className="num">Ποσότητα</th>
-                <th className="num">Κόστος</th>
+                <th className="num">Κόστος/μον.</th>
+                <th className="num">Αξία</th>
                 <th>Λήξη</th>
                 <th>Status</th>
                 <th></th>
@@ -242,6 +277,7 @@ export default function Inventory() {
               {filtered.map(it => {
                 const status = computeStatus(it);
                 const meta = STATUS_META[status];
+                const value = (Number(it.quantity) || 0) * (Number(it.cost) || 0);
                 return (
                   <tr key={it.id}>
                     <td>
@@ -253,16 +289,17 @@ export default function Inventory() {
                       {fmtNum(it.quantity)} <span className="inv-unit">{it.unit}</span>
                     </td>
                     <td className="num mono">{fmtPrice(it.cost)} €</td>
+                    <td className="num mono">{fmtPrice(value)} €</td>
                     <td className="mono small" style={{ color: (status === 'EXPIRING' || status === 'EXPIRED') ? 'var(--warning)' : 'var(--text-muted)' }}>
                       {it.expiry || '—'}
                     </td>
                     <td><span className={`badge ${meta.cls}`} style={{ fontSize: 10 }}>{meta.label}</span></td>
                     <td className="acts">
-                      <button className="btn btn-ghost btn-sm" onClick={() => setDrawerItem(it)}>
-                        <Icon name="edit" size={11}/>
+                      <button className="btn btn-ghost btn-sm" onClick={() => setDrawerItem(it)} title="Επεξεργασία">
+                        <Icon name="edit-solid" size={13}/>
                       </button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => remove(it.id)}>
-                        <Icon name="trash" size={11}/>
+                      <button className="btn btn-ghost btn-sm" onClick={() => remove(it.id)} title="Διαγραφή">
+                        <Icon name="trash-solid" size={13}/>
                       </button>
                     </td>
                   </tr>
@@ -288,6 +325,44 @@ export default function Inventory() {
           onSave={upsert}
         />
       )}
+    </>
+  );
+}
+
+// ── Inventory page (gate + header) ──────────────────────────────────────────────
+export default function Inventory() {
+  const { onPlanClick } = useOutletContext();
+  const { owner, shops, currentShopId, setCurrentShopId } = useAuth();
+  const isExclusive = owner?.plan === 'EXCLUSIVE';
+  const shop = shops.find(s => s.shop_id === currentShopId) || shops[0];
+
+  // Plan gate
+  if (!isExclusive) {
+    return (
+      <main className="page-main">
+        <PageHeader kicker="Απόθεμα" title="Διαχείριση κάβας" sub="Διαθέσιμο μόνο στο Exclusive πλάνο."/>
+        <div className="an-gate">
+          <div className="an-gate-icon"><Icon name="package" size={32}/></div>
+          <div className="an-gate-title">Exclusive Feature</div>
+          <div className="an-gate-sub">Καταγραφή ειδών, ποσοτήτων, κόστους, low-stock alerts και CSV εξαγωγή για παραγγελίες προμηθευτών. Διαθέσιμο μόνο στο Exclusive πλάνο.</div>
+          <button className="btn btn-primary" onClick={onPlanClick}>
+            <Icon name="bolt" size={13}/>Αναβάθμιση πλάνου
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!shop) return null;
+
+  const centerPill = (
+    <ShopSelectPill value={currentShopId} onChange={e => setCurrentShopId(e.target.value)} shops={shops}/>
+  );
+
+  return (
+    <main className="page-main">
+      <PageHeader topbarLabel="Απόθεμα" center={centerPill}/>
+      <InventoryBoard key={shop.shop_id} shop={shop}/>
     </main>
   );
 }
