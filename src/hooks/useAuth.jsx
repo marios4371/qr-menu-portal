@@ -8,23 +8,6 @@ const SESSION_TIMEOUT_MS = 8 * 60 * 60 * 1000;
 const LAST_ACTIVE_KEY    = "qrmenu_last_active";
 const TOKEN_KEY          = "qrmenu_token";
 
-// ── DEV-ONLY mock auth seam ────────────────────────────────────────────────
-// Activated only in `vite` dev mode AND when the URL has ?devmock=1. It can
-// never run in the production S3 build because import.meta.env.DEV is false
-// there. Used purely to preview authenticated pages locally. REMOVE before ship.
-const DEV_MOCK = import.meta.env.DEV &&
-  typeof window !== "undefined" &&
-  new URLSearchParams(window.location.search).has("devmock");
-const MOCK_OWNER = { firstName: "Μάριος", lastName: "Καλογεράκης", email: "demo@resto.gr", plan: "EXCLUSIVE" };
-const MOCK_SHOPS = [{
-  shop_id: "SHOP#demo", shopName: "POSADA", shopSlug: "posada",
-  menu: [
-    { id: "c1", name: "Cocktails", items: [{ id: "p1", name: "Margarita", price: 8.5, description: "Tequila, lime, triple sec", station: "BAR" }] },
-    { id: "c2", name: "Beers",     items: [{ id: "p2", name: "Alfa", price: 4, description: "", station: "BAR" }] },
-    { id: "c3", name: "Drinks",    items: [{ id: "p3", name: "Coca-Cola", price: 3, description: "", station: "BAR" }] },
-  ],
-}];
-
 function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(LAST_ACTIVE_KEY);
@@ -75,13 +58,6 @@ export function AuthProvider({ children }) {
 
   // Rehydration
   useEffect(() => {
-    if (DEV_MOCK) {
-      setOwner(MOCK_OWNER);
-      setShops(MOCK_SHOPS);
-      setCurrentShopId(MOCK_SHOPS[0].shop_id);
-      setLoading(false);
-      return;
-    }
     const token = localStorage.getItem(TOKEN_KEY);
     if (!token) { setLoading(false); return; }
     if (isSessionExpired()) { clearSession(); setLoading(false); return; }
