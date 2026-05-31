@@ -219,7 +219,9 @@ export default function MenuAppearance() {
     setBusy(true); setSaveErr('');
     try {
       await saveMenu({ shopId: shop.shop_id, data: { menu } });
-      await saveAppearance({ shopId: shop.shop_id, theme });
+      // Theme persistence is best-effort: the public menu renderer may not consume
+      // `theme` yet, so a failure here must not block the (successful) menu save.
+      try { await saveAppearance({ shopId: shop.shop_id, theme }); } catch {}
       setShops(prev => prev.map(sh => sh.shop_id === shop.shop_id ? { ...sh, menu, theme } : sh));
       setDirty(false);
       setSavedToast(true);

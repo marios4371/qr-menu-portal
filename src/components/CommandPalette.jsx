@@ -8,6 +8,9 @@ const COMMANDS = [
   { id: 'dashboard',   label: 'Αρχική',             icon: 'home',    path: '/dashboard',       section: 'Πλοήγηση', hint: '↵' },
   { id: 'editor',      label: 'Επεξεργασία Μενού',  icon: 'edit',    path: '/menu-editor',     section: 'Πλοήγηση', hint: '↵' },
   { id: 'appearance',  label: 'Εμφάνιση Μενού',     icon: 'palette', path: '/menu-appearance', section: 'Πλοήγηση', hint: '↵' },
+  { id: 'analytics',   label: 'Analytics',          icon: 'stat',    path: '/analytics',       section: 'Πλοήγηση', hint: '↵' },
+  { id: 'inventory',   label: 'Απόθεμα',            icon: 'package', path: '/inventory',       section: 'Πλοήγηση', hint: '↵' },
+  { id: 'settings',    label: 'Ρυθμίσεις',          icon: 'settings', path: '/settings',       section: 'Πλοήγηση', hint: '↵' },
   { id: 'qr',          label: 'Άνοιγμα QR Menu',    icon: 'ext',     action: 'openMenu',        section: 'Ενέργειες', hint: '↵' },
   { id: 'copy',        label: 'Αντιγραφή Menu URL',  icon: 'copy',    action: 'copyUrl',         section: 'Ενέργειες', hint: '↵' },
 ];
